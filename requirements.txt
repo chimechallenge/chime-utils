@@ -1,0 +1,8 @@
+meeteval[cli] @ git+https://github.com/fgnt/meeteval
+jiwer
+pyannote.metrics
+lhotse
+click
+torchaudio
+regex
+more-itertools
