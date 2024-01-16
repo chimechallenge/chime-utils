@@ -68,13 +68,16 @@ def gen_dipco(
 
     if download:
         download_dipco(corpus_dir)
+        # need this because it will be extracted in a subfolder
+        corpus_dir = os.path.join(corpus_dir, "Dipco")
 
     if os.path.exists(output_dir):
-        logger.error("The output directory {} already exists".format(output_dir))
+        logger.warning("The output directory {} already exists. "
+                       "This may possible overwrite previous data.".format(output_dir))
     else:
         Path(output_dir).mkdir(parents=True, exist_ok=False)
 
-    def normalize_dipco(annotation, txt_normalizer):
+    def normalize_dipco(annotation, txt_normalizer, split):
         annotation_scoring = []
 
         def _get_time(x):
@@ -82,7 +85,7 @@ def gen_dipco(
 
         for indx in range(len(annotation)):
             ex = annotation[indx]
-            ex["session_id"] = dipco_map[ex["session_id"]]
+            ex["session_id"] = dipco_map[split][ex["session_id"]]
 
             ex["start_time"] = "{:.3f}".format(_get_time(ex["start_time"]["U01"]))
             ex["end_time"] = "{:.3f}".format(_get_time(ex["end_time"]["U01"]))
@@ -116,10 +119,10 @@ def gen_dipco(
     for split in dset_part:
         # here same splits no need to remap
         Path(os.path.join(output_dir, "audio", split)).mkdir(
-            parents=True, exist_ok=False
+            parents=True, exist_ok=True
         )
         Path(os.path.join(output_dir, "transcriptions", split)).mkdir(
-            parents=True, exist_ok=False
+            parents=True, exist_ok=True
         )
         Path(os.path.join(output_dir, "transcriptions_scoring", split)).mkdir(
             parents=True, exist_ok=True
@@ -153,7 +156,7 @@ def gen_dipco(
             sess_name = Path(j_file).stem
 
             annotation, scoring_annotation = normalize_dipco(
-                annotation, text_normalization
+                annotation, text_normalization, split
             )
 
             annotation = sorted(annotation, key=lambda x: float(x["start_time"]))
@@ -161,7 +164,7 @@ def gen_dipco(
                 scoring_annotation, key=lambda x: float(x["start_time"])
             )
 
-            new_sess_name = dipco_map[sess_name]
+            new_sess_name = dipco_map[split][sess_name]
             # create symlinks too but swap names for the sessions too
             for x in sess2audio[sess_name]:
                 filename = new_sess_name + "_" + "_".join(Path(x).stem.split("_")[1:])
