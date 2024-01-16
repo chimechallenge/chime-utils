@@ -465,7 +465,7 @@ class EnglishSpellingNormalizer:
 class EnglishTextNormalizer:
     def __init__(self, standardize_numbers=False):
         self.replacers = {
-            # common non verbal sounds
+            # common non verbal sounds are mapped to the similar ones
             r"\b(hm+)\b|\b(mhm)\b|\b(mm+)\b|\b(m+h)\b|\b(hm+)\b|\b(um+)\b|\b(uhm+)\b": "hmm",
             r"\b(a+h+)\b|\b(ha+)\b": "ah",
             r"\b(o+h+)\b|\b(h+o+)\b": "oh",
@@ -549,7 +549,7 @@ class EnglishTextNormalizer:
         s = remove_symbols_and_diacritics(s, keep=".%$¢€£")  # keep numeric symbols
 
         if self.standardize_numbers is not None:
-            s = self.standardize_numbers(s)  # FIXME I think this should not be applied
+            s = self.standardize_numbers(s)
         s = self.standardize_spellings(s)
 
         # now remove prefix/suffix symbols that are not preceded/followed by numbers
