@@ -208,10 +208,12 @@ def prepare_chime6(
     # Fix manifests
     validate_recordings_and_supervisions(recording_set, supervision_set)
     supervision_set.to_file(
-        os.path.join(output_dir, f"chime6-{mic}_supervisions_{dset_part}.jsonl.gz")
+        os.path.join(output_dir,
+                     f"chime6-{mic}_supervisions_{dset_part}.jsonl.gz")
     )
     recording_set.to_file(
-        os.path.join(output_dir, f"chime6-{mic}_recordings_{dset_part}.jsonl.gz")
+        os.path.join(output_dir,
+                     f"chime6-{mic}_recordings_{dset_part}.jsonl.gz")
     )
     manifests[dset_part] = {
         "recordings": recording_set,
