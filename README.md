@@ -1,17 +1,12 @@
 #### Contribute
 
-
-I recommend making a fresh conda env
-`pip install .[dev]`
+I recommend making a fresh conda env, you can install with <br>
+`pip install -e .[dev]` 
 
 ### CLI
 
 new terminal command: 
 `chime-utils`
 
-- data preparation for DiPCo: 
+- e.g. data preparation for DiPCo: 
 `chime-utils dgen dipco /tmp/dipco_orig/ /tmp/chime8/dipco --download`
-- checksum notsodasr dgen checksum: `chime-utils dgen checksum /tmp/chime8`
-
-
-
