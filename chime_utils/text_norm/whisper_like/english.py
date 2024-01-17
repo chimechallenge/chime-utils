@@ -469,7 +469,7 @@ class EnglishTextNormalizer:
             r"\b(hm+)\b|\b(mhm)\b|\b(mm+)\b|\b(m+h)\b|\b(hm+)\b|\b(um+)\b|\b(uhm+)\b": "hmm",
             r"\b(a+h+)\b|\b(ha+)\b": "ah",
             r"\b(o+h+)\b|\b(h+o+)\b": "oh",
-            r"\b(u+h+)\b|\b(h+u+)\b": "uh",
+            r"\b(u+h+)\b|\b(h+u+)\b|\b(h+u+h+)\b": "uh",
             # common contractions
             r"\b(wi\sfi)\b": "wifi",
             r"\b(goin)\b": "going",
