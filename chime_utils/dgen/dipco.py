@@ -8,11 +8,12 @@ from copy import deepcopy
 from datetime import datetime as dt
 from pathlib import Path
 from typing import Optional
-from chime8_macro import dipco_map, dipco_spk_offset
-from chime_utils.text_norm import get_txt_norm
 
 import soundfile as sf
+from chime8_macro import dipco_map, dipco_spk_offset
 from lhotse.utils import Pathlike, resumable_download, safe_extract
+
+from chime_utils.text_norm import get_txt_norm
 
 logging.basicConfig(
     format="%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s",
@@ -70,8 +71,10 @@ def gen_dipco(
         corpus_dir = os.path.join(corpus_dir, "Dipco")
 
     if os.path.exists(output_dir):
-        logger.warning("The output directory {} already exists. "
-                       "This may possible overwrite previous data.".format(output_dir))
+        logger.warning(
+            "The output directory {} already exists. "
+            "This may possible overwrite previous data.".format(output_dir)
+        )
     else:
         Path(output_dir).mkdir(parents=True, exist_ok=False)
 

@@ -1,16 +1,20 @@
-import soundfile as sf
-from chime_utils.text_norm import get_txt_norm
-from copy import deepcopy
 import glob
-import os
-from pathlib import Path
 import json
+import os
+from copy import deepcopy
+from pathlib import Path
+
+import soundfile as sf
+
+from chime_utils.text_norm import get_txt_norm
 
 
-def gen_mixer6(output_dir,
-               corpus_dir,
-               dset_part="train_weak_call,train_weak_intv,dev",
-               challenge="chime8"):
+def gen_mixer6(
+    output_dir,
+    corpus_dir,
+    dset_part="train_weak_call,train_weak_intv,dev",
+    challenge="chime8",
+):
     """
     :param output_dir: Pathlike, the path of the dir to storage the final dataset
         (note that we will use symbolic links to the original dataset where
@@ -26,7 +30,8 @@ def gen_mixer6(output_dir,
         between dev and eval.
     """
     scoring_txt_normalization = get_txt_norm(challenge)
-    assert dset_part in ['train_weak_intv', 'train_weak_call','dev' and 'eval']
+    assert dset_part in ["train_weak_intv", "train_weak_call", "dev" and "eval"]
+
     def normalize_mixer6(annotation, txt_normalizer):
         annotation_scoring = []
         for indx in range(len(annotation)):
@@ -55,8 +60,7 @@ def gen_mixer6(output_dir,
         else:
             sess2audio[session_name].append(x)
     for c_split in splits:
-        Path(os.path.join(output_dir,
-                          "audio", c_split)).mkdir(
+        Path(os.path.join(output_dir, "audio", c_split)).mkdir(
             parents=True, exist_ok=False
         )
         Path(os.path.join(output_dir, "transcriptions", c_split)).mkdir(
@@ -66,17 +70,14 @@ def gen_mixer6(output_dir,
             parents=True, exist_ok=True
         )
         if c_split.startswith("train"):
-            ann_json = glob.glob(os.path.join(corpus_dir, "splits", c_split,
-                                              "*.json"))
+            ann_json = glob.glob(os.path.join(corpus_dir, "splits", c_split, "*.json"))
         elif c_split == "dev":
             use_version = "_a"  # alternative version is _b see data section
             ann_json = glob.glob(
-                os.path.join(corpus_dir, "splits", "dev" + use_version,
-                             "*.json")
+                os.path.join(corpus_dir, "splits", "dev" + use_version, "*.json")
             )
         elif c_split == "eval":
-            ann_json = glob.glob(os.path.join(corpus_dir, "splits", "test",
-                                              "*.json"))
+            ann_json = glob.glob(os.path.join(corpus_dir, "splits", "test", "*.json"))
         to_uem = []
         for j_file in ann_json:
             with open(j_file, "r") as f:
@@ -102,7 +103,9 @@ def gen_mixer6(output_dir,
             ]
 
             with open(
-                os.path.join(output_dir, "transcriptions", c_split, sess_name + ".json"),
+                os.path.join(
+                    output_dir, "transcriptions", c_split, sess_name + ".json"
+                ),
                 "w",
             ) as f:
                 json.dump(annotation, f, indent=4)

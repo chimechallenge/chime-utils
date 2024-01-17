@@ -1,25 +1,26 @@
-from pathlib import Path
-import os
-from lhotse.recipes.chime6 import TimeFormatConverter
-from chime_utils.text_norm import get_txt_norm
-from copy import deepcopy
-from chime_utils.dgen.chime8_macro import chime6_map
-import json
 import glob
+import json
+import os
+from copy import deepcopy
+from pathlib import Path
+
 import soundfile as sf
+from lhotse.recipes.chime6 import TimeFormatConverter
+
+from chime_utils.dgen.chime8_macro import chime6_map
+from chime_utils.text_norm import get_txt_norm
 
 CORPUS_URL = ""
 CHiME6_FS = 16000
 
 
-def gen_chime6(output_dir, corpus_dir,
-                download=False,
-                dset_part="train,dev",
-                challenge="chime8"):
+def gen_chime6(
+    output_dir, corpus_dir, download=False, dset_part="train,dev", challenge="chime8"
+):
     scoring_txt_normalization = get_txt_norm(challenge)
 
     if download:
-        raise NotImplementedError #FIXME when openslr is ready
+        raise NotImplementedError  # FIXME when openslr is ready
 
     def normalize_chime6(annotation, txt_normalizer):
         annotation_scoring = []
@@ -44,16 +45,16 @@ def gen_chime6(output_dir, corpus_dir,
     splits = dset_part.split(",")
     # pre-create all destination folders
     for split in splits:
-        Path(os.path.join(output_dir, "audio", split)).mkdir(parents=True,
-                                                          exist_ok=True)
+        Path(os.path.join(output_dir, "audio", split)).mkdir(
+            parents=True, exist_ok=True
+        )
         Path(os.path.join(output_dir, "transcriptions", split)).mkdir(
             parents=True, exist_ok=True
         )
         Path(os.path.join(output_dir, "transcriptions_scoring", split)).mkdir(
             parents=True, exist_ok=True
         )
-        Path(os.path.join(output_dir, "uem", split)).mkdir(parents=True,
-                                                        exist_ok=True)
+        Path(os.path.join(output_dir, "uem", split)).mkdir(parents=True, exist_ok=True)
 
     all_uem = {k: [] for k in splits}
     for split in splits:
@@ -65,8 +66,7 @@ def gen_chime6(output_dir, corpus_dir,
             "path is set correctly".format(json_dir)
         )
         # we also create audio files symlinks here
-        audio_files = glob.glob(os.path.join(corpus_dir,
-                                             "audio", split, "*.wav"))
+        audio_files = glob.glob(os.path.join(corpus_dir, "audio", split, "*.wav"))
         sess2audio = {}
         for x in audio_files:
             session_name = Path(x).stem.split("_")[0]
@@ -94,27 +94,25 @@ def gen_chime6(output_dir, corpus_dir,
             [
                 os.symlink(
                     x,
-                    os.path.join(output_dir, "audio", tsplit,
-                                 Path(x).stem) + ".wav",
+                    os.path.join(output_dir, "audio", tsplit, Path(x).stem) + ".wav",
                 )
                 for x in sess2audio[sess_name]
             ]
 
             with open(
-                    os.path.join(output_dir, "transcriptions", tsplit,
-                                 sess_name + ".json"),
-                    "w",
+                os.path.join(output_dir, "transcriptions", tsplit, sess_name + ".json"),
+                "w",
             ) as f:
                 json.dump(annotation, f, indent=4)
             # retain original annotation but dump also the scoring one
             with open(
-                    os.path.join(
-                        output_dir,
-                        "transcriptions_scoring",
-                        tsplit,
-                        sess_name + ".json",
-                    ),
-                    "w",
+                os.path.join(
+                    output_dir,
+                    "transcriptions_scoring",
+                    tsplit,
+                    sess_name + ".json",
+                ),
+                "w",
             ) as f:
                 json.dump(scoring_annotation, f, indent=4)
 
@@ -133,8 +131,3 @@ def gen_chime6(output_dir, corpus_dir,
             c_uem = sorted(c_uem)
             with open(os.path.join(output_dir, "uem", k, "all.uem"), "w") as f:
                 f.writelines(c_uem)
-
-
-
-
-

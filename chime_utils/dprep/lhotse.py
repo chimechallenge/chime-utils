@@ -16,6 +16,7 @@ from lhotse import fix_manifests, validate_recordings_and_supervisions
 from lhotse.audio import AudioSource, Recording, RecordingSet
 from lhotse.supervision import SupervisionSegment, SupervisionSet
 from lhotse.utils import Pathlike, add_durations
+
 from chime_utils.text_norm import get_txt_norm
 
 logging.basicConfig(
@@ -40,7 +41,7 @@ def prepare_chime6(
         Pathlike
     ] = None,  # alternative annotation e.g. from non-oracle diarization
     discard_problematic: Optional[bool] = True,
-    txt_norm: Optional[str] = "chime8"
+    txt_norm: Optional[str] = "chime8",
 ) -> Dict[str, Dict[str, Union[RecordingSet, SupervisionSet]]]:
     """
     Returns the manifests which consist of the Recordings and Supervisions
@@ -208,12 +209,10 @@ def prepare_chime6(
     # Fix manifests
     validate_recordings_and_supervisions(recording_set, supervision_set)
     supervision_set.to_file(
-        os.path.join(output_dir,
-                     f"chime6-{mic}_supervisions_{dset_part}.jsonl.gz")
+        os.path.join(output_dir, f"chime6-{mic}_supervisions_{dset_part}.jsonl.gz")
     )
     recording_set.to_file(
-        os.path.join(output_dir,
-                     f"chime6-{mic}_recordings_{dset_part}.jsonl.gz")
+        os.path.join(output_dir, f"chime6-{mic}_recordings_{dset_part}.jsonl.gz")
     )
     manifests[dset_part] = {
         "recordings": recording_set,
@@ -230,7 +229,7 @@ def prepare_dipco(
     json_dir: Optional[
         Pathlike
     ] = None,  # alternative annotation e.g. from non-oracle diarization
-    txt_norm: Optional[str] = "chime8"
+    txt_norm: Optional[str] = "chime8",
 ) -> Dict[str, Dict[str, Union[RecordingSet, SupervisionSet]]]:
     """
     Returns the manifests which consist of the Recordings and Supervisions
@@ -388,7 +387,7 @@ def prepare_mixer6(
     json_dir: Optional[
         Pathlike
     ] = None,  # alternative annotation e.g. from non-oracle diarization
-    txt_norm: Optional[str] = "chime8"
+    txt_norm: Optional[str] = "chime8",
 ) -> Dict[str, Dict[str, Union[RecordingSet, SupervisionSet]]]:
     """
     Returns the manifests which consist of the Recordings and Supervisions

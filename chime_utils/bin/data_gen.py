@@ -1,8 +1,15 @@
 import logging
+
 import click
+
 from chime_utils.bin.base import cli
-from chime_utils.dgen import (gen_chime6, gen_dipco,
-                              gen_mixer6, gen_notsofar1, data_check)
+from chime_utils.dgen import (
+    data_check,
+    gen_chime6,
+    gen_dipco,
+    gen_mixer6,
+    gen_notsofar1,
+)
 
 logging.basicConfig(
     format="%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s",
@@ -39,8 +46,7 @@ def dgen():
     help="Whether to forgive missing files (e.g. want only to check a subset of the data).",
 )
 @click.option(
-    "--create", type=bool, default=False, help="Organizers-only, "
-                                               "create checksum."
+    "--create", type=bool, default=False, help="Organizers-only, " "create checksum."
 )
 def checksum_data(data_folder, check_eval, checksum_json, forgive_missing, create):
     data_check(data_folder, check_eval, checksum_json, forgive_missing, create)
@@ -148,7 +154,7 @@ def mixer6(corpus_dir, output_dir, part, challenge):
     type=str,
     default="train,dev",
     help="Which part of the dataset you want to generate, "
-    "choose between 'train', 'dev', 'public_eval', 'eval'.\n" #FIXME coordinate with MS for these names.
+    "choose between 'train', 'dev', 'public_eval', 'eval'.\n"  # FIXME coordinate with MS for these names.
     "You can choose multiple by using commas e.g. 'train,dev,eval'.",
 )
 def notsofar1(corpus_dir, output_dir, download, part):
