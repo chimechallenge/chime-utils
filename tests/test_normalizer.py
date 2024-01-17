@@ -34,10 +34,12 @@ def test_text_normalizer(std):
     assert std("uhh uhm") == "uh hmm"
     assert std("ahh okay") == "ah okay"
     assert (
-        std("like five hundred dollars [unintelligible] per head [unintelligible]")
+        std("like five hundred dollars "
+            "[unintelligible] per head [unintelligible]")
         == "like five hundred dollars per head"
     )
     assert (
-        std("hmmm this is not as bad [unintelligible] ummm probably thirty minutes")
+        std("hmmm this is not as bad "
+            "[unintelligible] ummm probably thirty minutes")
         == "hmm this is not as bad hmm probably thirty minutes"
     )
