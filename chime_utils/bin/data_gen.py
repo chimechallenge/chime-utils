@@ -39,7 +39,8 @@ def dgen():
     help="Whether to forgive missing files (e.g. want only to check a subset of the data).",
 )
 @click.option(
-    "--create", type=bool, default=False, help="Organizers-only, create checksum."
+    "--create", type=bool, default=False, help="Organizers-only, "
+                                               "create checksum."
 )
 def checksum_data(data_folder, check_eval, checksum_json, forgive_missing, create):
     data_check(data_folder, check_eval, checksum_json, forgive_missing, create)
@@ -73,7 +74,7 @@ def checksum_data(data_folder, check_eval, checksum_json, forgive_missing, creat
     "This option controls the partitioning between train, dev and eval and the text normalization used.",
 )
 def chime6(corpus_dir, output_dir, download, part, challenge):
-    prep_chime6(output_dir, corpus_dir, download, part, challenge)
+    gen_chime6(output_dir, corpus_dir, download, part, challenge)
 
 
 @dgen.command(name="dipco")
