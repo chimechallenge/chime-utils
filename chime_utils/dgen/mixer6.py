@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import json
 
+
 def gen_mixer6(output_dir,
                corpus_dir,
                dset_part="train_weak_call,train_weak_intv,dev",
@@ -25,7 +26,7 @@ def gen_mixer6(output_dir,
         between dev and eval.
     """
     scoring_txt_normalization = get_txt_norm(challenge)
-
+    assert dset_part in ['train_weak_intv', 'train_weak_call','dev' and 'eval']
     def normalize_mixer6(annotation, txt_normalizer):
         annotation_scoring = []
         for indx in range(len(annotation)):

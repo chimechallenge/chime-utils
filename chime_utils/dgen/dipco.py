@@ -8,6 +8,8 @@ from copy import deepcopy
 from datetime import datetime as dt
 from pathlib import Path
 from typing import Optional
+from chime8_macro import dipco_map, dipco_spk_offset
+from chime_utils.text_norm import get_txt_norm
 
 import soundfile as sf
 from lhotse.utils import Pathlike, resumable_download, safe_extract
@@ -58,13 +60,9 @@ def gen_dipco(
         choice of the text normalization and possibly how sessions are split
         between dev and eval.
     """
-    if challenge == "chime8":
-        from chime_utils.dgen.chime8_macro import dipco_map, dipco_spk_offset
-        from chime_utils.text_norm.whisper_like import EnglishTextNormalizer
+    assert dset_part in ["dev", "eval"]
 
-        text_normalization = EnglishTextNormalizer()
-    else:
-        raise NotImplementedError
+    text_normalization = get_txt_norm(challenge)
 
     if download:
         download_dipco(corpus_dir)
