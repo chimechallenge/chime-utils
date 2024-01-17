@@ -62,6 +62,8 @@ def prepare_chime6(
         see https://chimechallenge.github.io/chime6/track1_data.html)
     :param txt_norm: str, which text normalization preprocessing one wishes to use;
         choose between 'chime7' and 'chime8' or None.
+    :return dict: Dict whose key is the dataset part ("train", "dev" and "eval"), and the
+        value is Dicts with the keys 'recordings' and 'supervisions'.
     """
     txt_normalizer = get_txt_norm(txt_norm)
     assert mic in ["ihm", "mdm"], "mic must be either 'ihm' or 'mdm'."
@@ -247,6 +249,8 @@ def prepare_dipco(
          https://github.com/chimechallenge/CHiME7_DASR_falign.
     :param txt_norm: str, which text normalization preprocessing one wishes to use;
         choose between 'chime7' and 'chime8' or None.
+    :return dict: Dict whose key is the dataset part ("train", "dev" and "eval"), and the
+        value is Dicts with the keys 'recordings' and 'supervisions'.
     """
 
     txt_normalizer = get_txt_norm(txt_norm)
@@ -399,6 +403,8 @@ def prepare_mixer6(
         For MDM, there are 11 channels.
     :param txt_norm: str, which text normalization preprocessing one wishes to use;
         choose between 'chime7' and 'chime8' or None.
+    :return dict: Dict whose key is the dataset part ("train", "dev" and "eval"), and the
+        value is Dicts with the keys 'recordings' and 'supervisions'.
     """
     txt_normalizer = get_txt_norm(txt_norm)
     assert mic in ["ihm", "mdm"], "mic must be one of 'ihm' or 'mdm'"

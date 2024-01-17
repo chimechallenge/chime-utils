@@ -82,12 +82,12 @@ def gen_dipco(
         annotation_scoring = []
 
         def _get_time(x):
-            return (dt.strptime(x, "%H:%M:%S.%f") - dt(1900, 1, 1)).total_seconds()
+            return (dt.strptime(x, "%H:%M:%S.%f") -
+                    dt(1900, 1, 1)).total_seconds()
 
         for indx in range(len(annotation)):
             ex = annotation[indx]
             ex["session_id"] = dipco_map[split][ex["session_id"]]
-
             ex["start_time"] = "{:.3f}".format(_get_time(ex["start_time"]["U01"]))
             ex["end_time"] = "{:.3f}".format(_get_time(ex["end_time"]["U01"]))
             ex["speaker"] = "P{:02d}".format(
