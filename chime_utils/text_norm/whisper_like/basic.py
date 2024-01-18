@@ -39,7 +39,9 @@ def remove_symbols_and_diacritics(s: str, keep=""):
                 else (
                     ""
                     if unicodedata.category(c) == "Mn"
-                    else " " if unicodedata.category(c)[0] in "MSP" else c
+                    else " "
+                    if unicodedata.category(c)[0] in "MSP"
+                    else c
                 )
             )
         )
