@@ -7,12 +7,17 @@ import click
 import lhotse
 
 from chime_utils.bin.base import cli
-from chime_utils.dprep.lhotse import prepare_chime6, prepare_dipco, prepare_mixer6
+from chime_utils.dprep.lhotse import (
+    prepare_chime6,
+    prepare_dipco,
+    prepare_mixer6,
+)
 from chime_utils.text_norm import get_txt_norm
 
 logging.basicConfig(
     format=(
-        "%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]" " %(message)s"
+        "%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]"
+        " %(message)s"
     ),
     datefmt="%Y-%m-%d:%H:%M:%S",
     level=logging.INFO,
@@ -281,7 +286,9 @@ def mixer6(
     default="*.jsonl.gz",
     help="Glob pattern to apply for finding the manifests to normalize.",
 )
-def text_normalize(input_dir, output_dir, txt_norm="chime8", regex="*.jsonl.gz"):
+def text_normalize(
+    input_dir, output_dir, txt_norm="chime8", regex="*.jsonl.gz"
+):
     txt_normalizer = get_txt_norm(txt_norm)
     os.makedirs(output_dir, exist_ok=True)
 

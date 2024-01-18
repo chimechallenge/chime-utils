@@ -17,7 +17,8 @@ from chime_utils.text_norm import get_txt_norm
 
 logging.basicConfig(
     format=(
-        "%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]" " %(message)s"
+        "%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]"
+        " %(message)s"
     ),
     datefmt="%Y-%m-%d:%H:%M:%S",
     level=logging.INFO,
@@ -42,7 +43,9 @@ def download_dipco(
     target_dir = Path(target_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
     tar_path = os.path.join(target_dir, "DiPCo.tgz")
-    resumable_download(CORPUS_URL, filename=tar_path, force_download=force_download)
+    resumable_download(
+        CORPUS_URL, filename=tar_path, force_download=force_download
+    )
     with tarfile.open(tar_path) as tar:
         safe_extract(tar, path=target_dir)
 
@@ -89,12 +92,16 @@ def gen_dipco(
         annotation_scoring = []
 
         def _get_time(x):
-            return (dt.strptime(x, "%H:%M:%S.%f") - dt(1900, 1, 1)).total_seconds()
+            return (
+                dt.strptime(x, "%H:%M:%S.%f") - dt(1900, 1, 1)
+            ).total_seconds()
 
         for indx in range(len(annotation)):
             ex = annotation[indx]
             ex["session_id"] = sess_map[ex["session_id"]]
-            ex["start_time"] = "{:.3f}".format(_get_time(ex["start_time"]["U01"]))
+            ex["start_time"] = "{:.3f}".format(
+                _get_time(ex["start_time"]["U01"])
+            )
             ex["end_time"] = "{:.3f}".format(_get_time(ex["end_time"]["U01"]))
             ex["speaker"] = spk_map[ex["speaker_id"]]
             del ex["speaker_id"]
@@ -142,7 +149,9 @@ def gen_dipco(
         )
 
         # we also create audio files symlinks here
-        audio_files = glob.glob(os.path.join(corpus_dir, "audio", split, "*.wav"))
+        audio_files = glob.glob(
+            os.path.join(corpus_dir, "audio", split, "*.wav")
+        )
         sess2audio = {}
         for x in audio_files:
             session_name = Path(x).stem.split("_")[0]
@@ -165,7 +174,9 @@ def gen_dipco(
                 annotation, text_normalization, split
             )
 
-            annotation = sorted(annotation, key=lambda x: float(x["start_time"]))
+            annotation = sorted(
+                annotation, key=lambda x: float(x["start_time"])
+            )
             scoring_annotation = sorted(
                 scoring_annotation, key=lambda x: float(x["start_time"])
             )
@@ -173,7 +184,9 @@ def gen_dipco(
             new_sess_name = sess_map[sess_name]
             # create symlinks too but swap names for the sessions too
             for x in sess2audio[sess_name]:
-                filename = new_sess_name + "_" + "_".join(Path(x).stem.split("_")[1:])
+                filename = (
+                    new_sess_name + "_" + "_".join(Path(x).stem.split("_")[1:])
+                )
                 if filename.split("_")[1].startswith("P"):
                     speaker_id = filename.split("_")[1]
                     filename = filename.split("_")[0] + "_{}".format(
@@ -181,7 +194,9 @@ def gen_dipco(
                     )
                 os.symlink(
                     x,
-                    os.path.join(output_dir, "audio", split, filename + ".wav"),
+                    os.path.join(
+                        output_dir, "audio", split, filename + ".wav"
+                    ),
                 )
 
             with open(
@@ -206,7 +221,9 @@ def gen_dipco(
                 json.dump(scoring_annotation, f, indent=4)
 
             uem_start = 0
-            uem_end = max([sf.SoundFile(x).frames for x in sess2audio[sess_name]])
+            uem_end = max(
+                [sf.SoundFile(x).frames for x in sess2audio[sess_name]]
+            )
             c_uem = "{} 1 {} {}\n".format(
                 new_sess_name,
                 "{:.3f}".format(float(uem_start)),
@@ -218,5 +235,7 @@ def gen_dipco(
             assert split in ["dev", "eval"]  # uem only for development set
             Path(os.path.join(output_dir, "uem", split)).mkdir(parents=True)
             to_uem = sorted(to_uem)
-            with open(os.path.join(output_dir, "uem", split, "all.uem"), "w") as f:
+            with open(
+                os.path.join(output_dir, "uem", split, "all.uem"), "w"
+            ) as f:
                 f.writelines(to_uem)

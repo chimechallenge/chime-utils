@@ -9,7 +9,8 @@ import tqdm
 
 logging.basicConfig(
     format=(
-        "%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]" " %(message)s"
+        "%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]"
+        " %(message)s"
     ),
     datefmt="%Y-%m-%d:%H:%M:%S",
     level=logging.INFO,
@@ -44,7 +45,9 @@ def data_check(
     :param create: bool, organizer only, used to compute MD5 hashes.
     """
     if input_json is None:
-        input_json = os.path.join(os.path.dirname(__file__), "chime8_dasr_md5.json")
+        input_json = os.path.join(
+            os.path.dirname(__file__), "chime8_dasr_md5.json"
+        )
 
     open_option = "w" if create else "r"
 
@@ -54,7 +57,9 @@ def data_check(
     all_files = []
     for ext in [".json", ".uem", ".wav", ".flac"]:
         all_files.extend(
-            glob.glob(os.path.join(root_folder, "**/*{}".format(ext)), recursive=True)
+            glob.glob(
+                os.path.join(root_folder, "**/*{}".format(ext)), recursive=True
+            )
         )
 
     if create:
@@ -77,7 +82,9 @@ def data_check(
             c_rel_path = str(Path(f).relative_to(root_folder))
             if c_rel_path not in input_json.keys():
                 if not forgive_missing:
-                    raise KeyError(f"{c_rel_path} not in JSON md5 checksum file.")
+                    raise KeyError(
+                        f"{c_rel_path} not in JSON md5 checksum file."
+                    )
                 else:
                     continue
 
@@ -94,7 +101,9 @@ def data_check(
 
 def get_mappings(challenge):
     if challenge == "chime8":
-        json_mapping_file = os.path.join(os.path.dirname(__file__), "c8map.json")
+        json_mapping_file = os.path.join(
+            os.path.dirname(__file__), "c8map.json"
+        )
         with open(json_mapping_file, "r") as f:
             mapping = json.load(f)
     else:
