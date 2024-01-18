@@ -7,11 +7,7 @@ import click
 import lhotse
 
 from chime_utils.bin.base import cli
-from chime_utils.dprep.lhotse import (
-    prepare_chime6,
-    prepare_dipco,
-    prepare_mixer6,
-)
+from chime_utils.dprep.lhotse import prepare_chime6, prepare_dipco, prepare_mixer6
 from chime_utils.text_norm import get_txt_norm
 
 logging.basicConfig(

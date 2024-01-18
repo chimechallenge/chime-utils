@@ -1,7 +1,4 @@
-from chime_utils.text_norm.c7dasr import (
-    chime6_norm_scoring,
-    chime7_norm_scoring,
-)
+from chime_utils.text_norm.c7dasr import chime6_norm_scoring, chime7_norm_scoring
 from chime_utils.text_norm.whisper_like import EnglishTextNormalizer
 
 
