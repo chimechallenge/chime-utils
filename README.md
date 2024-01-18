@@ -1,9 +1,18 @@
+## CHiME Utils
+A package for 
+
+
+
+#### Installation
+
+`pip install .`
+
 #### Contribute
 
 I recommend making a fresh conda env, you can install with <br>
 `pip install -e .[dev]` 
 
-### CLI
+### CLI 
 
 new terminal command: 
 `chime-utils`
