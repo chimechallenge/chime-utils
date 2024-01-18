@@ -1,33 +1,28 @@
 """
 legacy CHiME-7 DASR and CHiME-6 text normalization.
 """
+
 import jiwer
 from jiwer.transforms import RemoveKaldiNonWords
 from lhotse.recipes.chime6 import normalize_text_chime6
 
-jiwer_chime6_scoring = jiwer.Compose(
-    [
-        RemoveKaldiNonWords(),
-        jiwer.SubstituteRegexes(
-            {r"\"": " ", "^[ \t]+|[ \t]+$": "", r"\u2019": "'"}
-        ),  # noqa E501
-        jiwer.RemoveEmptyStrings(),
-        jiwer.RemoveMultipleSpaces(),
-    ]
-)
-jiwer_chime7_scoring = jiwer.Compose(
-    [
-        jiwer.SubstituteRegexes(
-            {
-                "(?:^|(?<= ))(hm|hmm|mhm|mmh|mmm)(?:(?= )|$)": "hmmm",
-                "(?:^|(?<= ))(uhm|um|umm|umh|ummh)(?:(?= )|$)": "ummm",
-                "(?:^|(?<= ))(uh|uhh)(?:(?= )|$)": "uhhh",
-            }
-        ),
-        jiwer.RemoveEmptyStrings(),
-        jiwer.RemoveMultipleSpaces(),
-    ]
-)
+jiwer_chime6_scoring = jiwer.Compose([
+    RemoveKaldiNonWords(),
+    jiwer.SubstituteRegexes(
+        {r"\"": " ", "^[ \t]+|[ \t]+$": "", r"\u2019": "'"}
+    ),  # noqa E501
+    jiwer.RemoveEmptyStrings(),
+    jiwer.RemoveMultipleSpaces(),
+])
+jiwer_chime7_scoring = jiwer.Compose([
+    jiwer.SubstituteRegexes({
+        "(?:^|(?<= ))(hm|hmm|mhm|mmh|mmm)(?:(?= )|$)": "hmmm",
+        "(?:^|(?<= ))(uhm|um|umm|umh|ummh)(?:(?= )|$)": "ummm",
+        "(?:^|(?<= ))(uh|uhh)(?:(?= )|$)": "uhhh",
+    }),
+    jiwer.RemoveEmptyStrings(),
+    jiwer.RemoveMultipleSpaces(),
+])
 
 
 def chime6_norm_scoring(txt):

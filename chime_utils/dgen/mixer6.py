@@ -94,24 +94,18 @@ def gen_mixer6(
         Path(os.path.join(output_dir, "transcriptions", c_split)).mkdir(
             parents=True, exist_ok=False
         )
-        Path(
-            os.path.join(output_dir, "transcriptions_scoring", c_split)
-        ).mkdir(parents=True, exist_ok=True)
+        Path(os.path.join(output_dir, "transcriptions_scoring", c_split)).mkdir(
+            parents=True, exist_ok=True
+        )
         if c_split.startswith("train"):
-            ann_json = glob.glob(
-                os.path.join(corpus_dir, "splits", c_split, "*.json")
-            )
+            ann_json = glob.glob(os.path.join(corpus_dir, "splits", c_split, "*.json"))
         elif c_split == "dev":
             use_version = "_a"  # alternative version is _b see data section
             ann_json = glob.glob(
-                os.path.join(
-                    corpus_dir, "splits", "dev" + use_version, "*.json"
-                )
+                os.path.join(corpus_dir, "splits", "dev" + use_version, "*.json")
             )
         elif c_split == "eval":
-            ann_json = glob.glob(
-                os.path.join(corpus_dir, "splits", "test", "*.json")
-            )
+            ann_json = glob.glob(os.path.join(corpus_dir, "splits", "test", "*.json"))
         to_uem = []
         for j_file in ann_json:
             with open(j_file, "r") as f:
@@ -176,9 +170,7 @@ def gen_mixer6(
                 to_uem.append(c_uem)
             elif c_split == "eval":
                 uem_start = 0
-                uem_end = max(
-                    [sf.SoundFile(x).frames for x in sess2audio[sess_name]]
-                )
+                uem_end = max([sf.SoundFile(x).frames for x in sess2audio[sess_name]])
                 c_uem = "{} 1 {} {}\n".format(
                     sess_map[sess_name],
                     "{:.3f}".format(float(uem_start)),
@@ -190,7 +182,5 @@ def gen_mixer6(
             assert c_split in ["dev", "eval"]  # uem only for development set
             Path(os.path.join(output_dir, "uem", c_split)).mkdir(parents=True)
             to_uem = sorted(to_uem)
-            with open(
-                os.path.join(output_dir, "uem", c_split, "all.uem"), "w"
-            ) as f:
+            with open(os.path.join(output_dir, "uem", c_split, "all.uem"), "w") as f:
                 f.writelines(to_uem)

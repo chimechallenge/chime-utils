@@ -79,9 +79,7 @@ def gen_chime6(
         Path(os.path.join(output_dir, "transcriptions_scoring", split)).mkdir(
             parents=True, exist_ok=True
         )
-        Path(os.path.join(output_dir, "uem", split)).mkdir(
-            parents=True, exist_ok=True
-        )
+        Path(os.path.join(output_dir, "uem", split)).mkdir(parents=True, exist_ok=True)
 
     all_uem = {k: [] for k in splits}
     for split in splits:
@@ -93,9 +91,7 @@ def gen_chime6(
             "path is set correctly".format(json_dir)
         )
         # we also create audio files symlinks here
-        audio_files = glob.glob(
-            os.path.join(corpus_dir, "audio", split, "*.wav")
-        )
+        audio_files = glob.glob(os.path.join(corpus_dir, "audio", split, "*.wav"))
         sess2audio = {}
         for x in audio_files:
             session_name = Path(x).stem.split("_")[0]
@@ -126,16 +122,13 @@ def gen_chime6(
             [
                 os.symlink(
                     x,
-                    os.path.join(output_dir, "audio", tsplit, Path(x).stem)
-                    + ".wav",
+                    os.path.join(output_dir, "audio", tsplit, Path(x).stem) + ".wav",
                 )
                 for x in sess2audio[sess_name]
             ]
 
             with open(
-                os.path.join(
-                    output_dir, "transcriptions", tsplit, sess_name + ".json"
-                ),
+                os.path.join(output_dir, "transcriptions", tsplit, sess_name + ".json"),
                 "w",
             ) as f:
                 json.dump(annotation, f, indent=4)
