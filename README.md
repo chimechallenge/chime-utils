@@ -10,7 +10,10 @@ A package for
 #### Contribute
 
 I recommend making a fresh conda env, you can install with <br>
+
 `pip install -e .[dev]` 
+`pip install pre-commit`
+`pre-commit install --install-hooks`
 
 ### CLI 
 
