@@ -45,7 +45,8 @@ def remove_symbols_and_diacritics(s: str, keep=""):
 
 def remove_symbols(s: str):
     """
-    Replace any other markers, symbols, punctuations with a space, keeping diacritics
+    Replace any other markers, symbols,
+    punctuations with a space, keeping diacritics
     """
     return "".join(
         " " if unicodedata.category(c)[0] in "MSP" else c
@@ -54,16 +55,22 @@ def remove_symbols(s: str):
 
 
 class BasicTextNormalizer:
-    def __init__(self, remove_diacritics: bool = False, split_letters: bool = False):
+    def __init__(
+        self, remove_diacritics: bool = False, split_letters: bool = False
+    ):
         self.clean = (
-            remove_symbols_and_diacritics if remove_diacritics else remove_symbols
+            remove_symbols_and_diacritics
+            if remove_diacritics
+            else remove_symbols
         )
         self.split_letters = split_letters
 
     def __call__(self, s: str):
         s = s.lower()
-        s = re.sub(r"[<\[][^>\]]*[>\]]", "", s)  # remove words between brackets
-        s = re.sub(r"\(([^)]+?)\)", "", s)  # remove words between parenthesis
+        # remove words between brackets
+        s = re.sub(r"[<\[][^>\]]*[>\]]", "", s)
+        # remove words between parenthesis
+        s = re.sub(r"\(([^)]+?)\)", "", s)
         s = self.clean(s).lower()
 
         if self.split_letters:

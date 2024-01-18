@@ -7,15 +7,40 @@ from pathlib import Path
 import soundfile as sf
 from lhotse.recipes.chime6 import TimeFormatConverter
 
-from chime_utils.dgen.chime8_macro import chime6_map
 from chime_utils.text_norm import get_txt_norm
 
 CORPUS_URL = ""
 CHiME6_FS = 16000
 
+# NOTE, no CHiME-8 map
+chime7_map = {
+    "train": [
+        "S03",
+        "S04",
+        "S05",
+        "S06",
+        "S07",
+        "S08",
+        "S12",
+        "S13",
+        "S16",
+        "S17",
+        "S18",
+        "S22",
+        "S23",
+        "S24",
+    ],
+    "dev": ["S02", "S09"],
+    "eval": ["S19", "S20", "S01", "S21"],
+}
+
 
 def gen_chime6(
-    output_dir, corpus_dir, download=False, dset_part="train,dev", challenge="chime8"
+    output_dir,
+    corpus_dir,
+    download=False,
+    dset_part="train,dev",
+    challenge="chime8",
 ):
     scoring_txt_normalization = get_txt_norm(challenge)
 
@@ -54,7 +79,9 @@ def gen_chime6(
         Path(os.path.join(output_dir, "transcriptions_scoring", split)).mkdir(
             parents=True, exist_ok=True
         )
-        Path(os.path.join(output_dir, "uem", split)).mkdir(parents=True, exist_ok=True)
+        Path(os.path.join(output_dir, "uem", split)).mkdir(
+            parents=True, exist_ok=True
+        )
 
     all_uem = {k: [] for k in splits}
     for split in splits:
@@ -66,7 +93,9 @@ def gen_chime6(
             "path is set correctly".format(json_dir)
         )
         # we also create audio files symlinks here
-        audio_files = glob.glob(os.path.join(corpus_dir, "audio", split, "*.wav"))
+        audio_files = glob.glob(
+            os.path.join(corpus_dir, "audio", split, "*.wav")
+        )
         sess2audio = {}
         for x in audio_files:
             session_name = Path(x).stem.split("_")[0]
@@ -85,22 +114,28 @@ def gen_chime6(
                 annotation, scoring_txt_normalization
             )
 
-            tsplit = None  # find destination split
-            for k in ["train", "dev", "eval"]:
-                if sess_name in chime6_map[k].keys():
-                    tsplit = k
+            if challenge == "chime7":
+                tsplit = split  # find destination split
+                for k in ["train", "dev", "eval"]:
+                    if sess_name in chime7_map[k].keys():
+                        tsplit = k
+            else:
+                tsplit = split
 
             # create symlinks too
             [
                 os.symlink(
                     x,
-                    os.path.join(output_dir, "audio", tsplit, Path(x).stem) + ".wav",
+                    os.path.join(output_dir, "audio", tsplit, Path(x).stem)
+                    + ".wav",
                 )
                 for x in sess2audio[sess_name]
             ]
 
             with open(
-                os.path.join(output_dir, "transcriptions", tsplit, sess_name + ".json"),
+                os.path.join(
+                    output_dir, "transcriptions", tsplit, sess_name + ".json"
+                ),
                 "w",
             ) as f:
                 json.dump(annotation, f, indent=4)

@@ -7,11 +7,18 @@ import click
 import lhotse
 
 from chime_utils.bin.base import cli
-from chime_utils.dprep.lhotse import prepare_chime6, prepare_dipco, prepare_mixer6
+from chime_utils.dprep.lhotse import (
+    prepare_chime6,
+    prepare_dipco,
+    prepare_mixer6,
+)
 from chime_utils.text_norm import get_txt_norm
 
 logging.basicConfig(
-    format="%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s",
+    format=(
+        "%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]"
+        " %(message)s"
+    ),
     datefmt="%Y-%m-%d:%H:%M:%S",
     level=logging.INFO,
 )
@@ -34,9 +41,11 @@ def lhotse_prep():
     default="train,dev",
     required=False,
     show_default=True,
-    help="For which part of the dataset you want to prepare lhotse manifests.\n"
-    "Choose between 'train','dev' and 'eval'."
-    "You can choose multiple by using commas e.g. 'train,dev,eval'.",
+    help=(
+        "For which part of the dataset you want to prepare lhotse manifests.\n"
+        "Choose between 'train','dev' and 'eval'."
+        "You can choose multiple by using commas e.g. 'train,dev,eval'."
+    ),
 )
 @click.option(
     "--mic",
@@ -45,10 +54,12 @@ def lhotse_prep():
     default="mdm",
     required=False,
     show_default=True,
-    help="the microphone type to use, choose from "
-    '"ihm" (close-talk) or "mdm" (multi-microphone array) settings. '
-    "For MDM, there are 6 array devices with 4 channels each, "
-    "so the resulting recordings will have 24 channels.",
+    help=(
+        "the microphone type to use, choose from "
+        '"ihm" (close-talk) or "mdm" (multi-microphone array) settings. '
+        "For MDM, there are 6 array devices with 4 channels each, "
+        "so the resulting recordings will have 24 channels."
+    ),
 )
 @click.option(
     "--json-dir",
@@ -57,11 +68,13 @@ def lhotse_prep():
     required=False,
     default=None,
     show_default=True,
-    help="Override the JSON annotation directory"
-    "of the current dataset partition (e.g. dev)"
-    "this allows for example to create a manifest from for example a JSON"
-    "created with forced alignment available at"
-    "https://github.com/chimechallenge/CHiME7_DASR_falign.",
+    help=(
+        "Override the JSON annotation directory"
+        "of the current dataset partition (e.g. dev)"
+        "this allows for example to create a manifest from for example a JSON"
+        "created with forced alignment available at"
+        "https://github.com/chimechallenge/CHiME7_DASR_falign."
+    ),
 )
 @click.option(
     "--use-problematic",
@@ -70,9 +83,11 @@ def lhotse_prep():
     default=True,
     required=False,
     is_flag=True,
-    help="Whether or not use problematic devices in the"
-    "manifests creation.\nSee https://www.chimechallenge.org/challenges/chime6/track1_data, "
-    "there are some devices that had recording problems in some sessions.",
+    help=(
+        "Whether or not use problematic devices in themanifests creation.\nSee"
+        " https://www.chimechallenge.org/challenges/chime6/track1_data, there"
+        " are some devices that had recording problems in some sessions."
+    ),
 )
 @click.option(
     "--txt-norm",
@@ -81,8 +96,10 @@ def lhotse_prep():
     required=False,
     default="chime8",
     show_default=True,
-    help="Which text normalization to use."
-    "Choose between 'None', 'chime6', 'chime7' and 'chime8'",
+    help=(
+        "Which text normalization to use."
+        "Choose between 'None', 'chime6', 'chime7' and 'chime8'"
+    ),
 )
 def chime6(
     corpus_dir: str,
@@ -98,7 +115,13 @@ def chime6(
     for d in dset_part:
         for m in mic:
             prepare_chime6(
-                corpus_dir, output_dir, d, m, json_dir, use_problematic, txt_norm
+                corpus_dir,
+                output_dir,
+                d,
+                m,
+                json_dir,
+                use_problematic,
+                txt_norm,
             )
 
 
@@ -112,9 +135,11 @@ def chime6(
     default="dev",
     required=False,
     show_default=True,
-    help="For which part of the dataset you want to prepare lhotse manifests.\n"
-    "Choose between 'dev' and 'eval'."
-    "You can choose multiple by using commas e.g. 'dev,eval'.",
+    help=(
+        "For which part of the dataset you want to prepare lhotse manifests.\n"
+        "Choose between 'dev' and 'eval'."
+        "You can choose multiple by using commas e.g. 'dev,eval'."
+    ),
 )
 @click.option(
     "--mic",
@@ -123,10 +148,12 @@ def chime6(
     default="mdm",
     required=False,
     show_default=True,
-    help="the microphone type to use, choose from "
-    '"ihm" (close-talk) or "mdm" (multi-microphone array) settings. '
-    "For MDM, there are 5 array devices with 7 channels each, "
-    "so the resulting recordings will have 35 channels.",
+    help=(
+        "the microphone type to use, choose from "
+        '"ihm" (close-talk) or "mdm" (multi-microphone array) settings. '
+        "For MDM, there are 5 array devices with 7 channels each, "
+        "so the resulting recordings will have 35 channels."
+    ),
 )
 @click.option(
     "--json-dir",
@@ -135,11 +162,13 @@ def chime6(
     required=False,
     default=None,
     show_default=True,
-    help="Override the JSON annotation directory"
-    "of the current dataset partition (e.g. dev)"
-    "this allows for example to create a manifest from for example a JSON"
-    "created with forced alignment available at"
-    "https://github.com/chimechallenge/CHiME7_DASR_falign.",
+    help=(
+        "Override the JSON annotation directory"
+        "of the current dataset partition (e.g. dev)"
+        "this allows for example to create a manifest from for example a JSON"
+        "created with forced alignment available at"
+        "https://github.com/chimechallenge/CHiME7_DASR_falign."
+    ),
 )
 @click.option(
     "--txt-norm",
@@ -148,8 +177,10 @@ def chime6(
     required=False,
     default="chime8",
     show_default=True,
-    help="Which text normalization to use."
-    "Choose between 'None', 'chime6', 'chime7' and 'chime8'",
+    help=(
+        "Which text normalization to use."
+        "Choose between 'None', 'chime6', 'chime7' and 'chime8'"
+    ),
 )
 def dipco(
     corpus_dir: str,
@@ -176,9 +207,11 @@ def dipco(
     default="dev",
     required=False,
     show_default=True,
-    help="For which part of the dataset you want to prepare lhotse manifests.\n"
-    "Choose between 'train_weak_intv','train_weak_call', 'dev' and 'eval'."
-    "You can choose multiple by using commas e.g. 'dev,eval'.",
+    help=(
+        "For which part of the dataset you want to prepare lhotse manifests.\n"
+        "Choose between 'train_weak_intv','train_weak_call', 'dev' and 'eval'."
+        "You can choose multiple by using commas e.g. 'dev,eval'."
+    ),
 )
 @click.option(
     "--mic",
@@ -187,9 +220,11 @@ def dipco(
     default="mdm",
     required=False,
     show_default=True,
-    help="the microphone type to use, choose from "
-    '"ihm" (close-talk) or "mdm" (multi-microphone array) settings. '
-    "For MDM, there are 11 heterogeneous devices.",
+    help=(
+        "the microphone type to use, choose from "
+        '"ihm" (close-talk) or "mdm" (multi-microphone array) settings. '
+        "For MDM, there are 11 heterogeneous devices."
+    ),
 )
 @click.option(
     "--json-dir",
@@ -198,11 +233,13 @@ def dipco(
     required=False,
     default=None,
     show_default=True,
-    help="Override the JSON annotation directory"
-    "of the current dataset partition (e.g. dev)"
-    "this allows for example to create a manifest from for example a JSON"
-    "created with forced alignment available at"
-    "https://github.com/chimechallenge/CHiME7_DASR_falign.",
+    help=(
+        "Override the JSON annotation directory"
+        "of the current dataset partition (e.g. dev)"
+        "this allows for example to create a manifest from for example a JSON"
+        "created with forced alignment available at"
+        "https://github.com/chimechallenge/CHiME7_DASR_falign."
+    ),
 )
 @click.option(
     "--txt-norm",
@@ -211,8 +248,10 @@ def dipco(
     required=False,
     default="chime8",
     show_default=True,
-    help="Which text normalization to use."
-    "Choose between 'None', 'chime6', 'chime7' and 'chime8'",
+    help=(
+        "Which text normalization to use."
+        "Choose between 'None', 'chime6', 'chime7' and 'chime8'"
+    ),
 )
 def mixer6(
     corpus_dir: str,
@@ -236,8 +275,10 @@ def mixer6(
     "--txt-norm",
     type=str,
     default="chime8",
-    help="Which text normalization you want to apply. "
-    "Choose between 'chime7', 'chime6' and 'chime8'",
+    help=(
+        "Which text normalization you want to apply. "
+        "Choose between 'chime7', 'chime6' and 'chime8'"
+    ),
 )
 @click.option(
     "--regex",
@@ -245,7 +286,9 @@ def mixer6(
     default="*.jsonl.gz",
     help="Glob pattern to apply for finding the manifests to normalize.",
 )
-def text_normalize(input_dir, output_dir, txt_norm="chime8", regex="*.jsonl.gz"):
+def text_normalize(
+    input_dir, output_dir, txt_norm="chime8", regex="*.jsonl.gz"
+):
     txt_normalizer = get_txt_norm(txt_norm)
     os.makedirs(output_dir, exist_ok=True)
 

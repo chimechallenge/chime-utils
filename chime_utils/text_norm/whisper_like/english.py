@@ -15,9 +15,9 @@ class EnglishNumberNormalizer:
 
     - remove any commas
     - keep the suffixes such as: `1960s`, `274th`, `32nd`, etc.
-    - spell out currency symbols after the number. e.g. `$20 million` -> `20000000 dollars`
+    - spell out currency symbols after the number. e.g. `$20 million` -> `20000000 dollars` # noqa e501
     - spell out `one` and `ones`
-    - interpret successive single-digit numbers as nominal: `one oh one` -> `101`
+    - interpret successive single-digit numbers as nominal: `one oh one` -> `101` # noqa e501
     """
 
     def __init__(self):
@@ -81,7 +81,8 @@ class EnglishNumberNormalizer:
             "ninety": 90,
         }
         self.tens_plural = {
-            name.replace("y", "ies"): (value, "s") for name, value in self.tens.items()
+            name.replace("y", "ies"): (value, "s")
+            for name, value in self.tens.items()
         }
         self.tens_ordinal = {
             name.replace("y", "ieth"): (value, "th")
@@ -104,10 +105,12 @@ class EnglishNumberNormalizer:
             "decillion": 1_000_000_000_000_000_000_000_000_000_000_000,
         }
         self.multipliers_plural = {
-            name + "s": (value, "s") for name, value in self.multipliers.items()
+            name + "s": (value, "s")
+            for name, value in self.multipliers.items()
         }
         self.multipliers_ordinal = {
-            name + "th": (value, "th") for name, value in self.multipliers.items()
+            name + "th": (value, "th")
+            for name, value in self.multipliers.items()
         }
         self.multipliers_suffixed = {
             **self.multipliers_plural,
@@ -190,7 +193,9 @@ class EnglishNumberNormalizer:
                 skip = False
                 continue
 
-            next_is_numeric = next is not None and re.match(r"^\d+(\.\d+)?$", next)
+            next_is_numeric = next is not None and re.match(
+                r"^\d+(\.\d+)?$", next
+            )
             has_prefix = current[0] in self.prefixes
             current_without_prefix = current[1:] if has_prefix else current
             if re.match(r"^\d+(\.\d+)?$", current_without_prefix):
@@ -352,7 +357,8 @@ class EnglishNumberNormalizer:
                     yield output(current)
             elif current in self.specials:
                 if next not in self.words and not next_is_numeric:
-                    # apply special handling only if the next word can be numeric
+                    # apply special handling
+                    # only if the next word can be numeric
                     if value is not None:
                         yield output(value)
                     yield output(current)
@@ -431,7 +437,9 @@ class EnglishNumberNormalizer:
                 return m.string
 
         # apply currency postprocessing; "$2 and ¢7" -> "$2.07"
-        s = re.sub(r"([€£$])([0-9]+) (?:and )?¢([0-9]{1,2})\b", combine_cents, s)
+        s = re.sub(
+            r"([€£$])([0-9]+) (?:and )?¢([0-9]{1,2})\b", combine_cents, s
+        )
         s = re.sub(r"[€£$]0.([0-9]{1,2})\b", extract_cents, s)
 
         # write "one(s)" instead of "1(s)", just for the readability
@@ -441,7 +449,9 @@ class EnglishNumberNormalizer:
 
     def __call__(self, s: str):
         s = self.preprocess(s)
-        s = " ".join(word for word in self.process_words(s.split()) if word is not None)
+        s = " ".join(
+            word for word in self.process_words(s.split()) if word is not None
+        )
         s = self.postprocess(s)
 
         return s
@@ -466,7 +476,9 @@ class EnglishTextNormalizer:
     def __init__(self, standardize_numbers=False):
         self.replacers = {
             # common non verbal sounds are mapped to the similar ones
-            r"\b(hm+)\b|\b(mhm)\b|\b(mm+)\b|\b(m+h)\b|\b(hm+)\b|\b(um+)\b|\b(uhm+)\b": "hmm",
+            r"\b(hm+)\b|\b(mhm)\b|\b(mm+)\b|\b(m+h)\b|\b(hm+)\b|\b(um+)\b|\b(uhm+)\b": (  # noqa e501
+                "hmm"
+            ),
             r"\b(a+h+)\b|\b(ha+)\b": "ah",
             r"\b(o+h+)\b|\b(h+o+)\b": "oh",
             r"\b(u+h+)\b|\b(h+u+)\b|\b(h+u+h+)\b": "uh",
@@ -510,12 +522,11 @@ class EnglishTextNormalizer:
             r"\bjr\b": "junior ",
             r"\bsr\b": "senior ",
             r"\besq\b": "esquire ",
-            # prefect tenses, ideally it should be any past participles, but it's harder..
             r"'d been\b": " had been",
             r"'s been\b": " has been",
             r"'d gone\b": " had gone",
             r"'s gone\b": " has gone",
-            r"'d done\b": " had done",  # "'s done" is ambiguous
+            r"'d done\b": " had done",
             r"'s got\b": " has got",
             # general contractions
             r"n't\b": " not",
@@ -536,26 +547,33 @@ class EnglishTextNormalizer:
     def __call__(self, s: str):
         s = s.lower()
 
-        s = re.sub(r"[<\[][^>\]]*[>\]]", "", s)  # remove words between brackets
-        s = re.sub(r"\(([^)]+?)\)", "", s)  # remove words between parenthesis
-        # s = re.sub(self.ignore_patterns, "", s)
-        s = re.sub(r"\s+'", "'", s)  # when there's a space before an apostrophe
+        s = re.sub(r"[<\[][^>\]]*[>\]]", "", s)
+        # remove words between brackets
+        s = re.sub(r"\(([^)]+?)\)", "", s)
+        # remove words between parenthesis
+        s = re.sub(r"\s+'", "'", s)
+        # when there's a space before an apostrophe
 
         for pattern, replacement in self.replacers.items():
             s = re.sub(pattern, replacement, s)
 
-        s = re.sub(r"(\d),(\d)", r"\1\2", s)  # remove commas between digits
-        s = re.sub(r"\.([^0-9]|$)", r" \1", s)  # remove periods not followed by numbers
-        s = remove_symbols_and_diacritics(s, keep=".%$¢€£")  # keep numeric symbols
+        s = re.sub(r"(\d),(\d)", r"\1\2", s)
+        # remove commas between digits
+        s = re.sub(r"\.([^0-9]|$)", r" \1", s)
+        # remove periods not followed by numbers
+        s = remove_symbols_and_diacritics(s, keep=".%$¢€£")
+        # keep numeric symbols
 
         if self.standardize_numbers is not None:
             s = self.standardize_numbers(s)
         s = self.standardize_spellings(s)
 
-        # now remove prefix/suffix symbols that are not preceded/followed by numbers
+        # now remove prefix/suffix symbols
+        # that are not preceded/followed by numbers
         s = re.sub(r"[.$¢€£]([^0-9])", r" \1", s)
         s = re.sub(r"([^0-9])%", r"\1 ", s)
 
-        s = re.sub(r"\s+", " ", s)  # replace any successive whitespaces with a space
+        s = re.sub(r"\s+", " ", s)
+        # replace any successive whitespaces with a space
 
         return s
