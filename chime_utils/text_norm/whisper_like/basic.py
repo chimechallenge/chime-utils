@@ -55,13 +55,9 @@ def remove_symbols(s: str):
 
 
 class BasicTextNormalizer:
-    def __init__(
-        self, remove_diacritics: bool = False, split_letters: bool = False
-    ):
+    def __init__(self, remove_diacritics: bool = False, split_letters: bool = False):
         self.clean = (
-            remove_symbols_and_diacritics
-            if remove_diacritics
-            else remove_symbols
+            remove_symbols_and_diacritics if remove_diacritics else remove_symbols
         )
         self.split_letters = split_letters
 

@@ -81,8 +81,7 @@ class EnglishNumberNormalizer:
             "ninety": 90,
         }
         self.tens_plural = {
-            name.replace("y", "ies"): (value, "s")
-            for name, value in self.tens.items()
+            name.replace("y", "ies"): (value, "s") for name, value in self.tens.items()
         }
         self.tens_ordinal = {
             name.replace("y", "ieth"): (value, "th")
@@ -105,12 +104,10 @@ class EnglishNumberNormalizer:
             "decillion": 1_000_000_000_000_000_000_000_000_000_000_000,
         }
         self.multipliers_plural = {
-            name + "s": (value, "s")
-            for name, value in self.multipliers.items()
+            name + "s": (value, "s") for name, value in self.multipliers.items()
         }
         self.multipliers_ordinal = {
-            name + "th": (value, "th")
-            for name, value in self.multipliers.items()
+            name + "th": (value, "th") for name, value in self.multipliers.items()
         }
         self.multipliers_suffixed = {
             **self.multipliers_plural,
@@ -193,9 +190,7 @@ class EnglishNumberNormalizer:
                 skip = False
                 continue
 
-            next_is_numeric = next is not None and re.match(
-                r"^\d+(\.\d+)?$", next
-            )
+            next_is_numeric = next is not None and re.match(r"^\d+(\.\d+)?$", next)
             has_prefix = current[0] in self.prefixes
             current_without_prefix = current[1:] if has_prefix else current
             if re.match(r"^\d+(\.\d+)?$", current_without_prefix):
@@ -437,9 +432,7 @@ class EnglishNumberNormalizer:
                 return m.string
 
         # apply currency postprocessing; "$2 and ¢7" -> "$2.07"
-        s = re.sub(
-            r"([€£$])([0-9]+) (?:and )?¢([0-9]{1,2})\b", combine_cents, s
-        )
+        s = re.sub(r"([€£$])([0-9]+) (?:and )?¢([0-9]{1,2})\b", combine_cents, s)
         s = re.sub(r"[€£$]0.([0-9]{1,2})\b", extract_cents, s)
 
         # write "one(s)" instead of "1(s)", just for the readability
@@ -449,9 +442,7 @@ class EnglishNumberNormalizer:
 
     def __call__(self, s: str):
         s = self.preprocess(s)
-        s = " ".join(
-            word for word in self.process_words(s.split()) if word is not None
-        )
+        s = " ".join(word for word in self.process_words(s.split()) if word is not None)
         s = self.postprocess(s)
 
         return s

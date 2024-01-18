@@ -36,15 +36,13 @@ def dgen():
     type=click.Path(exists=True),
 )
 @click.argument(
-    "checksum-json",
-    type=click.Path(exists=False), default=None, required=False
+    "checksum-json", type=click.Path(exists=False), default=None, required=False
 )
 @click.option(
     "--check-eval",
     is_flag=True,
     default=False,
-    help="Whether to check also for evaluation "
-         "(released later for some corpora).",
+    help="Whether to check also for evaluation " "(released later for some corpora).",
 )
 @click.option(
     "--forgive-missing",
@@ -54,11 +52,9 @@ def dgen():
     "(e.g. want only to check a subset of the data).",
 )
 @click.option(
-    "--create", type=bool, default=False,
-    help="Organizers-only, " "create checksum."
+    "--create", type=bool, default=False, help="Organizers-only, " "create checksum."
 )
-def checksum_data(data_folder, check_eval,
-                  checksum_json, forgive_missing, create):
+def checksum_data(data_folder, check_eval, checksum_json, forgive_missing, create):
     data_check(data_folder, check_eval, checksum_json, forgive_missing, create)
 
 
@@ -71,7 +67,8 @@ def checksum_data(data_folder, check_eval,
     is_flag=True,
     default=False,
     help="Whether to download CHiME-6 or not."
-         " " "(you may have it already in storage)",
+    " "
+    "(you may have it already in storage)",
 )
 @click.option(
     "--part",
@@ -264,6 +261,5 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, skip_notsofar1=True):
 
     with open(output_file, "w") as f:
         json.dump(
-            {"sessions_map": sess_mapping_out,
-             "spk_map": spk_mapping_out}, f, indent=4
+            {"sessions_map": sess_mapping_out, "spk_map": spk_mapping_out}, f, indent=4
         )
