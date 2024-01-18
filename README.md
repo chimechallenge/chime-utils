@@ -20,5 +20,10 @@ I recommend making a fresh conda env, you can install with <br>
 new terminal command: 
 `chime-utils`
 
-- e.g. data preparation for DiPCo: 
-`chime-utils dgen dipco /tmp/dipco_orig/ /tmp/chime8/dipco --download`
+#### Usage
+1. data preparation for DiPCo:
+  - When you already have DiPCo
+`chime-utils dgen dipco [current_DiPCo_dir] [chime8_root_dir]/chime8/dipco`
+
+  - When you want to download it:
+`chime-utils dgen dipco [dir_to_download_DiPCo] [chime8_root_dir]/chime8/dipco --download`
