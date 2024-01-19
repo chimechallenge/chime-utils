@@ -11,7 +11,9 @@ from chime_utils.text_norm import get_txt_norm
 
 logging.basicConfig(
     format=(
-        "%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]" " %(message)s"
+        "%(asctime)s,%(msecs)d %(levelname)-8s "
+        "[%(filename)s:%(lineno)d]"
+        " %(message)s"
     ),
     datefmt="%Y-%m-%d:%H:%M:%S",
     level=logging.INFO,
