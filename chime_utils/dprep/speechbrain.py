@@ -45,8 +45,7 @@ def prepare_chime6(
     :param mic: str, the microphone type to use,
     choose from "ihm" (close-talk) or "mdm" (multi-mic array) settings.
         For MDM, there are 6 array devices with 4 channels each,
-        so the resulting recordings will have
-        24 channels (for most sessions).
+        so the resulting recordings will have 24 channels (for most sessions).
     :param json_dir: Pathlike, override the JSON annotation directory
         of the current dataset partition (e.g. dev)
         this allows for example to create a manifest from for example a JSON
