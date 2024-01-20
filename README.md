@@ -3,7 +3,7 @@
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/chimechallenge.svg?style=social&label=Follow%20%40chimechallenge)](https://twitter.com/chimechallenge)
 [![Slack][slack-badge]][slack-invite]
 
-✅ Official data generation and data preparation scripts for CHiME-8 DASR. 
+✅ Official data generation and data preparation scripts for [CHiME-8 DASR](https://www.chimechallenge.org/current/task1/index). 
 
 We provide a more convenient standalone interface for downloading the core and prepare the official CHiME-8 DASR data. <br> 
 This year we also support automatic downloading of CHiME-6. <br>
@@ -60,12 +60,15 @@ Hereafter we describe each command/function in detail.
 You can generate all CHiME-8 DASR data in one go with: <br>
 `chime-utils dgen dasr ./chime8_dasr ./download /path/to/mixer6 --part train,dev` 
 
-This script will download CHiME-6, DiPCo and NOTSOFAR1 in `./download` <br>
+This script will download CHiME-6, DiPCo and NOTSOFAR1 automatically in `./download` <br>
+Ensure you have at least 1TB of space there. You can remove the .tar.gz after the full data preparation to save some space later.
+
 Mixer 6 Speech instead has to be obtained through LDC. <br>
 Refer to [chimechallenge.org/current/task1/data](https://www.chimechallenge.org/current/task1/data) on how to obtain Mixer 6 Speech.
 
-You can check if the data has been successfully prepared with: <br>
-`chime-utils dgen checksum ./chime8_dasr` 
+🔐 You can check if the data has been successfully prepared with: <br>
+`chime-utils dgen checksum ./chime8_dasr` <br>
+It is better to run this also for the evaluation part, when evaluation will be released. 
 
 ### 🐢 Single Dataset Scripts
 
@@ -84,7 +87,13 @@ We also provide scripts for obtaining each core dataset independently if needed.
  
 ## Data preparation
 
-### 🚀 NeMo Official Baseline
+### 🚀 NVIDIA NeMo Official Baseline 
+ 
+[![nVIDIA](https://img.shields.io/badge/nVIDIA-%2376B900.svg?style=for-the-badge&logo=nVIDIA&logoColor=white)](https://github.com/NVIDIA/NeMo)
+
+This year CHiME-8 DASR baseline is built directly upon [NVIDIA NeMo](https://github.com/NVIDIA/NeMo) last year CHiME-7 DASR Submission [1]. <br>
+
+It is available at FIXME
 
 
 ### Other Toolkits
@@ -140,24 +149,55 @@ on all scenarios simultaneously.
 
 ## Scoring
 
-Last but not least, we also provide scripts for scoring (same scripts as used by organizers to score submissions). <br>
-To know more about scoring please head over the official [CHiME-8 Challenge website]().
+Last but not least, we also provide scripts for scoring (the exact same scripts organizers will use for ranking CHiME-8 DASR submissions). <br>
+To learn more about scoring and ranking in CHiME-8 DASR please head over the official [CHiME-8 Challenge website](https://www.chimechallenge.org/current/task1/index).
+
+Note that the following scrips expect the participants predictions to be in the standard CHiME-style JSON format, where the JSON is a list of 
+dicts (one for each utterance) with the following keys:
+
+```
+    {
+        "end_time": "43.82",
+        "start_time": "40.60",
+        "words": "chime style json format",
+        "speaker": "P05",
+        "session_id": "S02"
+    }
+```
+
+Please head over to [CHiME-8 DASR Submission instructions](https://www.chimechallenge.org/current/task1/submission) to know more about scoring and text normalization and also ranking.
+
+The scripts may accept a single JSON or a folder where multiple JSON files are contained. <br>
+E.g. one per each scenario as requested in [CHiME-8 DASR Submission instructions](https://www.chimechallenge.org/current/task1/submission). <br>
+For example for the development set: <br>
+
+```
+dev
+├── chime6.json
+├── dipco.json
+├── mixer6.json
+└── notsofar1.json
+```
 
 ### ASR 
 
 In detail we provide scripts to compute common ASR metrics for long-form meeting scenarios. 
-These scores are computed automatically through [Meeteval]() [1]. 
+These scores are computed through the awesome [Meeteval](https://github.com/fgnt/meeteval) [2] toolkit. 
 
 - tcpWER
 - cpWER
-- DA-WER 
+- DA-WER
 
-
-You can also use 
-
+You can also use `chime-utils score json2ctm input-dir output-dir` to automatically convert all JSON files in `input-dir` and its subfolders to `.ctm` files. <br> 
+This allows to use easily also other ASR metrics tools such as [NIST Asclite](https://mig.nist.gov/MIG_Website/tools/asclite.html). 
 
 
 ### Diarization 
+
+
+
+- DER
+- JER
 
 
 ### Error Analysis 
@@ -166,26 +206,31 @@ You can also use
 As well as utils to convert CHiME-style long-form JSON annotation to other formats such as .ctm and Audacity compatible labels (.txt)
 so that systems output can be more in-depth analyzed. 
 
-- .ctm conversion
+- .ctm and .stm conversion
 - .rttm conversion 
 
-- Audacity labels
+- Audacity labels (see [Audacity manual page](https://manual.audacityteam.org/man/label_tracks.html))
 
 
-#### 🚀 MeetEval meeting recognition visualization (recommended)
+#### 🔍 MeetEval meeting recognition visualization (recommended)
 
-https://thequilo.github.io/meeteval_jupyterlite/lab/
+For ASR+diarization error analysis we recommend the use of this super useful tool 
+from Meeteval authors Thilo Von Neumann and Christoph Boeddeker (will be presented at ICASSP 2024 in a show and tell session): <br>
+- https://thequilo.github.io/meeteval_jupyterlite/lab/
 
+To use this tool all you need is to convert the predictions and the ground truth to `.stm` format: 
+
+`chime-utils score json2stm pred-dir pred-stm-output-dir` <br>
+`chime-utils score json2stm gt-dir gt-stm-output-dir` <br>
 
 ---
 
 ## References 
 
-[1] 
+[1] Park, T. J., Huang, H., Jukic, A., Dhawan, K., Puvvada, K. C., Koluguri, N., ... & Ginsburg, B. (2023). The CHiME-7 Challenge: System Description and Performance of NeMo Team's DASR System. arXiv preprint arXiv:2310.12378. <br>
 
-[2]
+[2] von Neumann, T., Boeddeker, C., Delcroix, M., & Haeb-Umbach, R. (2023). MeetEval: A Toolkit for Computation of Word Error Rates for Meeting Transcription Systems. arXiv preprint arXiv:2307.11394. <br>
 
-[3]
 
 
 
