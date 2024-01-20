@@ -8,8 +8,10 @@ We provide a more convenient standalone interface for downloading the core and p
 This year we also support automatic downloading of CHiME-6. <br>
 
 ---
+
 **NOTE** <br>
 For in-depth details about CHiME-8 DASR data refer to [chimechallenge.org/current/task1/data](https://www.chimechallenge.org/current/task1/data).
+
 ---
 
 ## Installation
@@ -103,3 +105,6 @@ You can prepare Speechbrain compatible
 Last but not least, this 
 
 
+[slack-badge]: https://img.shields.io/badge/slack-chat-green.svg?logo=slack
+[slack-invite]: https://join.slack.com/t/chime-fey5388/shared_invite/zt-1oha0gedv-JEUr1mSztR7~iK9AxM4HOA
+[twitter]: https://twitter.com/chimechallenge<h2>References</h2>
