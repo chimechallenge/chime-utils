@@ -36,13 +36,13 @@ This package brings a new module: <br>
 
 And related CLI commands: <br>
 - `chime-utils dgen` <br>
-    - for generating and downloading CHiME-8 data.
+    - generates and downloads CHiME-8 data.
 - `chime-utils lhotse-prep` <br>
-    - for preparing CHiME-8 data in lhotse manifests (which can be then converted to Kaldi and ESPNet compatible ones).
+    - prepares CHiME-8 data lhotse manifests (which can be then converted to Kaldi and ESPNet compatible ones).
 - `chime-utils speechbrain-prep` <br>
-    - for preparing 
+    - prepares CHiME-8 data Speechbrain-style JSON format.
 - `chime-utils score` <br>
-    - scripts used for official scoring
+    - scripts used for official scoring.
 
 Hereafter we describe each command/function in detail. 
 
@@ -51,7 +51,8 @@ Hereafter we describe each command/function in detail.
 ### All DASR data in one go
 
 You can generate all CHiME-8 DASR data in one go with: <br>
-`chime-utils dgen dasr ./chime8_dasr ./download /path/to/mixer6 --part train,dev` <br>
+`chime-utils dgen dasr ./chime8_dasr ./download /path/to/mixer6 --part train,dev` 
+
 This script will download CHiME-6, DiPCo and NOTSOFAR1 in `./download` <br>
 Mixer 6 Speech instead has to be obtained through LDC. <br>
 Refer to [chimechallenge.org/current/task1/data](https://www.chimechallenge.org/current/task1/data) on how to obtain Mixer 6 Speech.
@@ -66,8 +67,8 @@ We also provide scripts for obtaining each core dataset independently if needed.
 
 - CHiME-6
    -  `chime-utils dgen chime6 ./chime8_dasr /path/to/chime6 --part train,dev` 
-       - It can also be downloaded automatically to `/path/to/dipco` using:
-           - `chime-utils dgen chime6 ./chime8_dasr /path/to/chime6 --part dev --download` 
+   - It can also be downloaded automatically to `/path/to/dipco` using:
+       - `chime-utils dgen chime6 ./chime8_dasr /path/to/chime6 --part dev --download` 
 - DiPCo
     -  `chime-utils dgen dipco ./chime8_dasr /path/to/dipco --part dev` 
     - It can also be downloaded automatically to `/path/to/dipco` using:
