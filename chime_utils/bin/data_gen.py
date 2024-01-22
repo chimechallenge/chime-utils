@@ -7,17 +7,11 @@ from pathlib import Path
 import click
 
 from chime_utils.bin.base import cli
-from chime_utils.dgen import (
-    data_check,
-    gen_chime6,
-    gen_dipco,
-    gen_mixer6,
-    gen_notsofar1,
-)
+from chime_utils.dgen import data_check, gen_chime6, gen_dipco, gen_mixer6
 
 logging.basicConfig(
     format=(
-        "%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s"
+        "%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]" " %(message)s"
     ),
     datefmt="%Y-%m-%d:%H:%M:%S",
     level=logging.INFO,
@@ -36,17 +30,18 @@ def dgen():
     "data-folder",
     type=click.Path(exists=True),
 )
-@click.argument(
-    "checksum-json",
+@click.option(
+    "--checksum-json",
     type=click.Path(exists=False),
     default=None,
     required=False,
+    help="Optional path to another MD5 hashes JSON file.",
 )
 @click.option(
     "--check-eval",
     is_flag=True,
     default=False,
-    help="Whether to check also for evaluation (released later for some corpora).",
+    help=("Whether to check also for evaluation (released later for some" " corpora)."),
 )
 @click.option(
     "--forgive-missing",
@@ -64,7 +59,70 @@ def dgen():
     help="Organizers-only, create checksum.",
 )
 def checksum_data(data_folder, check_eval, checksum_json, forgive_missing, create):
+    """
+    This function can be used if the data has been generated correctly.
+    It computes MD5 hash for each file and checks if it is consistent with what
+    organizers have.\n
+    DATA_FOLDER: Path to the DASR dataset root (with chime6, dipco and mixer6
+    as subfolders)
+    """
     data_check(data_folder, check_eval, checksum_json, forgive_missing, create)
+
+
+@dgen.command(name="dasr")
+@click.argument("dasr-dir", type=click.Path(exists=False))
+@click.argument("download-dir", type=click.Path(exists=False))
+@click.argument("mixer6-dir", type=click.Path(exists=True))
+@click.option(
+    "--part",
+    "-p",
+    type=str,
+    default="train,dev",
+    help=(
+        "Which part of the dataset you want to generate, "
+        "choose between 'train','dev' and 'eval'.\n"
+        "You can choose multiple by using commas e.g. 'train,dev,eval'."
+    ),
+)
+@click.option(
+    "--challenge",
+    "-c",
+    type=str,
+    default="chime8",
+    help=(
+        "Which CHiME Challenge edition do you need this data for ? "
+        "Choose between 'chime7' and 'chime8'.\n"
+        "This option controls the partitioning between train, "
+        "dev and eval and the text normalization used."
+    ),
+)
+def gen_all_dasr(dasr_dir, download_dir, mixer6_dir, part, challenge="chime8"):
+    """
+    This script downloads and prepares all DASR data for the four core scenarios:
+    CHiME-6, DiPCo, Mixer 6 Speech and NOTSOFAR1.
+    Note that Mixer 6 must be obtained through LDC while the other datasets can
+    be downloaded automatically.
+    Refer to https://www.chimechallenge.org/current/task1/data for further details. # noqa E501
+
+    DOWNLOAD_DIR: Pathlike, where the original core datasets will be downloaded.\n
+    DASR_DIR: Pathlike, where the final prepared DASR data will be stored.\n
+    MIXER6_DIR: Pathlike, path to Mixer 6 Speech root folder.
+    """
+    for c_part in part.split(","):
+        if c_part == "public_eval":
+            # only prep notsofar1 here
+            continue
+        # prep chime6
+        gen_chime6(dasr_dir, download_dir, True, c_part, challenge)
+        if c_part in ["dev", "eval"]:
+            gen_dipco(dasr_dir, download_dir, True, c_part, challenge)
+        if c_part.startswith("train"):
+            for c_part in ["train_call", "train_intv"]:
+                gen_mixer6(dasr_dir, mixer6_dir, c_part, challenge)
+        else:
+            # dev or eval
+            gen_mixer6(dasr_dir, mixer6_dir, c_part, challenge)
+        # notsofar1 here
 
 
 @dgen.command(name="chime6")
@@ -75,7 +133,9 @@ def checksum_data(data_folder, check_eval, checksum_json, forgive_missing, creat
     "-d",
     is_flag=True,
     default=False,
-    help="Whether to download CHiME-6 or not. (you may have it already in storage)",
+    help=(
+        "Whether to download CHiME-6 or not. (you may have it already in" " storage)"
+    ),
 )
 @click.option(
     "--part",
@@ -101,6 +161,13 @@ def checksum_data(data_folder, check_eval, checksum_json, forgive_missing, creat
     ),
 )
 def chime6(corpus_dir, output_dir, download, part, challenge):
+    """
+    This script prepares the CHiME-6 dataset in a suitable manner as used in
+    CHiME-6, CHiME-7 DASR and CHiME-8 DASR challenges.
+    CORPUS_DIR: Path to the original CHiME-6 directory, if the dataset does not
+        exist it will be downloaded to this folder.\n
+    OUTPUT_DIR: Path to where the final prepared dataset will be stored.
+    """
     gen_chime6(output_dir, corpus_dir, download, part, challenge)
 
 
@@ -112,7 +179,10 @@ def chime6(corpus_dir, output_dir, download, part, challenge):
     "-d",
     is_flag=True,
     default=False,
-    help="Whether to download DiPCo or not (you may have the .tar already downloaded).",
+    help=(
+        "Whether to download DiPCo or not (you may have the .tar already"
+        " downloaded)."
+    ),
 )
 @click.option(
     "--part",
@@ -138,6 +208,13 @@ def chime6(corpus_dir, output_dir, download, part, challenge):
     ),
 )
 def dipco(corpus_dir, output_dir, download, part, challenge):
+    """
+    This script prepares the DiPCo dataset in a suitable manner as used in
+    CHiME-7 DASR and CHiME-8 DASR challenges.
+    CORPUS_DIR: Path to the original DiPCo directory, if the dataset does not
+        exist it will be downloaded to this folder.\n
+    OUTPUT_DIR: Path to where the final prepared dataset will be stored.
+    """
     gen_dipco(output_dir, corpus_dir, download, part, challenge)
 
 
@@ -168,6 +245,13 @@ def dipco(corpus_dir, output_dir, download, part, challenge):
     ),
 )
 def mixer6(corpus_dir, output_dir, part, challenge):
+    """
+    This script prepares the Mixer 6 Speech dataset in a suitable manner as used in
+    CHiME-7 DASR and CHiME-8 DASR challenges.\n
+    CORPUS_DIR: Path to the original Mixer 6 Speech directory. It must be
+        obtained through LDC, please refer to https://www.chimechallenge.org/current/task1/data\n
+    OUTPUT_DIR: Path to where the final prepared dataset will be stored.
+    """
     gen_mixer6(output_dir, corpus_dir, part, challenge)
 
 
@@ -179,7 +263,9 @@ def mixer6(corpus_dir, output_dir, part, challenge):
     "-d",
     is_flag=True,
     default=False,
-    help="Whether to download NOTSOFAR1 or not (you may have it already in storage).",
+    help=(
+        "Whether to download NOTSOFAR1 or not (you may have it already in" " storage)."
+    ),
 )
 @click.option(
     "--part",
@@ -193,7 +279,9 @@ def mixer6(corpus_dir, output_dir, part, challenge):
     ),
 )
 def notsofar1(corpus_dir, output_dir, download, part):
-    gen_notsofar1(output_dir, corpus_dir, download, part)
+    pass
+    # FIXME
+    # gen_notsofar1(output_dir, corpus_dir, download, part)
 
 
 # this last function is organizer-only
@@ -207,14 +295,18 @@ def notsofar1(corpus_dir, output_dir, download, part):
     default=True,
     help="Do not generate for NOTSOFAR1.",
 )
-def gen_sess_spk_map_chime8(corpus_dir, output_file, skip_notsofar1=True):
+@click.option("--challenge", "-c", type=str, default="chime8")
+def gen_sess_spk_map_chime8(
+    corpus_dir, output_file, skip_notsofar1=True, challenge="chime8"
+):
     """
-    Organizers only, used to generate session and spk names for all scenarios
+    Organizers only, used to generate session and spk names for all scenarios.
+    CORPUS_DIR: Path to the original datasets in the same directory.
+    OUTPUT_FILE: Path to JSON mapping file.
     """
-    # we need to parse all sessions for each corpus and each speaker then
-    # starting from chime-6 assign a map from orig_sess_name --> SXX and
-    # orig_spk_name --> PXX
-    # note that chime6 we keep it the same.
+    if challenge not in ["chime8"]:
+        raise NotImplementedError
+
     corporas = ["chime6", "dipco", "mixer6"]
 
     def fetch_all_spk(json_files):
@@ -242,7 +334,8 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, skip_notsofar1=True):
         # sort here as glob is sys dependent
         sessions_j = sorted(sessions_j, key=lambda x: Path(x).stem)
         for sess_num, s in enumerate(sessions_j):
-            if corp == "chime6":
+            if corp in ["chime6", "mixer6"]:
+                # do not rename sessions for mixer6, we cannot
                 orig_name = Path(s).stem
                 new_name = orig_name
             else:
@@ -255,7 +348,7 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, skip_notsofar1=True):
         # now fetch also all speakers from all jsons and sort them
         all_speakers = fetch_all_spk(sessions_j)
         for spk in all_speakers:
-            if corp == "chime6":
+            if corp in ["chime6"]:
                 new_name = spk
             else:
                 new_name = "P{:02d}".format(int(last_spk.strip("P")) + 1)
