@@ -22,7 +22,7 @@ from chime_utils.text_norm import get_txt_norm
 
 logging.basicConfig(
     format=(
-        "%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s"
+        "%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]" " %(message)s"
     ),
     datefmt="%Y-%m-%d:%H:%M:%S",
     level=logging.INFO,
@@ -47,7 +47,8 @@ def prepare_chime6(
     txt_norm: Optional[str] = "chime8",
 ) -> Dict[str, Dict[str, Union[RecordingSet, SupervisionSet]]]:
     """
-    Returns the manifests which consist of the Recordings and Supervisions
+    Returns the Lhotse speech
+    manifests which consist of the Recordings and Supervisions
     :param corpus_dir: Pathlike, the path of CHiME-6 main directory.
     :param output_dir: Pathlike, the path where to write the manifests.
     :param mic: str, the microphone type to use,
