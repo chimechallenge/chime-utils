@@ -9,10 +9,10 @@ from lhotse.recipes.chime6 import TimeFormatConverter
 
 from chime_utils.text_norm import get_txt_norm
 
-CORPUS_URL = ""
+CORPUS_URL = ""  # FIXME openslr
 CHiME6_FS = 16000
 
-# NOTE, no CHiME-8 map
+# NOTE, CHiME-8 uses same original split as CHiME-6
 chime7_map = {
     "train": [
         "S03",
@@ -36,12 +36,23 @@ chime7_map = {
 
 
 def gen_chime6(
-    output_dir,
-    corpus_dir,
-    download=False,
-    dset_part="train,dev",
-    challenge="chime8",
+    output_dir, corpus_dir, download=False, dset_part="train,dev", challenge="chime8"
 ):
+    """
+    :param output_dir: Pathlike, path to output directory where the prepared data is saved.
+    :param corpus_dir: Pathlike, path to the original CHiME-6 directory.
+        If the dataset does not exist it will be downloaded
+        to this folder if download is set to True.
+    :param download: Whether to download the dataset from OpenSLR or not.
+        You may have it already in storage.
+    :param dset_part: Which part of the dataset you want to generate,
+        choose between 'train','dev' and 'eval'.
+        You can choose multiple ones by using commas e.g. 'train,dev,eval'.
+    :param challenge: str, which CHiME Challenge edition do you need this data for ?
+        Choose between 'chime7' and 'chime8'.
+        This option controls the partitioning between train,
+        dev and eval and the text normalization used.
+    """
     scoring_txt_normalization = get_txt_norm(challenge)
 
     if download:
@@ -80,6 +91,9 @@ def gen_chime6(
             parents=True, exist_ok=True
         )
         Path(os.path.join(output_dir, "uem", split)).mkdir(parents=True, exist_ok=True)
+        Path(os.path.join(output_dir, "devices", split)).mkdir(
+            parents=True, exist_ok=True
+        )
 
     all_uem = {k: [] for k in splits}
     for split in splits:
@@ -99,6 +113,37 @@ def gen_chime6(
                 sess2audio[session_name] = [x]
             else:
                 sess2audio[session_name].append(x)
+
+        # create device files
+        for c_sess in sess2audio.keys():
+            c_sess_audio_f = sess2audio[c_sess]
+            devices_json = {}
+            for audio in c_sess_audio_f:
+                c_device = Path(audio).stem.lstrip(c_sess + "_")
+                if c_device.startswith("P"):
+                    # close talk device
+                    d_type = {
+                        "is_close_talk": True,
+                        "speaker": c_device,
+                        "num_channels": 2,
+                        "device_type": "binaural_mic",
+                    }
+                else:
+                    # array device
+                    channel = c_device.split(".")[-1]
+                    d_type = {
+                        "is_close_talk": False,
+                        "speaker": None,
+                        "num_channels": 1,
+                        "device_type": f"kinect_array_{channel}_mic",
+                    }
+                devices_json[c_device] = d_type
+
+            devices_json = dict(sorted(devices_json.items(), key=lambda x: x[0]))
+            with open(
+                os.path.join(output_dir, "devices", split, c_sess + ".json"), "w"
+            ) as f:
+                json.dump(devices_json, f, indent=4)
 
         # for each json file
         for j_file in ann_json:
