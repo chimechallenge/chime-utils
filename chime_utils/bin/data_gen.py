@@ -1,8 +1,4 @@
-import glob
-import json
 import logging
-import os.path
-from pathlib import Path
 
 import click
 
@@ -164,6 +160,7 @@ def chime6(corpus_dir, output_dir, download, part, challenge):
     """
     This script prepares the CHiME-6 dataset in a suitable manner as used in
     CHiME-6, CHiME-7 DASR and CHiME-8 DASR challenges.
+
     CORPUS_DIR: Path to the original CHiME-6 directory, if the dataset does not
         exist it will be downloaded to this folder.\n
     OUTPUT_DIR: Path to where the final prepared dataset will be stored.
@@ -225,7 +222,7 @@ def dipco(corpus_dir, output_dir, download, part, challenge):
     "--part",
     "-p",
     type=str,
-    default="dev",
+    default="train_call,train_intv,dev",
     help=(
         "Which part of the dataset you want to generate, "
         "choose between 'train', 'dev' and 'eval'.\n"
@@ -282,98 +279,3 @@ def notsofar1(corpus_dir, output_dir, download, part):
     pass
     # FIXME
     # gen_notsofar1(output_dir, corpus_dir, download, part)
-
-
-# this last function is organizer-only
-@dgen.command(name="gen-mapping")
-@click.argument("corpus-dir", type=click.Path(exists=True))
-@click.argument("output-file", type=click.Path(exists=False))
-@click.option(
-    "--skip-notsofar1",
-    "-s",
-    type=bool,
-    default=True,
-    help="Do not generate for NOTSOFAR1.",
-)
-@click.option("--challenge", "-c", type=str, default="chime8")
-def gen_sess_spk_map_chime8(
-    corpus_dir, output_file, skip_notsofar1=True, challenge="chime8"
-):
-    """
-    Organizers only, used to generate session and spk names for all scenarios.
-    CORPUS_DIR: Path to the original datasets in the same directory.
-    OUTPUT_FILE: Path to JSON mapping file.
-    """
-    if challenge not in ["chime8"]:
-        raise NotImplementedError
-
-    corporas = ["chime6", "dipco", "mixer6"]
-
-    def fetch_all_spk(json_files):
-        spk_set = set()
-        for j in json_files:
-            with open(j, "r") as f:
-                annotation = json.load(f)
-
-            [spk_set.add(x["speaker"]) for x in annotation]
-
-        return sorted(list(spk_set))  # need to sort
-
-    sess_mapping_out = {}
-    spk_mapping_out = {}
-    last_sess = None
-    last_spk = None
-    for corp in corporas:
-        sess_mapping_out[corp] = {}
-        spk_mapping_out[corp] = {}
-        # fetch all sessions here from JSON files
-        sessions_j = glob.glob(
-            os.path.join(corpus_dir, corp, "transcriptions", "*/**.json"),
-            recursive=True,
-        )
-        # sort here as glob is sys dependent
-        sessions_j = sorted(sessions_j, key=lambda x: Path(x).stem)
-        for sess_num, s in enumerate(sessions_j):
-            if corp in ["chime6", "mixer6"]:
-                # do not rename sessions for mixer6, we cannot
-                orig_name = Path(s).stem
-                new_name = orig_name
-            else:
-                orig_name = Path(s).stem
-                new_name = "S{:02d}".format(int(last_sess.strip("S")) + 1)
-                # assert name is kept the same
-            sess_mapping_out[corp][orig_name] = new_name
-            last_sess = new_name
-
-        # now fetch also all speakers from all jsons and sort them
-        all_speakers = fetch_all_spk(sessions_j)
-        for spk in all_speakers:
-            if corp in ["chime6"]:
-                new_name = spk
-            else:
-                new_name = "P{:02d}".format(int(last_spk.strip("P")) + 1)
-            spk_mapping_out[corp][spk] = new_name
-            last_spk = new_name
-
-    if not skip_notsofar1:
-        raise NotImplementedError  # FIXME coordinate with MS
-
-        # note that notsofar1 must be treated differently !
-        # as it is not readily available.
-        # for split in ["dev", "train", "public_eval", "blind_eval"]:
-        #    split_json_dir = os.path.join(corpus_dir,
-        #                                  "notsofar1",
-        #                                  "transcriptions", split)
-        #    if not os.path.exists(split_json_dir):
-        #        logger.warning("{} does not exist. "
-        #        "This is fine if {} for NOTSOFAR1 "
-        #        "has not been released yet.".format(split_json_dir, split))
-        # as long as dev, train, public eval and blind eval respect release
-        # it should be fine.
-
-    with open(output_file, "w") as f:
-        json.dump(
-            {"sessions_map": sess_mapping_out, "spk_map": spk_mapping_out},
-            f,
-            indent=4,
-        )
