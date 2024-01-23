@@ -21,11 +21,10 @@ logger = logging.getLogger(__name__)
 
 @cli.group(name="org-tools")
 def org_tools():
-    """General utilities for creating and manipulating lhotse manifests."""
+    """Organizer only tools. Move along, nothing to see here."""
     pass
 
 
-# this last function is organizer-only
 @org_tools.command(name="gen-mapping")  # refactor to do one at a time
 @click.argument("corpus-dir", type=click.Path(exists=True))
 @click.argument("output-file", type=click.Path(exists=False))
@@ -48,7 +47,10 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, corpus_name):
             with open(j, "r") as f:
                 annotation = json.load(f)
 
-            [spk_set.add(x["speaker"]) for x in annotation]
+            if corpus_name == "dipco":
+                [spk_set.add(x["speaker_id"]) for x in annotation]
+            else:
+                [spk_set.add(x["speaker"]) for x in annotation]
 
         return sorted(list(spk_set))  # need to sort
 
@@ -57,9 +59,9 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, corpus_name):
             mapping = json.load(f)
         all_sessions = []
         all_spk = []
-        for corp in mapping["session_map"].keys():
-            all_sessions.append(mapping["session_map"][corp])
-            all_spk.append(mapping["spk_map"][corp])
+        for corp in mapping["sessions_map"].keys():
+            all_sessions.extend(list(mapping["sessions_map"][corp].keys()))
+            all_spk.extend(list(mapping["spk_map"][corp].keys()))
 
         all_sessions = [x for x in all_sessions if x.startswith("S")]
         last_sess = sorted(all_sessions, reverse=True)[0]
@@ -68,13 +70,13 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, corpus_name):
         # can actually remain as they are
         return mapping, last_sess, last_spk
 
-    if os.path.exists(output_file):
+    if corpus_name != "chime6":
         # load it
         mapping, last_sess, last_spk = load_prev_mapfile(output_file)
         # load and check what is the latest session among all
         # load and check what is the latest spk
     else:
-        mapping = {"session_map": {}, "spk_map": {}}
+        mapping = {"sessions_map": {}, "spk_map": {}}
         last_sess = None
         last_spk = None
 
@@ -84,44 +86,58 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, corpus_name):
     # note that we have to handle notsofar1 differently here !
     # can we use their dataframe ?
 
-    sessions_j = glob.glob(
-        os.path.join(corpus_dir, corpus_name, "transcriptions", "*/**.json"),
-        recursive=True,
-    )
-    # sort here as glob is sys dependent
-    sessions_j = sorted(sessions_j, key=lambda x: Path(x).stem)
-    for sess_num, s in enumerate(sessions_j):
-        if corpus_name in ["chime6", "mixer6"]:
-            # do not rename sessions for mixer6, we cannot
-            orig_name = Path(s).stem
-            new_name = orig_name
-        else:
-            orig_name = Path(s).stem
-            new_name = "S{:02d}".format(int(last_sess.strip("S")) + 1)
-            # assert name is kept the same
-        mapping["session_map"][corpus_name][orig_name] = new_name
-        last_sess = new_name
+    if corpus_name in ["chime6", "dipco"]:
+        sessions_j = glob.glob(
+            os.path.join(corpus_dir, "transcriptions", "*/**.json"),
+            recursive=True,
+        )
+        # sort here as glob is sys dependent
+        sessions_j = sorted(sessions_j, key=lambda x: Path(x).stem)
+        for sess_num, s in enumerate(sessions_j):
+            if corpus_name in ["chime6", "mixer6"]:
+                # do not rename sessions for mixer6, we cannot
+                orig_name = Path(s).stem
+                new_name = orig_name
+            else:
+                orig_name = Path(s).stem
+                new_name = "S{:02d}".format(int(last_sess.strip("S")) + 1)
+                # assert name is kept the same
+            mapping["sessions_map"][corpus_name][orig_name] = new_name
+            last_sess = new_name
 
-        # now fetch also all speakers from all jsons and sort them
-    if corpus_name not in ["mixer6"]:
         all_speakers = fetch_all_spk(sessions_j)
-    else:
-        # fetch from list file
+
+        for spk in all_speakers:
+            if corpus_name in ["chime6"]:
+                new_name = spk
+            else:
+                # if not chime6 rename speakers
+                new_name = "P{:02d}".format(int(last_spk.strip("P")) + 1)
+            mapping["spk_map"][corpus_name][spk] = new_name
+            last_spk = new_name
+
+    # now fetch also all speakers from all jsons and sort them
+    if corpus_name in ["mixer6"]:
+        # we need to handle mixer6 differently here
         all_speakers = set()
         for split in ["train_call", "train_intv", "dev", "test"]:
+            # read list file
             sess2spk = read_list_file(
                 os.path.join(corpus_dir, "splits", split + ".list")
             )
-            [all_speakers.add(x) for x in [v for x, v in sess2spk.items()]]
-            all_speakers = list(all_speakers)
-    for spk in all_speakers:
-        if corpus_name in ["chime6"]:
-            new_name = spk
-        else:
-            # if not chime6 rename speakers
+            for sess in sess2spk.keys():
+                mapping["sessions_map"][corpus_name][sess] = sess
+
+            for x, v in sess2spk.items():
+                for y in v:
+                    all_speakers.add(y)
+
+        all_speakers = list(all_speakers)
+
+        for spk in all_speakers:
             new_name = "P{:02d}".format(int(last_spk.strip("P")) + 1)
-        mapping["spk_map"][corpus_name][spk] = new_name
-        last_spk = new_name
+            mapping["spk_map"][corpus_name][spk] = new_name
+            last_spk = new_name
 
     with open(output_file, "w") as f:
         json.dump(

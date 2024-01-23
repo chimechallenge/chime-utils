@@ -12,7 +12,7 @@ from chime_utils.text_norm import get_txt_norm
 
 logging.basicConfig(
     format=(
-        "%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s"
+        "%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]" " %(message)s"
     ),
     datefmt="%Y-%m-%d:%H:%M:%S",
     level=logging.INFO,
@@ -50,8 +50,8 @@ def lhotse_prep():
     required=False,
     show_default=True,
     help=(
-        "the microphone type to use, choose from "
-        '"ihm" (close-talk) or "mdm" (multi-microphone array) settings. '
+        "The microphone type to use, choose from "
+        '"ihm" (close-talk) or "mdm" (multi-microphone array). '
         "For MDM, there are 6 array devices with 4 channels each, "
         "so the resulting recordings will have 24 channels."
     ),
@@ -79,7 +79,7 @@ def lhotse_prep():
     required=False,
     is_flag=True,
     help=(
-        "Whether or not use problematic devices in themanifests creation.\nSee"
+        "Whether or not use problematic devices in the manifests creation.\nSee"
         " https://www.chimechallenge.org/challenges/chime6/track1_data, there"
         " are some devices that had recording problems in some sessions."
     ),
@@ -105,6 +105,11 @@ def chime6(
     use_problematic: bool = False,
     txt_norm: str = "chime8",
 ):
+    """
+    This function prepares CHiME-6 data to lhotse manifest format.\n
+    CORPUS_DIR: Path to the CHiME-6 root directory.\n
+    OUTPUT_DIR: Path to the output directory where the lhotse manifests will be stored.
+    """
     dset_part = dset_part.split(",")
     mic = mic.split(",")
     for d in dset_part:
@@ -185,6 +190,11 @@ def dipco(
     json_dir=None,
     txt_norm: str = "chime8",
 ):
+    """
+    This function prepares DiPCo data to lhotse manifest format.\n
+    CORPUS_DIR: Path to the DiPCo root directory.\n
+    OUTPUT_DIR: Path to the output directory where the lhotse manifests will be stored.
+    """
     dset_part = dset_part.split(",")
     mic = mic.split(",")
     for d in dset_part:
@@ -256,6 +266,11 @@ def mixer6(
     json_dir=None,
     txt_norm: str = "chime8",
 ):
+    """
+    This function prepares Mixer 6 Speech data to lhotse manifest format.\n
+    CORPUS_DIR: Path to the Mixer 6 Speech root directory.\n
+    OUTPUT_DIR: Path to the output directory where the lhotse manifests will be stored.
+    """
     dset_part = dset_part.split(",")
     mic = mic.split(",")
     for d in dset_part:
@@ -282,6 +297,11 @@ def mixer6(
     help="Glob pattern to apply for finding the manifests to normalize.",
 )
 def text_normalize(input_dir, output_dir, txt_norm="chime8", regex="*.jsonl.gz"):
+    """
+    This function can be used to apply text normalization to lhotse manifests.\n
+    INPU_DIR: Path to the manifests parent dir.\n
+    OUTPUT_DIR: Path to the output directory where the text normalized lhotse manifests will be stored.
+    """
     txt_normalizer = get_txt_norm(txt_norm)
     os.makedirs(output_dir, exist_ok=True)
 
