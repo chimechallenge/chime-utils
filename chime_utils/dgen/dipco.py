@@ -17,7 +17,7 @@ from chime_utils.text_norm import get_txt_norm
 
 logging.basicConfig(
     format=(
-        "%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s"
+        "%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]" " %(message)s"
     ),
     datefmt="%Y-%m-%d:%H:%M:%S",
     level=logging.INFO,
@@ -66,7 +66,6 @@ def gen_dipco(
         choice of the text normalization and possibly how sessions are split
         between dev and eval.
     """
-    assert dset_part in ["dev", "eval"]
     mapping = get_mappings(challenge)
     spk_map = mapping["spk_map"]["dipco"]
     sess_map = mapping["sessions_map"]["dipco"]
@@ -77,13 +76,7 @@ def gen_dipco(
         # need this because it will be extracted in a subfolder
         corpus_dir = os.path.join(corpus_dir, "Dipco")
 
-    if os.path.exists(output_dir):
-        logger.warning(
-            "The output directory {} already exists. "
-            "This may possible overwrite previous data.".format(output_dir)
-        )
-    else:
-        Path(output_dir).mkdir(parents=True, exist_ok=False)
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
 
     def normalize_dipco(annotation, txt_normalizer, split):
         annotation_scoring = []
@@ -133,6 +126,10 @@ def gen_dipco(
         Path(os.path.join(output_dir, "transcriptions_scoring", split)).mkdir(
             parents=True, exist_ok=True
         )
+
+        Path(os.path.join(output_dir, "devices", split)).mkdir(
+            parents=True, exist_ok=True
+        )
         json_dir = os.path.join(corpus_dir, "transcriptions", split)
         ann_json = glob.glob(os.path.join(json_dir, "*.json"))
         assert len(ann_json) > 0, (
@@ -172,6 +169,7 @@ def gen_dipco(
 
             new_sess_name = sess_map[sess_name]
             # create symlinks too but swap names for the sessions too
+            devices_info = {}
             for x in sess2audio[sess_name]:
                 filename = new_sess_name + "_" + "_".join(Path(x).stem.split("_")[1:])
                 if filename.split("_")[1].startswith("P"):
@@ -179,10 +177,35 @@ def gen_dipco(
                     filename = filename.split("_")[0] + "_{}".format(
                         spk_map[speaker_id]
                     )
+
+                    devices_info[filename] = {
+                        "is_close_talk": True,
+                        "speaker": spk_map[speaker_id],
+                        "num_channels": 1,
+                        "device_type": "headset_mic",
+                    }
+                else:
+                    channel = Path(x).stem.split(".")[-1]
+                    devices_info[Path(x).stem.lstrip(sess_name)] = {
+                        "is_close_talk": False,
+                        "speaker": None,
+                        "num_channels": 1,
+                        "device_type": f"circular_array_{channel}_mic",
+                    }
                 os.symlink(
                     x,
                     os.path.join(output_dir, "audio", split, filename + ".wav"),
                 )
+
+            devices_info = dict(sorted(devices_info.items(), key=lambda x: x[0]))
+
+            with open(
+                os.path.join(
+                    output_dir, "devices", split, sess_map[sess_name] + ".json"
+                ),
+                "w",
+            ) as f:
+                json.dump(devices_info, f, indent=4)
 
             with open(
                 os.path.join(

@@ -9,6 +9,34 @@ import soundfile as sf
 from chime_utils.dgen.utils import get_mappings
 from chime_utils.text_norm import get_txt_norm
 
+devices2type = {
+    "CH01": "lavaliere",
+    "CH02": "headmic",
+    "CH03": "lavaliere",
+    "CH04": "podium_mic",
+    "CH05": "PZM_mic",
+    "CH06": "AT3035_Studio_mic",
+    "CH07": "ATPro45_Hanging_mic",
+    "CH08": "Panasonic_Camcorder",
+    "CH09": "RODE_NT6_mic",
+    "CH10": "RODE_NT6_mic",
+    "CH11": "Samson_C01U_mic",
+    "CH12": "AT815b_Shotgun_mic",
+    "CH13": "Acoustimagic_array",
+}
+
+
+def read_list_file(list_f):
+    with open(list_f, "r") as f:
+        lines = f.readlines()
+    out = {}
+    for l in lines:  # noqa E741
+        c_line = l.rstrip("\n").split("\t")
+        session_id = c_line[0]
+        subject_id, intv_id = c_line[1].split(",")
+        out[session_id] = [subject_id, intv_id]
+    return out
+
 
 def gen_mixer6(
     output_dir,
@@ -50,25 +78,50 @@ def gen_mixer6(
         return annotation, annotation_scoring
 
     def create_audio_symlinks(
-        split, tgt_sess_name, audios, output_dir, interviewer, subject
+        split,
+        tgt_sess_name,
+        audios,
+        output_dir,
+        interviewer_name,
+        subject_name,
     ):
+        # we also create a JSON that describes each device
+        devices_json = {}
         for c_audio in audios:
             audioname = Path(c_audio).stem
             channel_num = int(audioname.split("_")[-1].strip("CH"))
-            if channel_num == 1 and split != "eval":
-                # noisy close talk for the interviewer
-                new_name = "{}_{}".format(tgt_sess_name, interviewer)
-
-            elif channel_num == 2 and split != "eval":
-                # close talk for the subject
-                new_name = "{}_{}".format(tgt_sess_name, subject)
-            else:
-                array_name = "U{:02d}".format(channel_num)
-                new_name = "{}_{}.CH1".format(tgt_sess_name, array_name)
+            if channel_num <= 3 and split == "eval":
+                continue
+            new_name = "{}_CH{:02d}".format(tgt_sess_name, channel_num)
             os.symlink(
                 c_audio,
                 os.path.join(output_dir, "audio", split, new_name + ".flac"),
             )
+            if channel_num <= 3:
+                c_spk_mic_name = (
+                    interviewer_name if channel_num in [1, 3] else subject_name
+                )
+                devices_json["CH{}".format(channel_num)] = {
+                    "is_close_talk": True,
+                    "speaker": c_spk_mic_name,
+                    "num_channels": 1,
+                    "device_type": devices2type["CH{:02d}".format(channel_num)],
+                }
+            else:
+                devices_json["CH{}".format(channel_num)] = {
+                    "is_close_talk": False,
+                    "speaker": None,
+                    "num_channels": 1,
+                    "device_type": devices2type["CH{:02d}".format(channel_num)],
+                }
+
+        out_json = os.path.join(output_dir, "devices", split, f"{tgt_sess_name}.json")
+        Path(out_json).parent.mkdir(exist_ok=True, parents=True)
+        devices_json = dict(
+            sorted(devices_json.items(), key=lambda x: int(x[0].strip("CH")))
+        )
+        with open(out_json, "w") as f:
+            json.dump(devices_json, f, indent=4)
 
     splits = dset_part.split(",")
     audio_files = glob.glob(
@@ -80,12 +133,14 @@ def gen_mixer6(
         recursive=True,
     )
     sess2audio = {}
+
     for x in audio_files:
         session_name = "_".join(Path(x).stem.split("_")[0:-1])
         if session_name not in sess2audio:
             sess2audio[session_name] = [x]
         else:
             sess2audio[session_name].append(x)
+
     for c_split in splits:
         assert c_split in ["train_intv", "train_call", "dev", "eval"]
         Path(os.path.join(output_dir, "audio", c_split)).mkdir(
@@ -99,22 +154,28 @@ def gen_mixer6(
         )
         if c_split.startswith("train"):
             ann_json = glob.glob(os.path.join(corpus_dir, "splits", c_split, "*.json"))
+            list_file = os.path.join(corpus_dir, "splits", c_split + ".list")
         elif c_split == "dev":
             use_version = "_a"  # alternative version is _b see data section
             ann_json = glob.glob(
                 os.path.join(corpus_dir, "splits", "dev" + use_version, "*.json")
             )
+            list_file = os.path.join(corpus_dir, "splits", c_split + ".list")
+
         elif c_split == "eval":
             ann_json = glob.glob(os.path.join(corpus_dir, "splits", "test", "*.json"))
+            list_file = os.path.join(corpus_dir, "splits", "test.list")
+
+        sess2subintv = read_list_file(list_file)
         to_uem = []
         for j_file in ann_json:
             with open(j_file, "r") as f:
                 annotation = json.load(f)
             sess_name = Path(j_file).stem
             # add session name
-            c_speakers = set([x["speaker"] for x in annotation])
-            subject = sess_name.split("_")[3]
-            interviewer = c_speakers.difference(set([subject])).pop()
+            # retrieve speakers from .list file
+
+            subject, interviewer = sess2subintv[sess_name]
 
             [x.update({"session_id": sess_map[sess_name]}) for x in annotation]
             [x.update({"speaker": spk_map[x["speaker"]]}) for x in annotation]
