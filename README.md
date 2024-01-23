@@ -58,10 +58,10 @@ Hereafter we describe each command/function in detail.
 ### ⚡ All DASR data in one go
 
 You can generate all CHiME-8 DASR data in one go with: <br>
-`chime-utils dgen dasr ./chime8_dasr ./download /path/to/mixer6 --part train,dev` 
+`chime-utils dgen dasr ./download /path/to/mixer6 ./chime8_dasr --part train,dev` 
 
 This script will download CHiME-6, DiPCo and NOTSOFAR1 automatically in `./download` <br>
-Ensure you have at least 1TB of space there. You can remove the .tar.gz after the full data preparation to save some space later.
+Ensure you have at least 1TB of space there. You can remove the `.tar.gz` after the full data preparation to save some space later.
 
 Mixer 6 Speech instead has to be obtained through LDC. <br>
 Refer to [chimechallenge.org/current/task1/data](https://www.chimechallenge.org/current/task1/data) on how to obtain Mixer 6 Speech.
@@ -75,15 +75,15 @@ It is better to run this also for the evaluation part, when evaluation will be r
 We also provide scripts for obtaining each core dataset independently if needed.
 
 - CHiME-6
-   -  `chime-utils dgen chime6 ./chime8_dasr /path/to/chime6 --part train,dev` 
-   - It can also be downloaded automatically to `/path/to/dipco` using:
-       - `chime-utils dgen chime6 ./chime8_dasr /path/to/chime6 --part dev --download` 
+   -  `chime-utils dgen chime6 /path/to/chime6 ./chime8_dasr/chime6 --part train,dev` 
+   - It can also be downloaded automatically to `./download/chime6` using:
+       - `chime-utils dgen chime6 ./download/chime6 ./chime8_dasr/chime6 --part train,dev --download` 
 - DiPCo
-    -  `chime-utils dgen dipco ./chime8_dasr /path/to/dipco --part dev` 
-    - It can also be downloaded automatically to `/path/to/dipco` using:
-      - `chime-utils dgen dipco ./chime8_dasr /path/to/dipco --part dev --download` 
+    -  `chime-utils dgen dipco /path/to/dipco ./chime8_dasr/dipco --part dev` 
+    - It can also be downloaded automatically to `./download/dipco` using:
+      - `chime-utils dgen dipco ./download/dipco ./chime8_dasr/dipco --part dev --download` 
 - Mixer 6 Speech
-    - `chime-utils dgen mixer6 ./chime8_dasr /path/to/mixer6 --part train_call,train_intv,dev`
+    - `chime-utils dgen mixer6 /path/to/mixer6 ./chime8_dasr/mixer6 --part train_calls,train_intv,dev`
  
 ## Data preparation
 
@@ -98,33 +98,34 @@ It is available at FIXME
 
 ### Other Toolkits
 
-For convenience we also offer here data preparation scripts for different toolkits:
+For convenience, we also offer here data preparation scripts for different toolkits:
 - [Kaldi](https://github.com/kaldi-asr/kaldi) and [K2/Icefall](https://github.com/k2-fsa/icefall) (with [lhotse](https://github.com/lhotse-speech/lhotse))
 - [ESPNet](https://github.com/espnet/espne) (with [lhotse](https://github.com/lhotse-speech/lhotse))
 - [SpeechBrain](https://github.com/speechbrain/speechbrain)
 
 ### K2/Icefall/Lhotse
 
-You can prepare Lhotse manifests compatible with [K2/Icefall](https://github.com/k2-fsa/icefall) for all core datasets easily using:
+You can prepare Lhotse manifests compatible with [K2/Icefall](https://github.com/k2-fsa/icefall) for all core datasets easily.
 
-- CHiME-6
-    - e.g. to prepare manifests for far-field arrays and training, development partition: 
-        - `chime-utils lhotse-prep chime6 ./chime8_dasr/chime6 ./sb_manifests/chime6 --dset-part train,dev --mic mdm`
-    - you can also prepare manifests for on speakers close-talk mics: 
-        - `chime-utils lhotse-prep chime6 ./chime8_dasr/chime6 ./sb_manifests/chime6 --dset-part train,dev --mic ihm`
-- DiPCo
-    - e.g. to prepare manifests for far-field arrays for development partition: 
-        - `chime-utils speechbrain-prep dipco ./chime8_dasr/dipco ./sb_manifests/dipco --dset-part dev --mic mdm`
-    - you can also prepare manifests for on speakers close-talk mics: 
-        - `chime-utils speechbrain-prep dipco ./chime8_dasr/dipco ./sb_manifests/dipco --dset-part dev --mic ihm`
-- Mixer 6 Speech
-    - e.g. to prepare manifests for far-field arrays for training and development partitions: 
-        - `chime-utils speechbrain-prep mixer6 ./chime8_dasr/mixer6 ./sb_manifests/mixer6 --dset-part train_call,train_intv,dev --mic mdm`
-    - you can also prepare manifests for on speakers close-talk mics: 
-        - `chime-utils speechbrain-prep mixer6 ./chime8_dasr/mixer6 ./sb_manifests/mixer6 --dset-part train_call,train_intv,dev --mic ihm`
-- NOTSOFAR1
+For example, for CHiME-6:
+- e.g. to prepare manifests for far-field arrays and training, development partition: 
+    - `chime-utils lhotse-prep chime6 ./chime8_dasr/chime6 ./sb_manifests/chime6 --dset-part train,dev --mic mdm`
+- you can also prepare manifests for on speakers close-talk mics: 
+    - `chime-utils lhotse-prep chime6 ./chime8_dasr/chime6 ./sb_manifests/chime6 --dset-part train,dev --mic ihm`
+
+Similarly, you can use `chime-utils speechbrain-prep dipco`, `chime-utils speechbrain-prep mixer6` and `chime-utils speechbrain-prep notsofar1`
+commands to prepare manifests for the other three scenarios. 
+
 
 ### ESPNet and Kaldi
+
+You can use the scripts used to prepare lhotse manifests (see previous section) to also 
+prepare manifests compatible with Kaldi and ESPNet. <br>
+In fact you can convert easily lhotse manifests to Kaldi format e.g. by using: <br>
+`lhotse lhotse-prep lhotse2kaldi input-dir output-dir` 
+
+You can refer to [Lhotse Kaldi Interoperability](https://lhotse.readthedocs.io/en/latest/kaldi.html) for more information in Kaldi and 
+Lhotse manifests conversion.
 
 
 ### Speechbrain
@@ -181,7 +182,7 @@ dev
 
 ### ASR 
 
-In detail we provide scripts to compute common ASR metrics for long-form meeting scenarios. 
+In detail, we provide scripts to compute common ASR metrics for long-form meeting scenarios. 
 These scores are computed through the awesome [Meeteval](https://github.com/fgnt/meeteval) [2] toolkit. 
 
 - tcpWER
@@ -194,28 +195,29 @@ This allows to use easily also other ASR metrics tools such as [NIST Asclite](ht
 
 ### Diarization 
 
-
-
 - DER
 - JER
 
 
-### Error Analysis 
-
+### Error Analysis
 
 As well as utils to convert CHiME-style long-form JSON annotation to other formats such as .ctm and Audacity compatible labels (.txt)
 so that systems output can be more in-depth analyzed. 
 
-- .ctm and .stm conversion
-- .rttm conversion 
-
-- Audacity labels (see [Audacity manual page](https://manual.audacityteam.org/man/label_tracks.html))
+- [Segment Time Marked](https://www.nist.gov/system/files/documents/2021/08/03/OpenASR20_EvalPlan_v1_5.pdf) `.stm` format conversion:
+   - `chime-utils score json2stm input-dir output-dir`
+- [Conversation Time Mark](https://web.archive.org/web/20170119114252/http://www.itl.nist.gov/iad/mig/tests/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf) `.ctm` format conversion:
+   - `chime-utils score json2ctm input-dir output-dir`
+- [Rich Transcription Time Marked](https://web.archive.org/web/20170119114252/http://www.itl.nist.gov/iad/mig/tests/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf) `.rttm` format conversion:
+   - `chime-utils score json2rttm input-dir output-dir`
+       - this allows to use other diarization scoring tools such as [dscore](https://github.com/nryant/dscore).
+- Audacity labels (see [Audacity manual page](https://manual.audacityteam.org/man/label_tracks.html)) format conversion:
+    -  `chime-utils score json2aud input-dir output-dir`
 
 
 #### 🔍 MeetEval meeting recognition visualization (recommended)
 
-For ASR+diarization error analysis we recommend the use of this super useful tool 
-from Meeteval authors Thilo Von Neumann and Christoph Boeddeker (will be presented at ICASSP 2024 in a show and tell session): <br>
+For ASR+diarization error analysis we recommend the use of this super useful Meeteval tool (will be presented at ICASSP 2024 in a show and tell session): <br>
 - https://thequilo.github.io/meeteval_jupyterlite/lab/
 
 To use this tool all you need is to convert the predictions and the ground truth to `.stm` format: 
@@ -230,8 +232,6 @@ To use this tool all you need is to convert the predictions and the ground truth
 [1] Park, T. J., Huang, H., Jukic, A., Dhawan, K., Puvvada, K. C., Koluguri, N., ... & Ginsburg, B. (2023). The CHiME-7 Challenge: System Description and Performance of NeMo Team's DASR System. arXiv preprint arXiv:2310.12378. <br>
 
 [2] von Neumann, T., Boeddeker, C., Delcroix, M., & Haeb-Umbach, R. (2023). MeetEval: A Toolkit for Computation of Word Error Rates for Meeting Transcription Systems. arXiv preprint arXiv:2307.11394. <br>
-
-
 
 
 [slack-badge]: https://img.shields.io/badge/slack-chat-green.svg?logo=slack
