@@ -26,15 +26,8 @@ I recommend making a fresh conda env before:
 
 You can install with: 
 
-`python -m pip install .`
+`pip install git+https://github.com/chimechallenge/chime-utils`
 
-### Contribute
-
-If you wish to contribute you can install with: 
-
-`pip install -e .[dev]` <br>
-`pip install pre-commit` <br>
-`pre-commit install --install-hooks`
 
 ## Usage 
 
@@ -226,6 +219,24 @@ To use this tool all you need is to convert the predictions and the ground truth
 `chime-utils score json2stm gt-dir gt-stm-output-dir` <br>
 
 ---
+
+
+## Contribute
+
+If you wish to contribute, download this repo:
+
+`git clone https://github.com/chimechallenge/chime-utils` <br>
+`cd chime-utils` <br>
+
+and then install with:  
+
+`pip install -e .[dev]` <br>
+`pip install pre-commit` <br>
+`pre-commit install --install-hooks`
+
+<h3>📩 Contact </h3>
+Feel free to raise an issue for any question or bug. <br>
+You can also reach [CHiME-8 organizers](https://www.chimechallenge.org/current/task1/organizers) via the [CHiME Slack Workspace][slack-invite] if you prefer. 
 
 ## References 
 
