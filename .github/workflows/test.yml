@@ -25,5 +25,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
     - run: python -m pip install --upgrade pip
-    - run: python -m pip install -e .
+    # Default torch has GPU support and large binaries. CPU only is smaller.
+    - run: pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+    - run: python -m pip install -e .[dev]
     - run: pytest tests/test_normalizer.py
