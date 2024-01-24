@@ -5,13 +5,13 @@
 
 ✅ Official data generation and data preparation scripts for [CHiME-8 DASR](https://www.chimechallenge.org/current/task1/index). 
 
-We provide a more convenient standalone interface for downloading the core and prepare the official CHiME-8 DASR data. <br> 
+We provide a more convenient standalone interface for downloading and prepare the core CHiME-8 DASR data. <br> 
 This year we also support automatic downloading of CHiME-6. <br>
 
 ---
 
 ⚠️ **NOTE** <br>
-For in-depth details about CHiME-8 DASR data refer to [chimechallenge.org/current/task1/data](https://www.chimechallenge.org/current/task1/data). 
+For in-depth details about CHiME-8 DASR data and rules refer to [chimechallenge.org/current/task1/data](https://www.chimechallenge.org/current/task1/data).  
 
 <h4>📩 Contact </h4>
 For any issue/bug/question with this package feel free to raise an issue here or reach us via the CHiME [![Slack][slack-badge]][slack-invite]
@@ -35,7 +35,7 @@ You can install with:
 This package brings a new module: <br>
 `from chime-utils import dgen, dprep, scoring, text_norm`
 
-And related CLI commands: <br>
+And new CLI commands: <br>
 - `chime-utils dgen` <br>
     - generates and downloads CHiME-8 data.
 - `chime-utils lhotse-prep` <br>
@@ -81,6 +81,7 @@ We also provide scripts for obtaining each core dataset independently if needed.
  
 ## Data preparation
 
+
 ### 🚀 NVIDIA NeMo Official Baseline 
  
 [![nVIDIA](https://img.shields.io/badge/nVIDIA-%2376B900.svg?style=for-the-badge&logo=nVIDIA&logoColor=white)](https://github.com/NVIDIA/NeMo)
@@ -96,6 +97,15 @@ For convenience, we also offer here data preparation scripts for different toolk
 - [Kaldi](https://github.com/kaldi-asr/kaldi) and [K2/Icefall](https://github.com/k2-fsa/icefall) (with [lhotse](https://github.com/lhotse-speech/lhotse))
 - [ESPNet](https://github.com/espnet/espne) (with [lhotse](https://github.com/lhotse-speech/lhotse))
 - [SpeechBrain](https://github.com/speechbrain/speechbrain)
+
+⚠️ **NOTE** <br>
+In all manifests preparation scripts you can choose which text normalization you 
+want to apply on each utterance using as an additional argument: <br> 
+
+- `--txt-norm chime8`
+   - this is 
+- chime7
+- chime6 
 
 ### K2/Icefall/Lhotse
 
@@ -173,6 +183,15 @@ dev
 ├── mixer6.json
 └── notsofar1.json
 ```
+
+### CHiME-8 DASR Ranking Score
+
+
+
+
+### Text Normalization
+
+
 
 ### ASR 
 
