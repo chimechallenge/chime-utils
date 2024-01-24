@@ -13,6 +13,7 @@ This year we also support automatic downloading of CHiME-6. <br>
 ⚠️ **NOTE** <br>
 For in-depth details about CHiME-8 DASR data refer to [chimechallenge.org/current/task1/data](https://www.chimechallenge.org/current/task1/data). 
 
+<h4>📩 Contact </h4>
 For any issue/bug/question with this package feel free to raise an issue here or reach us via the CHiME [![Slack][slack-badge]][slack-invite]
 
 ---
@@ -234,9 +235,7 @@ and then install with:
 `pip install pre-commit` <br>
 `pre-commit install --install-hooks`
 
-<h3>📩 Contact </h3>
-Feel free to raise an issue for any question or bug. <br>
-You can also reach [CHiME-8 organizers](https://www.chimechallenge.org/current/task1/organizers) via the [CHiME Slack Workspace][slack-invite] if you prefer. 
+---
 
 ## References 
 
