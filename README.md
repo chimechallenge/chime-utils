@@ -157,7 +157,9 @@ on all scenarios simultaneously.
 Last but not least, we also provide scripts for scoring (the exact same scripts organizers will use for ranking CHiME-8 DASR submissions). <br>
 To learn more about scoring and ranking in CHiME-8 DASR please head over the official [CHiME-8 Challenge website](https://www.chimechallenge.org/current/task1/index).
 
-Note that the following scrips expect the participants predictions to be in the standard CHiME-style JSON format, where the JSON is a list of 
+Note that the following scrips expect the participants predictions to be in the standard CHiME-style JSON format also known as **SegLST (Segment-wise Long-form Speech Transcription) format** [2].
+<br>
+Each SegLST is a JSON containing a list of 
 dicts (one for each utterance) with the following keys:
 
 ```
@@ -172,7 +174,7 @@ dicts (one for each utterance) with the following keys:
 
 Please head over to [CHiME-8 DASR Submission instructions](https://www.chimechallenge.org/current/task1/submission) to know more about scoring and text normalization and also ranking.
 
-The scripts may accept a single JSON or a folder where multiple JSON files are contained. <br>
+The scripts may accept a single SegLST JSON or a folder where multiple SegLST JSON files are contained. <br>
 E.g. one per each scenario as requested in [CHiME-8 DASR Submission instructions](https://www.chimechallenge.org/current/task1/submission). <br>
 For example for the development set: <br>
 
@@ -202,7 +204,7 @@ These scores are computed through the awesome [Meeteval](https://github.com/fgnt
 - cpWER
 - DA-WER
 
-You can also use `chime-utils score json2ctm input-dir output-dir` to automatically convert all JSON files in `input-dir` and its subfolders to `.ctm` files. <br> 
+You can also use `chime-utils score segslt2ctm input-dir output-dir` to automatically convert all SegLST JSON files in `input-dir` and its subfolders to `.ctm` files. <br> 
 This allows to use easily also other ASR metrics tools such as [NIST Asclite](https://mig.nist.gov/MIG_Website/tools/asclite.html). 
 
 
@@ -214,18 +216,18 @@ This allows to use easily also other ASR metrics tools such as [NIST Asclite](ht
 
 ### Error Analysis
 
-As well as utils to convert CHiME-style long-form JSON annotation to other formats such as .ctm and Audacity compatible labels (.txt)
+As well as utils to convert SegSLT (aka CHiME-6 style) JSON annotation to other formats such as .ctm and Audacity compatible labels (.txt)
 so that systems output can be more in-depth analyzed. 
 
 - [Segment Time Marked](https://www.nist.gov/system/files/documents/2021/08/03/OpenASR20_EvalPlan_v1_5.pdf) `.stm` format conversion:
-   - `chime-utils score json2stm input-dir output-dir`
+   - `chime-utils score segslt2stm input-dir output-dir`
 - [Conversation Time Mark](https://web.archive.org/web/20170119114252/http://www.itl.nist.gov/iad/mig/tests/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf) `.ctm` format conversion:
-   - `chime-utils score json2ctm input-dir output-dir`
+   - `chime-utils score segslt2ctm input-dir output-dir`
 - [Rich Transcription Time Marked](https://web.archive.org/web/20170119114252/http://www.itl.nist.gov/iad/mig/tests/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf) `.rttm` format conversion:
-   - `chime-utils score json2rttm input-dir output-dir`
+   - `chime-utils score segslt2rttm input-dir output-dir`
        - this allows to use other diarization scoring tools such as [dscore](https://github.com/nryant/dscore).
 - Audacity labels (see [Audacity manual page](https://manual.audacityteam.org/man/label_tracks.html)) format conversion:
-    -  `chime-utils score json2aud input-dir output-dir`
+    -  `chime-utils score segslt2aud input-dir output-dir`
 
 
 #### 🔍 MeetEval meeting recognition visualization (recommended)
@@ -235,8 +237,8 @@ For ASR+diarization error analysis we recommend the use of this super useful Mee
 
 To use this tool all you need is to convert the predictions and the ground truth to `.stm` format: 
 
-`chime-utils score json2stm pred-dir pred-stm-output-dir` <br>
-`chime-utils score json2stm gt-dir gt-stm-output-dir` <br>
+`chime-utils score segslt2stm pred-dir pred-stm-output-dir` <br>
+`chime-utils score segslt2stm gt-dir gt-stm-output-dir` <br>
 
 ---
 
