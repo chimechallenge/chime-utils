@@ -66,6 +66,7 @@ def gen_dipco(
         choice of the text normalization and possibly how sessions are split
         between dev and eval.
     """
+    corpus_dir = Path(corpus_dir).resolve()  # allow for relative path
     mapping = get_mappings(challenge)
     spk_map = mapping["spk_map"]["dipco"]
     sess_map = mapping["sessions_map"]["dipco"]

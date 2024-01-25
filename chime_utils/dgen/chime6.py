@@ -54,6 +54,7 @@ def gen_chime6(
         dev and eval and the text normalization used.
     """
     scoring_txt_normalization = get_txt_norm(challenge)
+    corpus_dir = Path(corpus_dir).resolve()  # allow for relative path
 
     if download:
         raise NotImplementedError  # FIXME when openslr is ready

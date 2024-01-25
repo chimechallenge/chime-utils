@@ -60,7 +60,7 @@ def gen_mixer6(
         choice of the text normalization and possibly how sessions are split
         between dev and eval.
     """
-
+    corpus_dir = Path(corpus_dir).resolve()  # allow for relative path
     mapping = get_mappings(challenge)
     spk_map = mapping["spk_map"]["mixer6"]
     sess_map = mapping["sessions_map"]["mixer6"]
