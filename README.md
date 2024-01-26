@@ -78,6 +78,10 @@ We also provide scripts for obtaining each core dataset independently if needed.
       - `chime-utils dgen dipco ./download/dipco ./chime8_dasr/dipco --part dev --download` 
 - Mixer 6 Speech
     - `chime-utils dgen mixer6 /path/to/mixer6 ./chime8_dasr/mixer6 --part train_calls,train_intv,dev`
+- NOTSOFAR1
+  - `chime-utils dgen notsofar1 /path/to/mixer6 ./chime8_dasr/notsofar1 --part dev`
+  - It can also be downloaded automatically to `./download/notsofar1` using:
+      - `chime-utils dgen notsofar1 ./download/notsofar1 ./chime8_dasr/notsofar1 --part dev --download` 
  
 ## Data preparation
 
