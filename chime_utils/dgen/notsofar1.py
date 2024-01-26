@@ -5,6 +5,8 @@ import os
 from copy import deepcopy
 from pathlib import Path
 
+import soundfile as sf
+
 from chime_utils.dgen.azure_storage import download_meeting_subset
 from chime_utils.dgen.utils import get_mappings
 from chime_utils.text_norm import get_txt_norm
@@ -97,7 +99,6 @@ def convert2chime(
         del c_copy["word_timing"]
         del c_copy["ct_wav_file_name"]
         output_normalized.append(c_copy)
-        #
 
     output = sorted(output, key=lambda x: float(x["start_time"]))
     output_normalized = sorted(output_normalized, key=lambda x: float(x["start_time"]))
@@ -138,6 +139,9 @@ def gen_notsofar1(
         )
     device_jsons = sorted(device_jsons, key=lambda x: Path(x).parent.stem)
 
+    uem_file = os.path.join(output_dir, "uem", dset_part, "all.uem")
+    Path(uem_file).parent.mkdir(parents=True, exist_ok=True)
+    uem_data = []
     for device_j in device_jsons:
         orig_sess_name = Path(device_j).parent.stem
 
@@ -170,3 +174,19 @@ def gen_notsofar1(
                 text_normalization,
                 output_dir,
             )
+
+            # use close talk audio files to get UEM
+            ct_audio = glob.glob(
+                os.path.join(Path(device_j).parent, "close_talk", "*.wav")
+            )[0]
+            info = sf.SoundFile(ct_audio)
+            c_duration = info.frames / NOTSOFAR1_FS
+            uem_data.append(
+                "{} 1 {} {}\n".format(
+                    sess_name,
+                    "{:.3f}".format(float(0.0)),
+                    "{:.3f}".format(float(c_duration)),
+                )
+            )
+    with open(uem_file, "w") as f:
+        f.writelines(uem_data)
