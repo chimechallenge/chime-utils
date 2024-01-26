@@ -139,6 +139,70 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, corpus_name):
             mapping["spk_map"][corpus_name][spk] = new_name
             last_spk = new_name
 
+    if corpus_name == "notsofar1":
+        all_speakers = set()
+        for split in ["dev"]:
+            if split == "dev":
+                split_dir = os.path.join(corpus_dir, "240121_dev", "MTG")
+            split_dir = Path(split_dir)
+
+            assert all(
+                [Path(dir).stem.startswith("MTG") for dir in split_dir.iterdir()]
+            ), (
+                "Argument root_dir must be the root directory of a partition "
+                "of NOTSOFAR1 e.g. the dev set, "
+                "containing directories with name starting with MTG."
+            )
+
+            for meet_dir in split_dir.iterdir():
+                # load gtfile
+                with open(os.path.join(meet_dir, "gt_transcription.json")) as f:
+                    c_gt = json.load(f)
+                for utt in c_gt:
+                    all_speakers.add(utt["speaker_id"])
+
+                # load devices file
+                with open(os.path.join(meet_dir, "devices.json")) as f:
+                    devices_info = json.load(f)
+
+                mc_devices = [
+                    x
+                    for x in devices_info
+                    if x["is_close_talk"] is False and x["is_mc"] is True
+                ]
+                for mc_dev in mc_devices:
+                    # create a session
+                    new_name = "S{:02d}".format(int(last_sess.strip("S")) + 1)
+                    meeting_name = Path(meet_dir).stem
+                    device_name = mc_dev["device_name"]
+                    mapping["sessions_map"][corpus_name][
+                        f"{meeting_name}_{device_name}_mc"
+                    ] = new_name
+                    last_sess = new_name
+
+                sc_devices = [
+                    x
+                    for x in devices_info
+                    if x["is_close_talk"] is False and x["is_mc"] is False
+                ]
+
+                for sc_dev in sc_devices:
+                    # create a session
+                    new_name = "S{:02d}".format(int(last_sess.strip("S")) + 1)
+                    meeting_name = Path(meet_dir).stem
+                    device_name = sc_dev["device_name"]
+                    mapping["sessions_map"][corpus_name][
+                        f"{meeting_name}_{device_name}_sc"
+                    ] = new_name
+                    last_sess = new_name
+
+        all_speakers = list(all_speakers)
+        # remap all speakers
+        for spk in all_speakers:
+            new_name = "P{:02d}".format(int(last_spk.strip("P")) + 1)
+            mapping["spk_map"][corpus_name][spk] = new_name
+            last_spk = new_name
+
     with open(output_file, "w") as f:
         json.dump(
             mapping,

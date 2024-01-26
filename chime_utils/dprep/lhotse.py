@@ -78,6 +78,9 @@ def prepare_chime6(
         else json_dir
     )
 
+    if json_dir is not None:
+        logger.info(f"Using alternative JSON annotation in {json_dir}")
+
     if output_dir is not None:
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -270,10 +273,6 @@ def prepare_dipco(
         if json_dir is None
         else json_dir
     )
-    logger.info(
-        f"Parsing DiPCo {dset_part} set, microphones {mic} "
-        f"to lhotse manifests which will be placed in {output_dir}."
-    )
     if json_dir is not None:
         logger.info(f"Using alternative JSON annotation in {json_dir}")
     corpus_dir = Path(corpus_dir)
@@ -376,17 +375,14 @@ def prepare_dipco(
     if txt_normalizer is not None:
         supervision_set = supervision_set.transform_text(txt_normalizer)
     validate_recordings_and_supervisions(recording_set, supervision_set)
-    supervision_set.to_file(
-        os.path.join(output_dir, f"dipco-{mic}_supervisions_{dset_part}.jsonl.gz")
-    )
-    recording_set.to_file(
-        os.path.join(output_dir, f"dipco-{mic}_recordings_{dset_part}.jsonl.gz")
-    )
-    logger.info(
-        f"Saved supervisions and recording manifests to {output_dir} as "
-        f"dipco-{mic}_recordings_{dset_part}.jsonl.gz "
-        f"and dipco-{mic}_supervisions_{dset_part}.jsonl.gz"
-    )
+    if output_dir is not None:
+        supervision_set.to_file(
+            os.path.join(output_dir, f"dipco-{mic}_supervisions_{dset_part}.jsonl.gz")
+        )
+        recording_set.to_file(
+            os.path.join(output_dir, f"dipco-{mic}_recordings_{dset_part}.jsonl.gz")
+        )
+
     manifests[dset_part] = {
         "recordings": recording_set,
         "supervisions": supervision_set,
@@ -427,6 +423,8 @@ def prepare_mixer6(
             "dev",
         ], "No close-talk microphones on evaluation set."
 
+    if json_dir is not None:
+        logger.info(f"Using alternative JSON annotation in {json_dir}")
     transcriptions_dir = (
         os.path.join(corpus_dir, "transcriptions_scoring")
         if json_dir is None
