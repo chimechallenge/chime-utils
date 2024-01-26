@@ -201,6 +201,10 @@ dev
 ### Text Normalization
 
 
+Text normalization is applied automatically before scoring to your predictions. <br>
+In CHiME-8 DASR we use a more complex text normalization which is built on top of Whisper text normalization but is crucially different (less "aggressive"). <br>
+Examples are available here: [./tests/test_normalizer.py](./tests/test_normalizer.py)
+
 
 ### ASR 
 
