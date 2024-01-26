@@ -6,3 +6,4 @@ click
 torchaudio
 regex
 more-itertools
+azure-cli
