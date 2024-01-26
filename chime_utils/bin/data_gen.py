@@ -3,7 +3,13 @@ import logging
 import click
 
 from chime_utils.bin.base import cli
-from chime_utils.dgen import data_check, gen_chime6, gen_dipco, gen_mixer6
+from chime_utils.dgen import (
+    data_check,
+    gen_chime6,
+    gen_dipco,
+    gen_mixer6,
+    gen_notsofar1,
+)
 
 logging.basicConfig(
     format=(
@@ -268,7 +274,7 @@ def mixer6(corpus_dir, output_dir, part, challenge):
     "--part",
     "-p",
     type=str,
-    default="train,dev",
+    default="dev",
     help=(
         "Which part of the dataset you want to generate, "
         "choose between 'train', 'dev', 'public_eval', 'eval'.\n"
@@ -276,6 +282,6 @@ def mixer6(corpus_dir, output_dir, part, challenge):
     ),
 )
 def notsofar1(corpus_dir, output_dir, download, part):
-    pass
-    # FIXME
-    # gen_notsofar1(output_dir, corpus_dir, download, part)
+    parts = part.split(",")
+    for p in parts:
+        gen_notsofar1(output_dir, corpus_dir, download, p)

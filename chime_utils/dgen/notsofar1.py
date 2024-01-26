@@ -2,6 +2,7 @@ import glob
 import json
 import logging
 import os
+from copy import deepcopy
 from pathlib import Path
 
 from chime_utils.dgen.azure_storage import download_meeting_subset
@@ -75,40 +76,46 @@ def convert2chime(
     output = []
     output_normalized = []
     for entry in transcriptions:
-        # add sess id
-        entry["session_id"] = session_name
-        # convert floats to str
-        entry["start_time"] = str(entry["start_time"])
-        entry["end_time"] = str(entry["end_time"])
-        entry["speaker"] = spk_map[entry["speaker_id"]]
-        del entry["speaker_id"]
-        entry["word_timing"] = [
+        # this is fugly but works
+        c_copy = deepcopy(entry)
+        c_copy["session_id"] = session_name
+        c_copy["start_time"] = str(entry["start_time"])
+        c_copy["end_time"] = str(entry["end_time"])
+        c_copy["speaker"] = spk_map[entry["speaker_id"]]
+        del c_copy["speaker_id"]
+        c_copy["word_timing"] = [
             [x[0], str(x[1]), str(x[2])] for x in entry["word_timing"]
         ]
-        output.append(entry)
+        c_copy["words"] = deepcopy(entry["text"])
+        del c_copy["text"]
+        output.append(deepcopy(c_copy))  # need to copy again here
 
-        entry["words"] = txt_normalization(entry["words"])
-        if len(entry["words"]) == 0:
+        c_copy["words"] = txt_normalization(c_copy["words"])
+        if len(c_copy["words"]) == 0:
             continue
 
-        del entry["word_timing"]
-        del entry["ct_wav_file_name"]
-        output_normalized.append(entry)
+        del c_copy["word_timing"]
+        del c_copy["ct_wav_file_name"]
+        output_normalized.append(c_copy)
         #
 
     output = sorted(output, key=lambda x: float(x["start_time"]))
+    output_normalized = sorted(output_normalized, key=lambda x: float(x["start_time"]))
 
     with open(os.path.join(output_txt_f, f"{session_name}.json"), "w") as f:
         json.dump(output, f, indent=4)
 
+    with open(os.path.join(output_txt_f_norm, f"{session_name}.json"), "w") as f:
+        json.dump(output_normalized, f, indent=4)
 
-def prep_notsofar1(
-    output_dir, corpus_dir, dset_part="dev", download=False, challenge="chime8"
+
+def gen_notsofar1(
+    output_dir, corpus_dir, download=False, dset_part="dev", challenge="chime8"
 ):
     corpus_dir = Path(corpus_dir).resolve()  # allow for relative path
     mapping = get_mappings(challenge)
-    spk_map = mapping["spk_map"]["dipco"]
-    sess_map = mapping["sessions_map"]["dipco"]
+    spk_map = mapping["spk_map"]["notsofar1"]
+    sess_map = mapping["sessions_map"]["notsofar1"]
     text_normalization = get_txt_norm(challenge)
 
     if download:
@@ -124,6 +131,11 @@ def prep_notsofar1(
     device_jsons = glob.glob(
         os.path.join(corpus_dir, "**/devices.json"), recursive=True
     )
+    if len(device_jsons) == 0:
+        logger.error(
+            f"{corpus_dir} does not seem to contain NOTSOFAR1 meetings and metadata, something is wrong ! "
+            f"Maybe you wanted to --download the corpus and forgot to set the flag ?"
+        )
     device_jsons = sorted(device_jsons, key=lambda x: Path(x).parent.stem)
 
     for device_j in device_jsons:
