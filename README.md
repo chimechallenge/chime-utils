@@ -117,37 +117,40 @@ You can prepare Lhotse manifests compatible with [K2/Icefall](https://github.com
 
 For example, for CHiME-6:
 - e.g. to prepare manifests for far-field arrays and training, development partition: 
-    - `chime-utils lhotse-prep chime6 ./chime8_dasr/chime6 ./sb_manifests/chime6 --dset-part train,dev --mic mdm`
+    - `chime-utils lhotse-prep chime6 ./chime8_dasr/chime6 ./manifests/lhotse/chime6 --dset-part train,dev --mic mdm`
 - you can also prepare manifests for on speakers close-talk mics: 
-    - `chime-utils lhotse-prep chime6 ./chime8_dasr/chime6 ./sb_manifests/chime6 --dset-part train,dev --mic ihm`
+    - `chime-utils lhotse-prep chime6 ./chime8_dasr/chime6 ./manifests/lhotse/chime6 --dset-part train,dev --mic ihm`
 
-Similarly, you can use `chime-utils speechbrain-prep dipco`, `chime-utils speechbrain-prep mixer6` and `chime-utils speechbrain-prep notsofar1`
+Similarly, you can use `chime-utils lhotse-prep dipco`, `chime-utils lhotse-prep mixer6` and `chime-utils lhotse-prep notsofar1`
 commands to prepare manifests for the other three scenarios. 
 
 
 ### ESPNet and Kaldi
 
-You can use the scripts used to prepare lhotse manifests (see previous section) to also 
-prepare manifests compatible with Kaldi and ESPNet. <br>
-In fact you can convert easily lhotse manifests to Kaldi format e.g. by using: <br>
-`lhotse lhotse-prep lhotse2kaldi input-dir output-dir` 
+You can prepare Kaldi and ESPNet manifests for all core datasets easily. <br>
 
-You can refer to [Lhotse Kaldi Interoperability](https://lhotse.readthedocs.io/en/latest/kaldi.html) for more information in Kaldi and 
-Lhotse manifests conversion.
+For example, for CHiME-6:
+- e.g. to prepare manifests for far-field arrays and training, development partition: 
+    - `chime-utils espnet-prep chime6 ./chime8_dasr/chime6 ./manifests/espnet/chime6 --dset-part train,dev --mic mdm`
+- you can also prepare manifests for on speakers close-talk mics: 
+    - `chime-utils espnet-prep chime6 ./chime8_dasr/chime6 ./manifests/espnet/chime6 --dset-part train,dev --mic ihm`
+
+Similarly, you can use `chime-utils espnet-prep dipco`, `chime-utils espnet-prep mixer6` and `chime-utils espnet-prep notsofar1`
+commands to prepare manifests for the other three scenarios. 
 
 
 ### Speechbrain
 
-You can prepare [Speechbrain](https://github.com/speechbrain/speechbrain) compatible JSON annotation (with multi-channel support !)
+You can prepare [Speechbrain](https://github.com/speechbrain/speechbrain) compatible JSON annotation (with multichannel support !)
 easily.
 
 For example, for CHiME-6:
 - e.g. to prepare manifests for far-field arrays and training, development partition: 
-    - `chime-utils speechbrain-prep chime6 ./chime8_dasr/chime6 ./sb_manifests/chime6 --dset-part train,dev --mic mdm`
+    - `chime-utils speechbrain-prep chime6 ./chime8_dasr/chime6 ./manifests/speechbrain/chime6 --dset-part train,dev --mic mdm`
 - you can also prepare manifests for on speakers close-talk mics: 
-    - `chime-utils speechbrain-prep chime6 ./chime8_dasr/chime6 ./sb_manifests/chime6 --dset-part train,dev --mic ihm`
+    - `chime-utils speechbrain-prep chime6 ./chime8_dasr/chime6 ./manifests/speechbrain/chime6 --dset-part train,dev --mic ihm`
 - or both together:
-    - `chime-utils speechbrain-prep chime6 ./chime8_dasr/chime6 ./sb_manifests/chime6 --dset-part train,dev --mic all`
+    - `chime-utils speechbrain-prep chime6 ./chime8_dasr/chime6 ./manifests/speechbrain/chime6 --dset-part train,dev --mic all`
 
 Similarly, you can use `chime-utils speechbrain-prep dipco`, `chime-utils speechbrain-prep mixer6` and `chime-utils speechbrain-prep notsofar1`
 commands to prepare manifests for the other three scenarios. 
@@ -161,7 +164,7 @@ on all scenarios simultaneously.
 Last but not least, we also provide scripts for scoring (the exact same scripts organizers will use for ranking CHiME-8 DASR submissions). <br>
 To learn more about scoring and ranking in CHiME-8 DASR please head over the official [CHiME-8 Challenge website](https://www.chimechallenge.org/current/task1/index).
 
-Note that the following scrips expect the participants predictions to be in the standard CHiME-style JSON format also known as **SegLST (Segment-wise Long-form Speech Transcription) format** [2].
+Note that the following scrips expect the participants predictions to be in the standard CHiME-style JSON format also known as **SegLST (Segment-wise Long-form Speech Transcription) format** (we adopt [Meeteval](https://github.com/fgnt/meeteval) naming convention [2]).
 <br>
 Each SegLST is a JSON containing a list of 
 dicts (one for each utterance) with the following keys:
@@ -205,8 +208,8 @@ In detail, we provide scripts to compute common ASR metrics for long-form meetin
 These scores are computed through the awesome [Meeteval](https://github.com/fgnt/meeteval) [2] toolkit. 
 
 - tcpWER
-- cpWER
-- DA-WER
+- concatenated minimum-permutation word error rate (cpWER) [3]
+- diarization-assigned minimum permutation word error rate (DA-WER) [4]
 
 You can also use `chime-utils score segslt2ctm input-dir output-dir` to automatically convert all SegLST JSON files in `input-dir` and its subfolders to `.ctm` files. <br> 
 This allows to use easily also other ASR metrics tools such as [NIST Asclite](https://mig.nist.gov/MIG_Website/tools/asclite.html). 
@@ -239,10 +242,10 @@ so that systems output can be more in-depth analyzed.
 For ASR+diarization error analysis we recommend the use of this super useful Meeteval tool (will be presented at ICASSP 2024 in a show and tell session): <br>
 - https://thequilo.github.io/meeteval_jupyterlite/lab/
 
-To use this tool all you need is to convert the predictions and the ground truth to `.stm` format: 
+To use this tool all you need is to convert the predictio`.stm`ns and the ground truth to .stm format: 
 
-`chime-utils score segslt2stm pred-dir pred-stm-output-dir` <br>
-`chime-utils score segslt2stm gt-dir gt-stm-output-dir` <br>
+`chime-utils score segslt2stm /path/to/your_JSON_predictions /path/to/output_folder` <br>
+`chime-utils score segslt2stm /path/to/chime8_dasr_ground_truth_JSON /path/to/output_folder_gt` <br>
 
 ---
 
@@ -268,6 +271,9 @@ and then install with:
 
 [2] von Neumann, T., Boeddeker, C., Delcroix, M., & Haeb-Umbach, R. (2023). MeetEval: A Toolkit for Computation of Word Error Rates for Meeting Transcription Systems. arXiv preprint arXiv:2307.11394. <br>
 
+[3] Watanabe, S., Mandel, M., Barker, J., Vincent, E., Arora, A., Chang, X., ... & Ryant, N. (2020). CHiME-6 challenge: Tackling multispeaker speech recognition for unsegmented recordings. arXiv preprint arXiv:2004.09249.
+
+[4] Cornell, S., Wiesner, M., Watanabe, S., Raj, D., Chang, X., Garcia, P., ... & Khudanpur, S. (2023). The CHiME-7 DASR Challenge: Distant Meeting Transcription with Multiple Devices in Diverse Scenarios. arXiv preprint arXiv:2306.13734.
 
 [slack-badge]: https://img.shields.io/badge/slack-chat-green.svg?logo=slack
 [slack-invite]: https://join.slack.com/t/chime-fey5388/shared_invite/zt-1oha0gedv-JEUr1mSztR7~iK9AxM4HOA
