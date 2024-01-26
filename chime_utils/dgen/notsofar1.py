@@ -54,7 +54,7 @@ def convert2chime(
         filename = Path(elem).stem
         tgt_name = os.path.join(
             output_audio_f,
-            "{}_U01_CH{}.wav".format(session_name, int(filename.strip("ch")) + 1),
+            "{}_U01.CH{}.wav".format(session_name, int(filename.strip("ch")) + 1),
         )
         os.symlink(elem, tgt_name)
 
