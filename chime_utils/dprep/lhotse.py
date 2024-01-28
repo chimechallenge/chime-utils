@@ -257,8 +257,7 @@ def prepare_dipco(
     :param json_dir: Pathlike, override the JSON annotation directory
         of the current dataset partition (e.g. dev)
         this allows for example to create a manifest from for example a JSON
-        created with forced alignment available at
-         https://github.com/chimechallenge/CHiME7_DASR_falign.
+        created with forced alignment.
     :param txt_norm: str, which text normalization preprocessing
         one wishes to use; choose between 'chime7' and 'chime8' or None.
     :return dict: Dict whose key is the dataset part
@@ -551,6 +550,159 @@ def prepare_mixer6(
         )
         recording_set.to_file(
             os.path.join(output_dir, f"mixer6-{mic}_recordings_{dset_part}.jsonl.gz")
+        )
+
+    manifests[dset_part] = {
+        "recordings": recording_set,
+        "supervisions": supervision_set,
+    }
+    return manifests
+
+
+def prepare_notsofar1(
+    corpus_dir: Pathlike,
+    output_dir: Optional[Pathlike] = None,
+    dset_part: Optional[str] = "dev",
+    mic: Optional[str] = "mdm",
+    json_dir: Optional[
+        Pathlike
+    ] = None,  # alternative annotation e.g. from non-oracle diarization
+    txt_norm: Optional[str] = "chime8",
+) -> Dict[str, Dict[str, Union[RecordingSet, SupervisionSet]]]:
+    """
+    Returns the manifests which consist of the Recordings and Supervisions
+    :param corpus_dir: Pathlike, the path of NOTSOFAR1 main directory.
+    :param output_dir: Pathlike, the path where to write the manifests.
+    :param mic: str, the microphone type to use,
+    choose from "ihm" (close-talk), "mdm" or "sdm".
+    :param json_dir: Pathlike, override the JSON annotation directory
+        of the current dataset partition (e.g. dev)
+        this allows for example to create a manifest from for example a JSON
+        created with forced alignment.
+    :param txt_norm: str, which text normalization preprocessing
+        one wishes to use; choose between 'chime7' and 'chime8' or None.
+    :return dict: Dict whose key is the dataset part
+        ("train", "dev" and "eval"), and the
+        value is Dicts with the keys 'recordings' and 'supervisions'.
+    """
+
+    txt_normalizer = get_txt_norm(txt_norm)
+    assert mic in ["ihm", "mdm"], "mic must be one of 'ihm' or 'mdm'"
+    transcriptions_dir = (
+        os.path.join(corpus_dir, "transcriptions_scoring")
+        if json_dir is None
+        else json_dir
+    )
+    if json_dir is not None:
+        logger.info(f"Using alternative JSON annotation in {json_dir}")
+    corpus_dir = Path(corpus_dir)
+    assert corpus_dir.is_dir(), f"No such directory: {corpus_dir}"
+    manifests = defaultdict(dict)
+
+    if output_dir is not None:
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+    all_sessions = glob.glob(os.path.join(transcriptions_dir, dset_part, "*.json"))
+    all_sessions = [Path(x).stem for x in all_sessions]
+    recordings = []
+    supervisions = []
+    # First we create the recordings
+    if mic == "ihm":
+        for session in all_sessions:
+            audio_paths = [
+                Path(x)
+                for x in glob.glob(
+                    os.path.join(corpus_dir, "audio", dset_part, f"{session}_P*.wav")
+                )
+            ]
+            # sources = []
+            for idx, audio_path in enumerate(audio_paths):
+                sources = [
+                    AudioSource(type="file", channels=[0], source=str(audio_path))
+                ]
+                spk_id = audio_path.stem.split("_")[1]
+                audio_sf = sf.SoundFile(str(audio_path))
+                recordings.append(
+                    Recording(
+                        id=session + "_{}".format(spk_id),
+                        sources=sources,
+                        sampling_rate=int(audio_sf.samplerate),
+                        num_samples=audio_sf.frames,
+                        duration=audio_sf.frames / audio_sf.samplerate,
+                    )
+                )
+    else:
+        for session in all_sessions:
+            audio_paths = [
+                Path(x)
+                for x in glob.glob(
+                    os.path.join(corpus_dir, "audio", dset_part, f"{session}_U*.wav")
+                )
+            ]
+            sources = []
+            for idx, audio_path in enumerate(sorted(audio_paths)):
+                sources.append(
+                    AudioSource(type="file", channels=[idx], source=str(audio_path))
+                )
+
+            audio_sf = sf.SoundFile(str(audio_paths[0]))
+            recordings.append(
+                Recording(
+                    id=session,
+                    sources=sources,
+                    sampling_rate=int(audio_sf.samplerate),
+                    num_samples=audio_sf.frames,
+                    duration=audio_sf.frames / audio_sf.samplerate,
+                )
+            )
+
+    # Then we create the supervisions
+    for session in all_sessions:
+        with open(os.path.join(transcriptions_dir, dset_part, f"{session}.json")) as f:
+            transcript = json.load(f)
+            for idx, segment in enumerate(transcript):
+                spk_id = segment["speaker"]
+                channel = [0] if mic == "ihm" else list(range(7))
+                start = float(segment["start_time"])
+                end = float(segment["end_time"])
+
+                ex_id = (
+                    f"{spk_id}_notdofar1_{session}_{idx}-"
+                    f"{round(100 * start):06d}_{round(100 * end):06d}-{mic}"
+                )
+                if "words" not in segment.keys():
+                    assert json_dir is not None
+                    segment["words"] = "placeholder"
+                supervisions.append(
+                    SupervisionSegment(
+                        id=ex_id,
+                        recording_id=(
+                            session if mic == "mdm" else session + "_{}".format(spk_id)
+                        ),
+                        start=start,
+                        duration=add_durations(end, -start, sampling_rate=DIPCO_FS),
+                        channel=channel,
+                        text=segment["words"],
+                        speaker=spk_id,
+                    )
+                )
+
+    recording_set, supervision_set = fix_manifests(
+        RecordingSet.from_recordings(recordings),
+        SupervisionSet.from_segments(supervisions),
+    )
+    # Fix manifests
+    if txt_normalizer is not None:
+        supervision_set = supervision_set.transform_text(txt_normalizer)
+    validate_recordings_and_supervisions(recording_set, supervision_set)
+    if output_dir is not None:
+        supervision_set.to_file(
+            os.path.join(
+                output_dir, f"notsofar1-{mic}_supervisions_{dset_part}.jsonl.gz"
+            )
+        )
+        recording_set.to_file(
+            os.path.join(output_dir, f"notsofar1-{mic}_recordings_{dset_part}.jsonl.gz")
         )
 
     manifests[dset_part] = {
