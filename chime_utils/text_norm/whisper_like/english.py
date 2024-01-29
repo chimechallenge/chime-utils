@@ -470,6 +470,7 @@ class EnglishTextNormalizer:
             r"\b(hm+)\b|\b(mhm)\b|\b(mm+)\b|\b(m+h)\b|\b(hm+)\b|\b(um+)\b|\b(uhm+)\b": (  # noqa e501
                 "hmm"
             ),
+            r"\bt v\b": "tv",
             r"\b(a+h+)\b|\b(ha+)\b": "ah",
             r"\b(o+h+)\b|\b(h+o+)\b": "oh",
             r"\b(u+h+)\b|\b(h+u+)\b|\b(h+u+h+)\b": "uh",

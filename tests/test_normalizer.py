@@ -22,6 +22,8 @@ def test_text_normalizer(std):
     )
     assert std("goin") == "going"
     assert std("uhhh") == "uh"
+    assert std("t v") == "tv"
+    assert std("et voila") == "et voila"
     assert std("huh") == "uh"
     assert std("aha") == "aha"
     assert std("one hundred") == "one hundred"
