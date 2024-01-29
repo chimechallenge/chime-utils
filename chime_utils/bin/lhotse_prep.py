@@ -5,6 +5,7 @@ from pathlib import Path
 
 import click
 import lhotse
+import numpy as np
 
 from chime_utils.bin.base import cli
 from chime_utils.dprep.lhotse import (
@@ -392,3 +393,48 @@ def text_normalize(input_dir, output_dir, txt_norm="chime8", regex="*.jsonl.gz")
     for man in manifests:
         name = Path(man).stem + Path(man).suffix
         convert_single(man, os.path.join(output_dir, name), txt_normalizer)
+
+
+@lhotse_prep.command(name="discard-length")
+@click.argument("input_dir", type=click.Path(exists=True))
+@click.argument("output_dir", type=click.Path(exists=False), required=True)
+@click.option(
+    "--min-len",
+    type=float,
+    default=0.0,
+    help=("Minimum length for lhotse supervisions. Shorter will be discarded."),
+)
+@click.option(
+    "--max-len",
+    type=float,
+    default=np.inf,
+    help=("Max length for lhotse supervisions. Longer will be discarded."),
+)
+@click.option(
+    "--regex",
+    type=str,
+    default="*.jsonl.gz",
+    help="Glob pattern to apply for finding the manifests to normalize.",
+)
+def discard_length(
+    input_dir, output_dir, min_len=0.0, max_len=np.inf, regex="*.jsonl.gz"
+):
+    def discard_single(input_sup, output_sup):
+        original_manifest = lhotse.load_manifest(input_sup)
+        if not isinstance(original_manifest, lhotse.RecordingSet):
+            orig_length = len(original_manifest)
+            original_manifest = original_manifest.filter(
+                lambda s: s.duration >= min_len and s.duration <= max_len
+            )
+            final_length = len(original_manifest)
+            logger.info(
+                f"Discarded {orig_length - final_length} supervisions from {input_sup} because longer than {max_len} or shorter than {min_len}."
+                f"Original length: {orig_length}, New length: {final_length}."
+            )
+        original_manifest.to_file(output_sup)
+
+    os.makedirs(output_dir, exist_ok=True)
+    manifests = glob.glob(os.path.join(input_dir, regex))
+    for man in manifests:
+        name = Path(man).stem + Path(man).suffix
+        discard_single(man, os.path.join(output_dir, name))
