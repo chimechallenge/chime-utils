@@ -89,8 +89,6 @@ def gen_dipco(
 
     if download:
         download_dipco(corpus_dir)
-        # need this because it will be extracted in a subfolder
-        # corpus_dir = os.path.join(corpus_dir, "Dipco")
 
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
