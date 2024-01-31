@@ -209,7 +209,10 @@ def gen_chime6(
 
             # create symlinks too
             for x in sess2audio[sess_name]:
-                if Path(x).stem.startswith("P") and split in ["dev", "eval"]:
+                if Path(x).stem.split("_")[-1].startswith("P") and split in [
+                    "dev",
+                    "eval",
+                ]:
                     continue
                 os.symlink(
                     x,
