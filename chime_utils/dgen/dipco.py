@@ -27,6 +27,19 @@ logger = logging.getLogger(__name__)
 CORPUS_URL = "https://zenodo.org/records/8122551/files/DipCo.tgz"
 DIPCO_FS = 16000
 
+dipco_c8_sess2split = {
+    "S01": "eval",
+    "S02": "train",
+    "S03": "eval",
+    "S04": "dev",
+    "S05": "dev",
+    "S06": "eval",
+    "S07": "eval",
+    "S08": "eval",
+    "S09": "train",
+    "S10": "train",
+}
+
 
 def download_dipco(
     target_dir: Pathlike,
@@ -50,7 +63,7 @@ def download_dipco(
 
 
 def gen_dipco(
-    output_dir, corpus_dir, download=False, dset_part="dev", challenge="chime8"
+    output_dir, corpus_dir, download=False, dset_part="train,dev", challenge="chime8"
 ):
     """
     :param output_dir: Pathlike,
@@ -60,8 +73,8 @@ def gen_dipco(
     :param corpus_dir: Pathlike, the original path to DiPCo root folder.
     :param download: bool, whether to download the dataset or not (you may have
         it already in storage).
-    :param dset_part: str, choose between
-        'dev' and 'eval' or 'dev,eval' for both.
+    :param dset_part: str, choose between 'train',
+        'dev' and 'eval' or 'train,dev' for multiple.
     :param challenge: str, choose between chime7 and chime8, it controls the
         choice of the text normalization and possibly how sessions are split
         between dev and eval.
@@ -71,6 +84,8 @@ def gen_dipco(
     spk_map = mapping["spk_map"]["dipco"]
     sess_map = mapping["sessions_map"]["dipco"]
     text_normalization = get_txt_norm(challenge)
+
+    assert challenge == "chime8"  # not implemented chime7 currently
 
     if download:
         download_dipco(corpus_dir)
@@ -115,38 +130,50 @@ def gen_dipco(
         return annotation, annotation_scoring
 
     dset_part = dset_part.split(",")
-    for split in dset_part:
-        assert split in ["dev", "eval"]
+    for dest_split in dset_part:
+        assert dest_split in ["train", "dev", "eval"]
         # here same splits no need to remap
-        Path(os.path.join(output_dir, "audio", split)).mkdir(
+        Path(os.path.join(output_dir, "audio", dest_split)).mkdir(
             parents=True, exist_ok=True
         )
-        Path(os.path.join(output_dir, "transcriptions", split)).mkdir(
-            parents=True, exist_ok=True
-        )
-        Path(os.path.join(output_dir, "transcriptions_scoring", split)).mkdir(
-            parents=True, exist_ok=True
-        )
+        if dest_split not in ["eval", "dev"]:
+            Path(os.path.join(output_dir, "transcriptions", dest_split)).mkdir(
+                parents=True, exist_ok=True
+            )
+            Path(os.path.join(output_dir, "transcriptions_scoring", dest_split)).mkdir(
+                parents=True, exist_ok=True
+            )
 
-        Path(os.path.join(output_dir, "devices", split)).mkdir(
-            parents=True, exist_ok=True
-        )
-        json_dir = os.path.join(corpus_dir, "transcriptions", split)
-        ann_json = glob.glob(os.path.join(json_dir, "*.json"))
+            Path(os.path.join(output_dir, "devices", dest_split)).mkdir(
+                parents=True, exist_ok=True
+            )
+
+        # now we fetch all possible json files here, including evaluation ones
+        ann_json = []
+        audio_files = []
+        for orig_split in ["dev", "eval"]:
+            json_dir = os.path.join(corpus_dir, "transcriptions", orig_split)
+            ann_json.extend(glob.glob(os.path.join(json_dir, "*.json")))
+            audio_files.extend(
+                glob.glob(os.path.join(corpus_dir, "audio", orig_split, "*.wav"))
+            )
         assert len(ann_json) > 0, (
             "DiPCo JSON annotation was not found in {}, please check if "
             "DiPCo data was downloaded correctly and the DiPCo main dir "
-            "path is set correctly".format(json_dir)
+            "path is set correctly. "
+            "You can also download DiPCo using '--download' flag see '--help'.".format(
+                json_dir
+            )
         )
 
         # we also create audio files symlinks here
-        audio_files = glob.glob(os.path.join(corpus_dir, "audio", split, "*.wav"))
         sess2audio = {}
         for x in audio_files:
             session_name = Path(x).stem.split("_")[0]
-            if split == "eval" and Path(x).stem.split("_")[-1].startswith("P"):
-                # you should not use close-talk in evaluation !
-                continue
+            # check now if this session is in the current destination split
+            # if dest_split in ["eval", "dev"] and Path(x).stem.split("_")[-1].startswith("P"):
+            # you should not use close-talk in evaluation !
+            #    continue
             if session_name not in sess2audio:
                 sess2audio[session_name] = [x]
             else:
@@ -158,9 +185,11 @@ def gen_dipco(
             with open(j_file, "r") as f:
                 annotation = json.load(f)
             sess_name = Path(j_file).stem
+            if dipco_c8_sess2split[sess_name] != dest_split:
+                continue
 
             annotation, scoring_annotation = normalize_dipco(
-                annotation, text_normalization, split
+                annotation, text_normalization, dest_split
             )
 
             annotation = sorted(annotation, key=lambda x: float(x["start_time"]))
@@ -193,41 +222,49 @@ def gen_dipco(
                         "num_channels": 1,
                         "device_type": f"circular_array_{channel}_mic",
                     }
-                os.symlink(
-                    x,
-                    os.path.join(output_dir, "audio", split, filename + ".wav"),
-                )
+
+                if not (
+                    dest_split in ["eval", "dev"]
+                    and Path(x).stem.split("_")[-1].startswith("P")
+                ):
+                    os.symlink(
+                        x,
+                        os.path.join(
+                            output_dir, "audio", dest_split, filename + ".wav"
+                        ),
+                    )
 
             devices_info = dict(sorted(devices_info.items(), key=lambda x: x[0]))
 
-            with open(
-                os.path.join(
-                    output_dir, "devices", split, sess_map[sess_name] + ".json"
-                ),
-                "w",
-            ) as f:
-                json.dump(devices_info, f, indent=4)
+            if dest_split not in ["dev", "eval"]:
+                with open(
+                    os.path.join(
+                        output_dir, "devices", dest_split, sess_map[sess_name] + ".json"
+                    ),
+                    "w",
+                ) as f:
+                    json.dump(devices_info, f, indent=4)
 
-            with open(
-                os.path.join(
-                    output_dir,
-                    "transcriptions",
-                    split,
-                    new_sess_name + ".json",
-                ),
-                "w",
-            ) as f:
-                json.dump(annotation, f, indent=4)
-            with open(
-                os.path.join(
-                    output_dir,
-                    "transcriptions_scoring",
-                    split,
-                    new_sess_name + ".json",
-                ),
-                "w",
-            ) as f:
-                json.dump(scoring_annotation, f, indent=4)
+                with open(
+                    os.path.join(
+                        output_dir,
+                        "transcriptions",
+                        dest_split,
+                        new_sess_name + ".json",
+                    ),
+                    "w",
+                ) as f:
+                    json.dump(annotation, f, indent=4)
+                with open(
+                    os.path.join(
+                        output_dir,
+                        "transcriptions_scoring",
+                        dest_split,
+                        new_sess_name + ".json",
+                    ),
+                    "w",
+                ) as f:
+                    json.dump(scoring_annotation, f, indent=4)
 
             uem_start = 0
             uem_end = max([sf.SoundFile(x).frames for x in sess2audio[sess_name]])
@@ -239,8 +276,7 @@ def gen_dipco(
             to_uem.append(c_uem)
 
         if len(to_uem) > 0:
-            assert split in ["dev", "eval"]  # uem only for development set
-            Path(os.path.join(output_dir, "uem", split)).mkdir(parents=True)
+            Path(os.path.join(output_dir, "uem", dest_split)).mkdir(parents=True)
             to_uem = sorted(to_uem)
-            with open(os.path.join(output_dir, "uem", split, "all.uem"), "w") as f:
+            with open(os.path.join(output_dir, "uem", dest_split, "all.uem"), "w") as f:
                 f.writelines(to_uem)
