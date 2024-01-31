@@ -191,10 +191,10 @@ def chime6(corpus_dir, output_dir, download, part, challenge):
     "--part",
     "-p",
     type=str,
-    default="dev",
+    default="train,dev",
     help=(
         "Which part of the dataset you want to generate, "
-        "choose between 'dev' and 'eval'.\n"
+        "choose between 'train','dev' and 'eval'.\n"
         "You can choose multiple by using commas e.g. 'dev,eval'."
     ),
 )
@@ -228,10 +228,10 @@ def dipco(corpus_dir, output_dir, download, part, challenge):
     "--part",
     "-p",
     type=str,
-    default="train_call,train_intv,dev",
+    default="train_call,train_intv,train,dev",
     help=(
-        "Which part of the dataset you want to generate, "
-        "choose between 'train', 'dev' and 'eval'.\n"
+        "Which part of the dataset you want to generate "
+        "choose between 'train_call' 'train_intv', 'train', 'dev' and 'eval'.\n"
         "You can choose multiple by using commas e.g. 'dev,eval'."
     ),
 )
