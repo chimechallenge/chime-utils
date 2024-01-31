@@ -1,9 +1,11 @@
 import collections
+import dataclasses
 import logging
 from pathlib import Path
-import dataclasses
-import simplejson
+
 import click
+import simplejson
+
 from chime_utils.bin.base import cli
 
 logging.basicConfig(
@@ -39,8 +41,9 @@ def _load_and_prepare(
     hyp_folder,
     dasr_root,
 ):
-    import meeteval
     from pathlib import Path
+
+    import meeteval
 
     def load_files(files, nodata_msg) -> meeteval.io.SegLST:
         seglst = []
@@ -172,9 +175,10 @@ def tcpwer(
     dasr_root,
     output_folder=None,
 ):
-    import numpy as np
-    import meeteval
     import dataclasses
+
+    import meeteval
+    import numpy as np
 
     collar = 5
 
