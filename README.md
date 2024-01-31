@@ -263,7 +263,7 @@ If you wish to contribute, download this repo:
 
 and then install with:  
 
-`pip install -e .[dev]` <br>
+`pip install -e .` <br>
 `pip install pre-commit` <br>
 `pre-commit install --install-hooks`
 
