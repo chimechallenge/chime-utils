@@ -158,9 +158,9 @@ def gen_dipco(
                 glob.glob(os.path.join(corpus_dir, "audio", orig_split, "*.wav"))
             )
         assert len(ann_json) > 0, (
-            "DiPCo JSON annotation was not found in {}, please check if "
+            "DiPCo JSON annotation was not found in {}.\nPlease check if "
             "DiPCo data was downloaded correctly and the DiPCo main dir "
-            "path is set correctly. "
+            "path is set correctly.\n"
             "You can also download DiPCo using '--download' flag see '--help'.".format(
                 json_dir
             )
