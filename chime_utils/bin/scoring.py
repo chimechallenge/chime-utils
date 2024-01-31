@@ -96,17 +96,21 @@ def _load_and_prepare(
                     f"but couldn't find {file.relative_to(hyp_folder)}.",
                 )
             else:
-                print(f"WARNING: The file {file} doesn't exists. Use a dummy estimate for it.")
-                h = meeteval.io.SegLST([
-                    {
-                        'words': '',
-                        'start_time': 0,
-                        'end_time': 0,
-                        'session_id': session_id,
-                        'speaker': 0,
-                    }
-                    for session_id in set(r.T['session_id'])
-                ])
+                print(
+                    f"WARNING: The file {file} doesn't exists. Use a dummy estimate for it."
+                )
+                h = meeteval.io.SegLST(
+                    [
+                        {
+                            "words": "",
+                            "start_time": 0,
+                            "end_time": 0,
+                            "session_id": session_id,
+                            "speaker": 0,
+                        }
+                        for session_id in set(r.T["session_id"])
+                    ]
+                )
 
             yield deveval, scenario, h, r
 
@@ -141,6 +145,7 @@ def _dump_json(obj, file):
             return dataclasses.asdict(obj)
         else:
             return obj
+
     Path(file).write_text(simplejson.dumps(obj, default=to_dict))
 
 
@@ -210,17 +215,17 @@ def tcpwer(
     )
 
     if output_folder is None:
-        print('Skip write of details to the disk, because ')
+        print("Skip write of details to the disk, because ")
     else:
         output_folder = Path(output_folder)
         output_folder.mkdir(parents=True, exist_ok=True)
         _dump_json(details, str(output_folder / "tcpwer_per_session.json"))
         _dump_json(details, str(output_folder / "tcpwer_per_scenario.json"))
         for deveval, scenario, h, r in data:
-            (output_folder / 'hyp' / deveval).mkdir(parents=True, exist_ok=True)
-            (output_folder / 'ref' / deveval).mkdir(parents=True, exist_ok=True)
-            h.dump(output_folder / 'hyp' / deveval / f'{scenario}.json')
-            r.dump(output_folder / 'ref' / deveval / f'{scenario}.json')
+            (output_folder / "hyp" / deveval).mkdir(parents=True, exist_ok=True)
+            (output_folder / "ref" / deveval).mkdir(parents=True, exist_ok=True)
+            h.dump(output_folder / "hyp" / deveval / f"{scenario}.json")
+            r.dump(output_folder / "ref" / deveval / f"{scenario}.json")
 
 
 def diarization_score():
