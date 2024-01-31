@@ -10,9 +10,9 @@ from pathlib import Path
 from typing import Optional
 
 import soundfile as sf
-from lhotse.utils import Pathlike, resumable_download, safe_extract
+from lhotse.utils import Pathlike, resumable_download
 
-from chime_utils.dgen.utils import get_mappings
+from chime_utils.dgen.utils import get_mappings, tar_strip_members
 from chime_utils.text_norm import get_txt_norm
 
 logging.basicConfig(
@@ -57,7 +57,7 @@ def download_dipco(
     tar_path = os.path.join(target_dir, "DiPCo.tgz")
     resumable_download(CORPUS_URL, filename=tar_path, force_download=force_download)
     with tarfile.open(tar_path) as tar:
-        safe_extract(tar, path=target_dir)
+        tar.extractall(path=target_dir, members=tar_strip_members(target_dir, tar, 1))
 
     return target_dir
 
@@ -90,7 +90,7 @@ def gen_dipco(
     if download:
         download_dipco(corpus_dir)
         # need this because it will be extracted in a subfolder
-        corpus_dir = os.path.join(corpus_dir, "Dipco")
+        # corpus_dir = os.path.join(corpus_dir, "Dipco")
 
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 

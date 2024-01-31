@@ -10,6 +10,7 @@ import soundfile as sf
 from lhotse.recipes.chime6 import TimeFormatConverter
 from lhotse.utils import Pathlike, resumable_download
 
+from chime_utils.dgen.utils import tar_strip_members
 from chime_utils.text_norm import get_txt_norm
 
 CORPUS_URL = "https://us.openslr.org/resources/150/"
@@ -50,17 +51,6 @@ def download_chime6(
     :return: the path to downloaded and extracted directory with data.
     """
 
-    def strip_members(target_dir, tar, n_folders_stripped=1):
-        members = []
-        target_dir = Path(target_dir)
-        for member in tar.getmembers():
-            p = Path(member.path)
-            member.path = p.relative_to(*p.parts[:n_folders_stripped])
-            assert target_dir.joinpath(p) not in target_dir.parents
-            # this is needed to prevent path traversal attacks
-            members.append(member)
-        return members
-
     target_dir = Path(target_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
     for c_file in [
@@ -78,7 +68,7 @@ def download_chime6(
             with tarfile.open(tar_path) as tar:
                 strip = 2 if not c_file.endswith("transcriptions.tar.gz") else 1
                 tar.extractall(
-                    path=target_dir, members=strip_members(target_dir, tar, strip)
+                    path=target_dir, members=tar_strip_members(target_dir, tar, strip)
                 )
 
     return target_dir

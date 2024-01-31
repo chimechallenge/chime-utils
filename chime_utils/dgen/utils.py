@@ -17,6 +17,18 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def tar_strip_members(target_dir, tar, n_folders_stripped=1):
+    members = []
+    target_dir = Path(target_dir)
+    for member in tar.getmembers():
+        p = Path(member.path)
+        member.path = p.relative_to(*p.parts[:n_folders_stripped])
+        assert target_dir.joinpath(p) not in target_dir.parents
+        # this is needed to prevent path traversal attacks
+        members.append(member)
+    return members
+
+
 def md5_file(fname):
     hash_md5 = hashlib.md5()
     with open(fname, "rb") as f:
