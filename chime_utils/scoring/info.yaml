@@ -1,0 +1,60 @@
+team_name:
+affiliation:
+submission_id: # unique name for this submission
+cmt_paper_id: # cmt paper id
+contact_email: # your contact email
+
+## NOTE, in the following if you want to put multiple answers please,
+## separate with commas e.g. wavlm,wav2vec2,hubert
+## If the attribute does not apply e.g. you don't have SSE (speech separation and enhancement), leave it blank.
+
+
+# ranking score as obtained on development set with the leaderboard
+# we use this to doublecheck that this submission is okay
+ranking_score:
+  macro:
+  chime6:
+  dipco:
+  mixer6:
+  notsofar1:
+
+# all figures here on the final evaluation set
+inference:
+  approx_tot_time: # in hours e.g. 28 hours etc for inference on all evaluation
+  num_gpus: # number of GPUs, if multiple nodes sum the total across all nodes
+  gpu_type: # type of GPUs used if multiple types use commas h100,a100
+  num_cpus: # number of CPUs, if multiple nodes sum the total across all nodes
+  cpus_type: # type of CPUs used if multiple type use commas epyc7F72,epyc7F52
+
+asr:
+  external_models_used: # e.g. wavlm,hubert
+  num_ensembled_sys: # 0 if no ensemble
+  tot_parameters: # sum across all ensembled systems, use YAML floats e.g. 1.0e+6 for 1M parameters
+  training: # also for this, sum across all ensembled systems
+    approx_tot_time: # in hours e.g. 68 h report the sum here
+    external_data_used: # e.g. AMI,LibriSpeech
+    tot_hours_pre_augmentation: # tot hours of data before augmentation
+  lm:
+    external_models_used:
+    tot_parameters:
+
+diarization:
+  external_models_used: # e.g. wavlm,hubert
+  num_ensembled_sys: # 0 if no ensemble
+  tot_parameters: # sum across all ensembled systems use python floats e.g. 1.0e+6 for 1M parameters
+  training: # also for this, sum across all ensembled systems
+    approx_tot_time: # in hours e.g. 27 h, report the sum here
+    external_data_used: # e.g. AMI,LibriSpeech
+    tot_hours_pre_augmentation: # tot hours of data before augmentation
+
+sse_frontend: # speech separation and enhancement frontend
+  external_models_used: # e.g. wavlm,hubert
+  num_ensembled_sys: # 0 if no ensemble
+  tot_parameters: # sum across all ensembled systems use python floats e.g. 1.0e+6 for 1M parameters
+  training: # also for this, sum across all ensembled systems
+    approx_tot_time: # in hours e.g. 68 h
+    external_data_used: # e.g. AMI,LibriSpeech
+    tot_hours_pre_augmentation: # tot hours of data before augmentation
+
+
+
