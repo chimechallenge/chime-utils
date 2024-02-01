@@ -14,7 +14,7 @@ This year we also support automatic downloading of CHiME-6. <br>
 For in-depth details about CHiME-8 DASR data and rules refer to [chimechallenge.org/current/task1/data](https://www.chimechallenge.org/current/task1/data).  
 
 <h4>📩 Contact </h4>
-For any issue/bug/question with this package feel free to raise an issue here or reach us via the CHiME [![Slack][slack-badge]][slack-invite]
+For any issue/bug/question with this package feel free to raise an issue here or reach us via the [CHiME Slack]([slack-invite])
 
 ---
 

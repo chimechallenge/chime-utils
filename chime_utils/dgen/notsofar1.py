@@ -26,7 +26,12 @@ NOTSOFAR1_FS = 16000
 def download_notsofar1(download_dir, subset_name):
     if subset_name == "dev":
         subset_name = "dev_set"
-        version = "240121_dev"
+        version = "240130.1_dev"
+    elif subset_name == "train":
+        subset_name = "train_set"
+        version = "240130.1_train"
+    else:
+        raise RuntimeError("Evaluation data has not yet been released !")
     dev_meetings_dir = download_meeting_subset(
         subset_name=subset_name, version=version, destination_dir=str(download_dir)
     )
