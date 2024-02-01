@@ -24,7 +24,7 @@ def download_blob_container_dir(
     destination_dir: str,
     container_name: str,
     keep_structure: bool = False,
-    overwrite: bool = False,
+    overwrite: bool = True,
 ) -> Optional[str]:
     """
     Download a directory from the container to the given output directory
