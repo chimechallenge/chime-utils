@@ -14,7 +14,7 @@ This year we also support automatic downloading of CHiME-6. <br>
 For in-depth details about CHiME-8 DASR data and rules refer to [chimechallenge.org/current/task1/data](https://www.chimechallenge.org/current/task1/data).  
 
 <h4>📩 Contact </h4>
-For any issue/bug/question with this package feel free to raise an issue here or reach us via the [CHiME Slack]([slack-invite])
+For any issue/bug/question with this package feel free to raise an issue here or reach us via the [CHiME Slack](https://join.slack.com/t/chime-fey5388/shared_invite/zt-1oha0gedv-JEUr1mSztR7~iK9AxM4HOA).
 
 ---
 
@@ -54,7 +54,8 @@ Hereafter we describe each command/function in detail.
 ### ⚡ All DASR data in one go
 
 You can generate all CHiME-8 DASR data in one go with: <br>
-`chime-utils dgen dasr ./download /path/to/mixer6_root ./chime8_dasr --part train,dev` 
+`chime-utils dgen dasr ./download /path/to/mixer6_root ./chime8_dasr --part train,dev` <br>
+If unsure you can always use some `--help`.
 
 This script will download CHiME-6, DiPCo and NOTSOFAR1 automatically in `./download` <br>
 Ensure you have at least 1TB of space there. You can remove the `.tar.gz` after the full data preparation to save some space later.
