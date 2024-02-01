@@ -49,16 +49,33 @@ Hereafter we describe each command/function in detail.
 
 ## Data generation
 
+
 ### ⚡ All DASR data in one go
 
 You can generate all CHiME-8 DASR data in one go with: <br>
-`chime-utils dgen dasr ./download /path/to/mixer6 ./chime8_dasr --part train,dev` 
+`chime-utils dgen dasr ./download /path/to/mixer6_root ./chime8_dasr --part train,dev` 
 
 This script will download CHiME-6, DiPCo and NOTSOFAR1 automatically in `./download` <br>
 Ensure you have at least 1TB of space there. You can remove the `.tar.gz` after the full data preparation to save some space later.
 
 Mixer 6 Speech instead has to be obtained through LDC. <br>
-Refer to [chimechallenge.org/current/task1/data](https://www.chimechallenge.org/current/task1/data) on how to obtain Mixer 6 Speech.
+Refer to [chimechallenge.org/current/task1/data](https://www.chimechallenge.org/current/task1/data) on how to obtain Mixer 6 Speech. <br>
+The Mixer 6 root folder should look like this: <br>
+
+```
+mixer6_root 
+├── data 
+│   └── pcm_flac 
+├── metadata 
+│   ├── iv_components_final.csv 
+│   ├── mx6_calls.csv 
+...
+├── splits 
+│   ├── dev_a 
+│   ├── dev_a.list 
+...
+└── train_and_dev_files
+```
 
 🔐 You can check if the data has been successfully prepared with: <br>
 `chime-utils dgen checksum ./chime8_dasr` <br>
@@ -66,25 +83,28 @@ It is better to run this also for the evaluation part, when evaluation will be r
 
 ### 🐢 Single Dataset Scripts
 
-We also provide scripts for obtaining each core dataset independently if needed.
+
+We provide scripts for obtaining each core dataset independently if needed. <br>
+Command basic usage: `chime-utils dgen <DATASET> <DOWNLOAD_DIR> <OUTPUT_DIR> --download` <br>
+
 
 - CHiME-6
-   -  `chime-utils dgen chime6 /path/to/chime6 ./chime8_dasr/chime6 --part train,dev` 
-   - It can also be downloaded automatically to `./download/chime6` using:
-       - `chime-utils dgen chime6 ./download/chime6 ./chime8_dasr/chime6 --part train,dev --download` 
+   - `chime-utils dgen chime6 ./download/chime6 ./chime8_dasr/chime6 --part train,dev --download` 
+     - If it is already in storage in `/path/to/chime6_root` instead you can use:
+       - `chime-utils dgen chime6 /path/to/chime6_root ./chime8_dasr/chime6 --part train,dev`
 - DiPCo
-    -  `chime-utils dgen dipco /path/to/dipco ./chime8_dasr/dipco --part dev` 
-    - It can also be downloaded automatically to `./download/dipco` using:
-      - `chime-utils dgen dipco ./download/dipco ./chime8_dasr/dipco --part dev --download` 
+   - `chime-utils dgen dipco ./download/dipco ./chime8_dasr/dipco --part train,dev --download` 
+     - If it is already in storage in `/path/to/dipco` instead you can use:
+       - `chime-utils dgen dipco /path/to/dipco ./chime8_dasr/dipco --part train,dev`
 - Mixer 6 Speech
-    - `chime-utils dgen mixer6 /path/to/mixer6 ./chime8_dasr/mixer6 --part train_call,train_intv,dev`
+    - `chime-utils dgen mixer6 /path/to/mixer6_root ./chime8_dasr/mixer6 --part train_call,train_intv,train,dev`
+      - It must be obtained via [see Data page](https://www.chimechallenge.org/current/task1/data) and extracted manually. 
 - NOTSOFAR1
-  - `chime-utils dgen notsofar1 /path/to/notsofar1 ./chime8_dasr/notsofar1 --part dev`
-  - It can also be downloaded automatically to `./download/notsofar1` using:
-      - `chime-utils dgen notsofar1 ./download/notsofar1 ./chime8_dasr/notsofar1 --part dev --download` 
+   - `chime-utils dgen notsofar1 ./download/notsofar1 ./chime8_dasr/notsofar1 --part train,dev --download` 
+     - If it is already in storage in `/path/to/notsofar1` instead you can use:
+       - `chime-utils dgen notsofar1 /path/to/notsofar1 ./chime8_dasr/notsofar1 --part train,dev`
  
 ## Data preparation
-
 
 ### 🚀 NVIDIA NeMo Official Baseline 
  
