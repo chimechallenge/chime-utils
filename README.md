@@ -265,7 +265,7 @@ so that systems output can be more in-depth analyzed.
 #### 🔍 MeetEval meeting recognition visualization (recommended)
 
 For ASR+diarization error analysis we recommend the use of this super useful [Meeteval](github.com/fgnt/meeteval) tool (will be presented at ICASSP 2024 in a show and tell session): <br>
-- [https://fgnt.github.io/meeteval_jupyterlite/lab](https://fgnt.github.io/meeteval_jupyterlite/lab)
+- [https://fgnt.github.io/meeteval_jupyterlite/lab](https://fgnt.github.io/meeteval_jupyterlite/lab?path=Demo.ipynb)
 
 You can upload your predictions and references in any supported file format (SegLST is preferred) to the [JupyterLite notebook running in the browser](https://fgnt.github.io/meeteval_jupyterlite/lab?path=Demo.ipynb), run the visualization in a Jupyter notebook locally, or build a visualization in the command-line using
 ```
