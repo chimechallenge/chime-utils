@@ -274,7 +274,7 @@ def mixer6(corpus_dir, output_dir, part, challenge):
     "--part",
     "-p",
     type=str,
-    default="dev",
+    default="train,dev",
     help=(
         "Which part of the dataset you want to generate, "
         "choose between 'train', 'dev', 'public_eval', 'eval'.\n"
@@ -285,3 +285,9 @@ def notsofar1(corpus_dir, output_dir, download, part):
     parts = part.split(",")
     for p in parts:
         gen_notsofar1(output_dir, corpus_dir, download, p)
+
+
+def split_tr_validation(
+    corpus_dir, output_dir, split_from="train", split_ratio=0.1, seed=777
+):
+    pass
