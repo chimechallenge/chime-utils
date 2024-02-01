@@ -39,7 +39,9 @@ And new CLI commands: <br>
 - `chime-utils dgen` <br>
     - generates and downloads CHiME-8 data.
 - `chime-utils lhotse-prep` <br>
-    - prepares CHiME-8 data lhotse manifests (which can be then converted to Kaldi and ESPNet compatible ones).
+    - prepares CHiME-8 data lhotse manifests.
+- `chime-utils espnet-prep` <br>
+    - prepares CHiME-8 data ESPNet/Kaldi-style manifests.
 - `chime-utils speechbrain-prep` <br>
     - prepares CHiME-8 data Speechbrain-style JSON format.
 - `chime-utils score` <br>
@@ -48,7 +50,6 @@ And new CLI commands: <br>
 Hereafter we describe each command/function in detail. 
 
 ## Data generation
-
 
 ### ⚡ All DASR data in one go
 
@@ -98,7 +99,7 @@ Command basic usage: `chime-utils dgen <DATASET> <DOWNLOAD_DIR> <OUTPUT_DIR> --d
        - `chime-utils dgen dipco /path/to/dipco ./chime8_dasr/dipco --part train,dev`
 - Mixer 6 Speech
     - `chime-utils dgen mixer6 /path/to/mixer6_root ./chime8_dasr/mixer6 --part train_call,train_intv,train,dev`
-      - It must be obtained via [see Data page](https://www.chimechallenge.org/current/task1/data) and extracted manually. 
+      - It must be obtained via LDC ([see CHiME-8 data page](https://www.chimechallenge.org/current/task1/data)) and extracted manually. 
 - NOTSOFAR1
    - `chime-utils dgen notsofar1 ./download/notsofar1 ./chime8_dasr/notsofar1 --part train,dev --download` 
      - If it is already in storage in `/path/to/notsofar1` instead you can use:
