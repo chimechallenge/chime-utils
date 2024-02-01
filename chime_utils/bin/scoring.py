@@ -7,6 +7,7 @@ import click
 import simplejson
 
 from chime_utils.bin.base import cli
+from chime_utils.text_norm import get_txt_norm
 
 logging.basicConfig(
     format=(
@@ -40,10 +41,11 @@ def da_wer():
 def _load_and_prepare(
     hyp_folder,
     dasr_root,
+    text_norm,
 ):
-    from pathlib import Path
-
     import meeteval
+
+    text_norm = get_txt_norm(text_norm)
 
     def load_files(files, nodata_msg) -> meeteval.io.SegLST:
         seglst = []
@@ -62,6 +64,7 @@ def _load_and_prepare(
 
     dasr_root = Path(dasr_root)
     hyp_folder = Path(hyp_folder)
+    assert dasr_root.exists(), dasr_root
     assert hyp_folder.exists(), hyp_folder
     assert (hyp_folder / "dev").exists(), hyp_folder / "dev"
 
@@ -76,20 +79,23 @@ def _load_and_prepare(
             )
 
             # Issue in S21 for P45, where start is 3561.700 and end 3561.490
-            r = meeteval.io.SegLST(
-                [
-                    (
-                        segment
-                        if segment["end_time"] > segment["start_time"]
-                        else {
-                            **segment,
-                            "start_time": segment["end_time"],
-                            "end_time": segment["start_time"],
-                        }
+            def fix_negative_duration(segment):
+                if segment["end_time"] < segment["start_time"]:
+                    print(
+                        f"WARNING: Fix negative duration in {segment['session_id']} "
+                        f"for {segment['speaker']}, where start is "
+                        f"{segment['start_time']} and end is "
+                        f"{segment['end_time']} by swapping start and end."
                     )
-                    for segment in r
-                ]
-            )
+                    segment["end_time"], segment["start_time"] = (
+                        segment["start_time"],
+                        segment["end_time"],
+                    )
+                return segment
+
+            r = r.map(fix_negative_duration)
+
+            uem = meeteval.io.load(scenario_dir / "uem" / deveval / "all.uem")
 
             file = hyp_folder / deveval / f"{scenario}.json"
             if file.exists():
@@ -100,22 +106,44 @@ def _load_and_prepare(
                 )
             else:
                 print(
-                    f"WARNING: The file {file} doesn't exists. Use a dummy estimate for it."
+                    f"WARNING: The file {file} doesn't exists. "
+                    f"Use a dummy estimate for it."
                 )
                 h = meeteval.io.SegLST(
-                    [
+                    [  # noqa
                         {
                             "words": "",
-                            "start_time": 0,
-                            "end_time": 0,
+                            "start_time": min(r.T["start_time"]),
+                            "end_time": max(r.T["end_time"]),
                             "session_id": session_id,
-                            "speaker": 0,
+                            "speaker": "0",
                         }
                         for session_id in set(r.T["session_id"])
                     ]
                 )
 
-            yield deveval, scenario, h, r
+            def word_normalizer(segment):
+                words = segment["words"]
+                words = text_norm(words)
+                words2 = text_norm(words)
+                if False and words != words2:
+                    print(segment["words"])
+                    print(words)
+                    print(words2)
+                    raise RuntimeError(
+                        "Test normalizer is not idempotence."
+                        "This should never happen, please open an issue on "
+                        "https://github.com/chimechallenge/chime-utils",
+                        segment["words"],
+                        text_norm,
+                    )
+                segment["words"] = words
+                return segment
+
+            r = r.map(word_normalizer)
+            h = h.map(word_normalizer)
+
+            yield deveval, scenario, h, r, uem
 
 
 def _print_table(error_rates, header):
@@ -174,20 +202,28 @@ def tcpwer(
     hyp_folder,
     dasr_root,
     output_folder=None,
+    text_norm="chime8",
 ):
     import dataclasses
 
     import meeteval
     import numpy as np
 
+    if output_folder is not None:
+        output_folder = Path(output_folder)
+    else:
+        print("Skip write of details to the disk, because --output_folder is not given")
+
     collar = 5
 
     result = collections.defaultdict(dict)
     details = collections.defaultdict(dict)
 
-    data = list(_load_and_prepare(hyp_folder, dasr_root))
-    for deveval, scenario, h, r in data:
-        error_rates = meeteval.wer.tcpwer(reference=r, hypothesis=h, collar=collar)
+    data = _load_and_prepare(hyp_folder, dasr_root, text_norm=text_norm)
+    for deveval, scenario, h, r, uem in data:
+        error_rates = meeteval.wer.tcpwer(
+            reference=r, hypothesis=h, collar=collar, uem=uem
+        )
         details[deveval][scenario] = error_rates
         result[deveval][scenario] = meeteval.wer.combine_error_rates(error_rates)
 
@@ -198,6 +234,12 @@ def tcpwer(
             ],
             f"tcpWER for {deveval} {scenario} Scenario",
         )
+
+        if output_folder is not None:
+            (output_folder / "hyp" / deveval).mkdir(parents=True, exist_ok=True)
+            (output_folder / "ref" / deveval).mkdir(parents=True, exist_ok=True)
+            h.dump(output_folder / "hyp" / deveval / f"{scenario}.json")
+            r.dump(output_folder / "ref" / deveval / f"{scenario}.json")
 
     _print_table(
         [
@@ -225,11 +267,6 @@ def tcpwer(
         output_folder.mkdir(parents=True, exist_ok=True)
         _dump_json(details, str(output_folder / "tcpwer_per_session.json"))
         _dump_json(details, str(output_folder / "tcpwer_per_scenario.json"))
-        for deveval, scenario, h, r in data:
-            (output_folder / "hyp" / deveval).mkdir(parents=True, exist_ok=True)
-            (output_folder / "ref" / deveval).mkdir(parents=True, exist_ok=True)
-            h.dump(output_folder / "hyp" / deveval / f"{scenario}.json")
-            r.dump(output_folder / "ref" / deveval / f"{scenario}.json")
 
 
 def diarization_score():
