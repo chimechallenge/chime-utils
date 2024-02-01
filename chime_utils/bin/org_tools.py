@@ -2,9 +2,11 @@ import glob
 import json
 import logging
 import os
+from copy import deepcopy
 from pathlib import Path
 
 import click
+import numpy as np
 
 from chime_utils.bin.base import cli
 from chime_utils.dgen.mixer6 import read_list_file
@@ -141,9 +143,16 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, corpus_name):
 
     if corpus_name == "notsofar1":
         all_speakers = set()
-        for split in ["dev"]:
-            if split == "dev":
-                split_dir = os.path.join(corpus_dir, "240121_dev", "MTG")
+        for split in ["train", "dev"]:
+            if split == "train":
+                split_dir = os.path.join(
+                    corpus_dir, "train/train_set/240130.1_train/MTG/"
+                )  # os.path.join(corpus_dir, "240121_dev", "MTG")
+            elif split == "dev":
+                split_dir = os.path.join(
+                    corpus_dir, "dev/dev_set/240130.1_dev_with_GT_delme/MTG"
+                )
+
             split_dir = Path(split_dir)
 
             assert all(
@@ -154,6 +163,9 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, corpus_name):
                 "containing directories with name starting with MTG."
             )
 
+            import pdb
+
+            pdb.set_trace()
             for meet_dir in split_dir.iterdir():
                 # load gtfile
                 with open(os.path.join(meet_dir, "gt_transcription.json")) as f:
@@ -208,4 +220,76 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, corpus_name):
             mapping,
             f,
             indent=4,
+        )
+
+
+@org_tools.command(name="compute-stats")  # refactor to do one at a time
+@click.argument("dasr-root", type=click.Path(exists=True))
+@click.option(
+    "--corpus-name",
+    "-c",
+    type=str,
+    help="Name of corpus, e.g. chime6,dipco etc.",
+)
+def compute_stats(dasr_root, corpus_name):  # compute speech stats from JSONs
+    def compute_stats(segments, resolution=1000):
+        spk2indx = {
+            x: indx for indx, x in enumerate(list(set([x[0] for x in segments])))
+        }
+        n_speakers = len(spk2indx.keys())
+        last_seg = sorted(segments, key=lambda x: x[-1], reverse=True)[0]
+        first_seg = sorted(segments, key=lambda x: x[-2], reverse=False)[0]
+
+        length = int(np.ceil((last_seg[-1] - first_seg[-2]) * resolution))
+        activations = np.zeros((n_speakers, length), dtype="uint8")
+
+        for seg in segments:
+            start = int((seg[1] - first_seg[-2]) * resolution)
+            stop = int((seg[-1] - first_seg[-2]) * resolution)
+            activations[spk2indx[seg[0]], start:stop] = True
+
+        # here we can compute some statistics
+        flattened = np.sum(activations, 0)
+        speech_stats = []
+        for stat in range(n_speakers + 1):
+            tmp = np.sum(flattened == stat)
+            speech_stats.append(tmp)
+
+        speech_stats = [(x / resolution) for x in speech_stats]
+
+        return speech_stats, list(spk2indx.keys())
+
+    transcriptions_folder = os.path.join(dasr_root, corpus_name, "transcriptions")
+
+    # fetch splits
+    for split_dir in Path(transcriptions_folder).iterdir():
+        split_name = split_dir.stem
+        # fetch all .json annotation
+        annotations = glob.glob(os.path.join(split_dir, "*.json"))
+
+        split_stats = None
+        tot_speakers = set()
+        for ann in annotations:
+            with open(ann, "r") as f:
+                c_segs = json.load(f)
+
+            tmp = []
+            for utt in c_segs:
+                tmp.append(
+                    [utt["speaker"], float(utt["start_time"]), float(utt["end_time"])]
+                )
+            c_segs = tmp
+            current_stats = compute_stats(c_segs)
+            tot_speakers.union(set(current_stats[-1]))
+            if split_stats is None:
+                split_stats = deepcopy(current_stats[0])
+            else:
+                for indx in range(len(split_stats)):
+                    split_stats[indx] += current_stats[0][indx]
+
+        tot_duration = sum(split_stats)
+        print(
+            f"DATASET {corpus_name}, SPLIT {split_name}. TOT_SPK {len(tot_speakers)}\n"
+            f"TOT SIL {split_stats[0] / tot_duration}, TOT_SPEECH {sum(split_stats[1:]) / tot_duration}, TOT 1 SPK {split_stats[1] / tot_duration}, "
+            f"TOT OVL {sum(split_stats[2:]) / tot_duration}"
         )
