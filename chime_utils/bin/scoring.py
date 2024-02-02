@@ -45,7 +45,7 @@ def _load_and_prepare(
 ):
     import meeteval
 
-    text_norm = get_txt_norm(text_norm)
+    text_norm_fn = get_txt_norm(text_norm)
 
     def load_files(files, nodata_msg) -> meeteval.io.SegLST:
         seglst = []
@@ -120,14 +120,18 @@ def _load_and_prepare(
 
             def word_normalizer(segment):
                 words = segment["words"]
-                words = text_norm(words)
-                words2 = text_norm(words)
-                if False and words != words2:
-                    print(segment["words"])
-                    print(words)
-                    print(words2)
+                words = text_norm_fn(words)
+
+                for _ in range(5):
+                    # Enforce idempotence by multiple executions of the
+                    # text normalizer.
+                    words2 = text_norm_fn(words)
+                    if words == words:
+                        break
+                    words = words2
+                else:
                     raise RuntimeError(
-                        "Test normalizer is not idempotence."
+                        "Text normalizer is not idempotence."
                         "This should never happen, please open an issue on "
                         "https://github.com/chimechallenge/chime-utils",
                         segment["words"],
