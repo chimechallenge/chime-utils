@@ -1,10 +1,14 @@
 import collections
 import dataclasses
 import logging
+import pathlib
+import traceback
+import textwrap
 from pathlib import Path
 
 import click
 import simplejson
+import numpy as np
 
 from chime_utils.bin.base import cli
 from chime_utils.text_norm import get_txt_norm
@@ -25,12 +29,57 @@ def score():
     pass
 
 
-def json2ctm():
-    pass
+@score.command()
+@click.argument("input_dir", type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path))
+@click.argument("output_dir", type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path))
+def seglst2ctm(input_dir, output_dir):
+    import meeteval
+    for file in input_dir.rglob('*.json'):
+        try:
+            for speaker, ctm in meeteval.io.CTMGroup.new(
+                    meeteval.wer.wer.time_constrained.get_pseudo_word_level_timings(
+                        meeteval.io.SegLST.load(file), 'character_based'
+                    ), channel='1',
+            ).grouped_by_speaker_id().items():
+                out = output_dir / file.with_suffix('').relative_to(input_dir) / f'{speaker}.ctm'
+                out.parent.mkdir(exist_ok=True, parents=True)
+                ctm.dump(out)
+                print(f'Wrote {out}')
+        except Exception:
+            print(f'Failed to convert {file}. Ignore it.')
+            print(textwrap.indent(traceback.format_exc(), ' | '))
 
 
-def json2rttm():
-    pass
+@score.command()
+@click.argument("input_dir", type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path))
+@click.argument("output_dir", type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path))
+def seglst2rttm(input_dir, output_dir):
+    import meeteval
+    for file in input_dir.rglob('*.json'):
+        try:
+            out = output_dir / file.with_suffix('.rttm').relative_to(input_dir)
+            out.parent.mkdir(exist_ok=True, parents=True)
+            meeteval.io.RTTM.new(meeteval.io.SegLST.load(file)).dump(out)
+            print(f'Wrote {out}')
+        except Exception:
+            print(f'Failed to convert {file}. Ignore it.')
+            print(textwrap.indent(traceback.format_exc(), ' | '))
+
+
+@score.command()
+@click.argument("input_dir", type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path))
+@click.argument("output_dir", type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path))
+def seglst2stm(input_dir, output_dir):
+    import meeteval
+    for file in input_dir.rglob('*.json'):
+        try:
+            out = output_dir / file.with_suffix('.stm').relative_to(input_dir)
+            out.parent.mkdir(exist_ok=True, parents=True)
+            meeteval.io.RTTM.new(meeteval.io.SegLST.load(file)).dump(out)
+            print(f'Wrote {out}')
+        except Exception:
+            print(f'Failed to convert {file}. Ignore it.')
+            print(textwrap.indent(traceback.format_exc(), ' | '))
 
 
 def da_wer():
