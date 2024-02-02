@@ -62,10 +62,6 @@ def _load_and_prepare(
         seglst = meeteval.io.SegLST(seglst)
         return seglst
 
-    dasr_root = Path(dasr_root)
-    hyp_folder = Path(hyp_folder)
-    assert dasr_root.exists(), dasr_root
-    assert hyp_folder.exists(), hyp_folder
     assert (hyp_folder / "dev").exists(), hyp_folder / "dev"
 
     for scenario in ["chime6", "mixer6", "dipco"]:
@@ -187,16 +183,19 @@ def _dump_json(obj, file):
     help="Folder containing the JSON files relative to the system output. "
     "One file for each scenario: chime6.json, dipco.json and mixer6.json. "
     "These should contain all sessions in e.g. eval set.",
+    type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path),
 )
 @click.option(
     "-r",
     "--dasr_root",
     help="Folder containing the main folder of CHiME-7 DASR dataset.",
+    type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path),
 )
 @click.option(
     "-o",
     "--output_folder",
     help="Path for the output folder where we dump all logs and useful statistics.",
+    type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path),
 )
 def tcpwer(
     hyp_folder,
@@ -204,26 +203,60 @@ def tcpwer(
     output_folder=None,
     text_norm="chime8",
 ):
-    import dataclasses
+    _wer(hyp_folder, dasr_root, output_folder, text_norm, 'tcpWER')
 
+
+@score.command()
+@click.option(
+    "-s",
+    "--hyp_folder",
+    help="Folder containing the JSON files relative to the system output. "
+    "One file for each scenario: chime6.json, dipco.json and mixer6.json. "
+    "These should contain all sessions in e.g. eval set.",
+    type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path),
+)
+@click.option(
+    "-r",
+    "--dasr_root",
+    help="Folder containing the main folder of CHiME-7 DASR dataset.",
+    type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path),
+)
+@click.option(
+    "-o",
+    "--output_folder",
+    help="Path for the output folder where we dump all logs and useful statistics.",
+    type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path),
+)
+def cpwer(
+    hyp_folder,
+    dasr_root,
+    output_folder=None,
+    text_norm="chime8",
+):
+    _wer(hyp_folder, dasr_root, output_folder, text_norm, 'cpWER')
+
+
+def _wer(hyp_folder, dasr_root, output_folder, text_norm, metric):
     import meeteval
-    import numpy as np
 
-    if output_folder is not None:
-        output_folder = Path(output_folder)
-    else:
+    if output_folder is None:
         print("Skip write of details to the disk, because --output_folder is not given")
-
-    collar = 5
 
     result = collections.defaultdict(dict)
     details = collections.defaultdict(dict)
 
     data = _load_and_prepare(hyp_folder, dasr_root, text_norm=text_norm)
     for deveval, scenario, h, r, uem in data:
-        error_rates = meeteval.wer.tcpwer(
-            reference=r, hypothesis=h, collar=collar, uem=uem
-        )
+        if metric == 'tcpWER':
+            error_rates = meeteval.wer.tcpwer(
+                reference=r, hypothesis=h, collar=5, uem=uem
+            )
+        elif metric == 'cpWER':
+            error_rates = meeteval.wer.cpwer(
+                reference=r, hypothesis=h, uem=uem
+            )
+        else:
+            raise ValueError(metric)
         details[deveval][scenario] = error_rates
         result[deveval][scenario] = meeteval.wer.combine_error_rates(error_rates)
 
@@ -232,7 +265,7 @@ def tcpwer(
                 {"session_id": k, **dataclasses.asdict(v)}
                 for k, v in error_rates.items()
             ],
-            f"tcpWER for {deveval} {scenario} Scenario",
+            f"{metric} for {deveval} {scenario} Scenario",
         )
 
         if output_folder is not None:
@@ -247,7 +280,7 @@ def tcpwer(
             for k, v in result.items()
             for k2, v2 in v.items()
         ],
-        "tcpWER for all Scenario",
+        f"{metric} for all Scenario",
     )
 
     macro_wer = {
@@ -257,7 +290,7 @@ def tcpwer(
 
     _print_table(
         [{"": k, "error_rate": v} for k, v in macro_wer.items()],
-        "Macro-Averaged tcpWER for across all Scenario (Ranking Metric)",
+        f"Macro-Averaged {metric} for across all Scenario{' (Ranking Metric)' if metric == 'tcpWER' else ''}",
     )
 
     if output_folder is None:
@@ -265,8 +298,8 @@ def tcpwer(
     else:
         output_folder = Path(output_folder)
         output_folder.mkdir(parents=True, exist_ok=True)
-        _dump_json(details, str(output_folder / "tcpwer_per_session.json"))
-        _dump_json(details, str(output_folder / "tcpwer_per_scenario.json"))
+        _dump_json(details, str(output_folder / f"{metric}_per_session.json"))
+        _dump_json(details, str(output_folder / f"{metric}_per_scenario.json"))
 
 
 def diarization_score():
