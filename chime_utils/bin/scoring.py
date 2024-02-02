@@ -311,6 +311,13 @@ def tcpwer(
     help="Path for the output folder where we dump all logs and useful statistics.",
     type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path),
 )
+@click.option(
+    "--text-norm",
+    help="Path for the output folder where we dump all logs and useful statistics.",
+    default="chime8",
+    type=click.Choice(["chime6", "chime7", "chime8", None]),
+    show_default=True,
+)
 def cpwer(
     hyp_folder,
     dasr_root,
