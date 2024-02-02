@@ -2,13 +2,13 @@ import collections
 import dataclasses
 import logging
 import pathlib
-import traceback
 import textwrap
+import traceback
 from pathlib import Path
 
 import click
-import simplejson
 import numpy as np
+import simplejson
 
 from chime_utils.bin.base import cli
 from chime_utils.text_norm import get_txt_norm
@@ -30,56 +30,80 @@ def score():
 
 
 @score.command()
-@click.argument("input_dir", type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path))
-@click.argument("output_dir", type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path))
+@click.argument(
+    "input_dir", type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path)
+)
+@click.argument(
+    "output_dir", type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path)
+)
 def seglst2ctm(input_dir, output_dir):
     import meeteval
-    for file in input_dir.rglob('*.json'):
+
+    for file in input_dir.rglob("*.json"):
         try:
-            for speaker, ctm in meeteval.io.CTMGroup.new(
+            for speaker, ctm in (
+                meeteval.io.CTMGroup.new(
                     meeteval.wer.wer.time_constrained.get_pseudo_word_level_timings(
-                        meeteval.io.SegLST.load(file), 'character_based'
-                    ), channel='1',
-            ).grouped_by_speaker_id().items():
-                out = output_dir / file.with_suffix('').relative_to(input_dir) / f'{speaker}.ctm'
+                        meeteval.io.SegLST.load(file), "character_based"
+                    ),
+                    channel="1",
+                )
+                .grouped_by_speaker_id()
+                .items()
+            ):
+                out = (
+                    output_dir
+                    / file.with_suffix("").relative_to(input_dir)
+                    / f"{speaker}.ctm"
+                )
                 out.parent.mkdir(exist_ok=True, parents=True)
                 ctm.dump(out)
-                print(f'Wrote {out}')
+                print(f"Wrote {out}")
         except Exception:
-            print(f'Failed to convert {file}. Ignore it.')
-            print(textwrap.indent(traceback.format_exc(), ' | '))
+            print(f"Failed to convert {file}. Ignore it.")
+            print(textwrap.indent(traceback.format_exc(), " | "))
 
 
 @score.command()
-@click.argument("input_dir", type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path))
-@click.argument("output_dir", type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path))
+@click.argument(
+    "input_dir", type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path)
+)
+@click.argument(
+    "output_dir", type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path)
+)
 def seglst2rttm(input_dir, output_dir):
     import meeteval
-    for file in input_dir.rglob('*.json'):
+
+    for file in input_dir.rglob("*.json"):
         try:
-            out = output_dir / file.with_suffix('.rttm').relative_to(input_dir)
+            out = output_dir / file.with_suffix(".rttm").relative_to(input_dir)
             out.parent.mkdir(exist_ok=True, parents=True)
             meeteval.io.RTTM.new(meeteval.io.SegLST.load(file)).dump(out)
-            print(f'Wrote {out}')
+            print(f"Wrote {out}")
         except Exception:
-            print(f'Failed to convert {file}. Ignore it.')
-            print(textwrap.indent(traceback.format_exc(), ' | '))
+            print(f"Failed to convert {file}. Ignore it.")
+            print(textwrap.indent(traceback.format_exc(), " | "))
 
 
 @score.command()
-@click.argument("input_dir", type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path))
-@click.argument("output_dir", type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path))
+@click.argument(
+    "input_dir", type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path)
+)
+@click.argument(
+    "output_dir", type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path)
+)
 def seglst2stm(input_dir, output_dir):
     import meeteval
-    for file in input_dir.rglob('*.json'):
+
+    for file in input_dir.rglob("*.json"):
         try:
-            out = output_dir / file.with_suffix('.stm').relative_to(input_dir)
+            out = output_dir / file.with_suffix(".stm").relative_to(input_dir)
             out.parent.mkdir(exist_ok=True, parents=True)
             meeteval.io.RTTM.new(meeteval.io.SegLST.load(file)).dump(out)
-            print(f'Wrote {out}')
+            print(f"Wrote {out}")
         except Exception:
-            print(f'Failed to convert {file}. Ignore it.')
-            print(textwrap.indent(traceback.format_exc(), ' | '))
+            print(f"Failed to convert {file}. Ignore it.")
+            print(textwrap.indent(traceback.format_exc(), " | "))
 
 
 def da_wer():
@@ -250,13 +274,20 @@ def _dump_json(obj, file):
     help="Path for the output folder where we dump all logs and useful statistics.",
     type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path),
 )
+@click.option(
+    "--text-norm",
+    help="Path for the output folder where we dump all logs and useful statistics.",
+    default="chime8",
+    type=click.Choice(["chime6", "chime7", "chime8", None]),
+    show_default=True,
+)
 def tcpwer(
     hyp_folder,
     dasr_root,
     output_folder=None,
     text_norm="chime8",
 ):
-    _wer(hyp_folder, dasr_root, output_folder, text_norm, 'tcpWER')
+    _wer(hyp_folder, dasr_root, output_folder, text_norm, "tcpWER")
 
 
 @score.command()
@@ -286,7 +317,7 @@ def cpwer(
     output_folder=None,
     text_norm="chime8",
 ):
-    _wer(hyp_folder, dasr_root, output_folder, text_norm, 'cpWER')
+    _wer(hyp_folder, dasr_root, output_folder, text_norm, "cpWER")
 
 
 def _wer(hyp_folder, dasr_root, output_folder, text_norm, metric):
@@ -300,14 +331,12 @@ def _wer(hyp_folder, dasr_root, output_folder, text_norm, metric):
 
     data = _load_and_prepare(hyp_folder, dasr_root, text_norm=text_norm)
     for deveval, scenario, h, r, uem in data:
-        if metric == 'tcpWER':
+        if metric == "tcpWER":
             error_rates = meeteval.wer.tcpwer(
                 reference=r, hypothesis=h, collar=5, uem=uem
             )
-        elif metric == 'cpWER':
-            error_rates = meeteval.wer.cpwer(
-                reference=r, hypothesis=h, uem=uem
-            )
+        elif metric == "cpWER":
+            error_rates = meeteval.wer.cpwer(reference=r, hypothesis=h, uem=uem)
         else:
             raise ValueError(metric)
         details[deveval][scenario] = error_rates
