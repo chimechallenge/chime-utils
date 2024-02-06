@@ -269,9 +269,9 @@ For ASR+diarization error analysis we recommend the use of this super useful [Me
 
 You can upload your predictions and references in any supported file format (SegLST is preferred) to the [JupyterLite notebook running in the browser](https://fgnt.github.io/meeteval_jupyterlite/lab?path=Demo.ipynb), run the visualization in a Jupyter notebook locally, or build a visualization in the command-line using
 ```
-python -m meeteval.viz -r path/to/reference.json -h path/to/hypothesis.json --example-id "<sessionID>"
+python -m meeteval.viz html -r ref.stm -h mysystem:hyp.stm -h myothersystem:hyp.stm --out=out --regex='.*'
 ```
-which will generate an HTML file that you can open with any browser.
+which will generate a HTML files that you can open with any browser.
 
 ---
 
