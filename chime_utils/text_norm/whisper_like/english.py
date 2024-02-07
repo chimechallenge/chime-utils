@@ -471,6 +471,7 @@ class EnglishTextNormalizer:
                 "hmm"
             ),
             r"\b(a+h+)\b|\b(ha+)\b": "ah",
+            r"[!?.]+(?=$|\s)": "",  # Okay.. --> okay
             r"\b(o+h+)\b|\b(h+o+)\b": "oh",
             r"\b(u+h+)\b|\b(h+u+)\b|\b(h+u+h+)\b": "uh",
             # common contractions
