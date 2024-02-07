@@ -5,6 +5,8 @@ from chime_utils.text_norm.whisper_like import EnglishTextNormalizer
 
 @pytest.mark.parametrize("std", [EnglishTextNormalizer()])
 def test_text_normalizer(std):
+    assert std("shan't") == "shall not"
+    assert std("han't") == "has not"
     assert std("Let's") == "let us"
     assert std("he's like") == "he is like"
     assert std("she's been like") == "she has been like"

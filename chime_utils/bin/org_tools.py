@@ -10,6 +10,7 @@ import numpy as np
 
 from chime_utils.bin.base import cli
 from chime_utils.dgen.mixer6 import read_list_file
+from chime_utils.text_norm import get_txt_norm
 
 logging.basicConfig(
     format=(
@@ -293,3 +294,41 @@ def compute_stats(dasr_root, corpus_name):  # compute speech stats from JSONs
             f"TOT SIL {split_stats[0] / tot_duration}, TOT_SPEECH {sum(split_stats[1:]) / tot_duration}, TOT 1 SPK {split_stats[1] / tot_duration}, "
             f"TOT OVL {sum(split_stats[2:]) / tot_duration}"
         )
+
+
+@org_tools.command(name="test-norm-consistency")  # refactor to do one at a time
+@click.argument("dasr-root", type=click.Path(exists=True))
+@click.option(
+    "--text-norm",
+    "-t",
+    type=str,
+    default="chime8",
+    help="Which text norm, chime8, chime6, chime7 or none",
+)
+def test_norm_consistency(dasr_root, text_norm="chime8"):
+    # Christoph's idea:
+    # fetch all utterances and check if applying two times the normalizer
+    # something changes
+    std = get_txt_norm(text_norm)
+    # fetch all possible transcriptions
+    json_files = glob.glob(os.path.join(dasr_root, "**/*.json"), recursive=True)
+
+    json_transcripts = [
+        x for x in json_files if Path(x).parent.parent.stem == "transcriptions"
+    ]
+    assert len(json_transcripts) > 0
+
+    for elem in json_transcripts:
+        with open(elem, "r") as f:
+            c_sess = json.load(f)
+
+        for utt in c_sess:
+            first = std(utt["words"])
+            second = std(first)
+            if first != second:
+                raise RuntimeError(
+                    "Text normalization is not consistent !\n"
+                    f"Original: {utt['words']}\n"
+                    f"First application: {first}\n"
+                    f"Second application: {second}"
+                )
