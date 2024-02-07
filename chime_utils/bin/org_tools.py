@@ -306,9 +306,13 @@ def compute_stats(dasr_root, corpus_name):  # compute speech stats from JSONs
     help="Which text norm, chime8, chime6, chime7 or none",
 )
 def test_norm_consistency(dasr_root, text_norm="chime8"):
-    # Christoph's idea:
-    # fetch all utterances and check if applying two times the normalizer
-    # something changes
+    """
+    Christoph's idea:
+    fetch all utterances and check if applying two times the normalizer
+    something changes.
+    Normalization should always be consistent.
+    """
+
     std = get_txt_norm(text_norm)
     # fetch all possible transcriptions
     json_files = glob.glob(os.path.join(dasr_root, "**/*.json"), recursive=True)
