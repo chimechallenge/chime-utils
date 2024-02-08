@@ -271,7 +271,7 @@ You can upload your predictions and references in any supported file format (Seg
 ```
 python -m meeteval.viz html -r ref.stm -h mysystem:hyp.stm -h myothersystem:hyp.stm --out=out --regex='.*'
 ```
-which will generate a HTML files that you can open with any browser.
+which will generate HTML files that you can open with any browser.
 
 ---
 
