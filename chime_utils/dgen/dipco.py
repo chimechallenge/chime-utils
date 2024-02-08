@@ -209,7 +209,8 @@ def gen_dipco(
                     devices_info[filename] = {
                         "is_close_talk": True,
                         "speaker": spk_map[speaker_id],
-                        "num_channels": 1,
+                        "channel": 1,
+                        "tot_channels": 1,
                         "device_type": "headset_mic",
                     }
                 else:
@@ -217,8 +218,9 @@ def gen_dipco(
                     devices_info[Path(x).stem.lstrip(sess_name)] = {
                         "is_close_talk": False,
                         "speaker": None,
-                        "num_channels": 1,
-                        "device_type": f"circular_array_{channel}_mic",
+                        "channel": channel,
+                        "tot_channels": 7,
+                        "device_type": "circular_array",
                     }
 
                 if not (

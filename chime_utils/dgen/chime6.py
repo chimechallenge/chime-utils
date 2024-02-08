@@ -166,7 +166,8 @@ def gen_chime6(
                     d_type = {
                         "is_close_talk": True,
                         "speaker": c_device,
-                        "num_channels": 2,
+                        "channel": [1, 2],
+                        "tot_channels": 2,
                         "device_type": "binaural_mic",
                     }
                 else:
@@ -175,8 +176,9 @@ def gen_chime6(
                     d_type = {
                         "is_close_talk": False,
                         "speaker": None,
-                        "num_channels": 1,
-                        "device_type": f"kinect_array_{channel}_mic",
+                        "channel": channel,
+                        "tot_channels": 4,
+                        "device_type": "kinect_array",
                     }
                 devices_json[c_device] = d_type
 

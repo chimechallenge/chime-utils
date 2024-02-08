@@ -432,14 +432,16 @@ def gen_mixer6(
                 devices_json["CH{}".format(channel_num)] = {
                     "is_close_talk": True,
                     "speaker": c_spk_mic_name,
-                    "num_channels": 1,
+                    "channel": 1,
+                    "tot_channels": 1,
                     "device_type": devices2type["CH{:02d}".format(channel_num)],
                 }
             else:
                 devices_json["CH{}".format(channel_num)] = {
                     "is_close_talk": False,
                     "speaker": None,
-                    "num_channels": 1,
+                    "channel": 1,
+                    "tot_channels": 7,
                     "device_type": devices2type["CH{:02d}".format(channel_num)],
                 }
 
