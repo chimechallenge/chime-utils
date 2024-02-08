@@ -265,13 +265,14 @@ so that systems output can be more in-depth analyzed.
 
 #### 🔍 MeetEval meeting recognition visualization (recommended)
 
-For ASR+diarization error analysis we recommend the use of this super useful Meeteval tool (will be presented at ICASSP 2024 in a show and tell session): <br>
-- https://thequilo.github.io/meeteval_jupyterlite/lab/
+For ASR+diarization error analysis we recommend the use of this super useful [Meeteval](github.com/fgnt/meeteval) tool (will be presented at ICASSP 2024 in a show and tell session): <br>
+- [https://fgnt.github.io/meeteval_jupyterlite/lab](https://fgnt.github.io/meeteval_jupyterlite/lab?path=Demo.ipynb)
 
-To use this tool all you need is to convert the predictio`.stm`ns and the ground truth to .stm format: 
-
-`chime-utils score segslt2stm /path/to/your_JSON_predictions /path/to/output_folder` <br>
-`chime-utils score segslt2stm /path/to/chime8_dasr_ground_truth_JSON /path/to/output_folder_gt` <br>
+You can upload your predictions and references in any supported file format (SegLST is preferred) to the [JupyterLite notebook running in the browser](https://fgnt.github.io/meeteval_jupyterlite/lab?path=Demo.ipynb), run the visualization in a Jupyter notebook locally, or build a visualization in the command-line using
+```
+python -m meeteval.viz html -r ref.stm -h mysystem:hyp.stm -h myothersystem:hyp.stm --out=out --regex='.*'
+```
+which will generate HTML files that you can open with any browser.
 
 ---
 
