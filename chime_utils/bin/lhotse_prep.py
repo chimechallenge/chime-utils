@@ -377,7 +377,7 @@ def notsofar1(
 def text_normalize(input_dir, output_dir, txt_norm="chime8", regex="*.jsonl.gz"):
     """
     This function can be used to apply text normalization to lhotse manifests.\n
-    INPU_DIR: Path to the manifests parent dir.\n
+    INPUT_DIR: Path to the manifests parent dir.\n
     OUTPUT_DIR: Path to the output directory where the text normalized lhotse manifests will be stored.
     """
     txt_normalizer = get_txt_norm(txt_norm)
@@ -419,6 +419,12 @@ def text_normalize(input_dir, output_dir, txt_norm="chime8", regex="*.jsonl.gz")
 def discard_length(
     input_dir, output_dir, min_len=0.0, max_len=np.inf, regex="*.jsonl.gz"
 ):
+    """
+    This function can be used to apply text normalization to lhotse manifests.\n
+    INPUT_DIR: Path to the manifests parent dir.\n
+    OUTPUT_DIR: Path to the output directory where the text normalized lhotse manifests will be stored.
+    """
+
     def discard_single(input_sup, output_sup):
         original_manifest = lhotse.load_manifest(input_sup)
         if not isinstance(original_manifest, lhotse.RecordingSet):
