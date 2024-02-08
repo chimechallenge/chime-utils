@@ -137,7 +137,7 @@ def _load_and_prepare(
 
     assert (hyp_folder / "dev").exists(), hyp_folder / "dev"
 
-    for scenario in ["chime6", "mixer6", "dipco"]:
+    for scenario in ["chime6", "mixer6", "dipco", "notsofar1"]:
         scenario_dir = dasr_root / scenario
         for deveval in ["dev", "eval"]:
             folder = scenario_dir / "transcriptions_scoring" / deveval
@@ -276,7 +276,7 @@ def _dump_json(obj, file):
 )
 @click.option(
     "--text-norm",
-    help="Path for the output folder where we dump all logs and useful statistics.",
+    help="Text normalization that is applied to the words.",
     default="chime8",
     type=click.Choice(["chime6", "chime7", "chime8", None]),
     show_default=True,
@@ -313,7 +313,7 @@ def tcpwer(
 )
 @click.option(
     "--text-norm",
-    help="Path for the output folder where we dump all logs and useful statistics.",
+    help="Text normalization that is applied to the words.",
     default="chime8",
     type=click.Choice(["chime6", "chime7", "chime8", None]),
     show_default=True,
