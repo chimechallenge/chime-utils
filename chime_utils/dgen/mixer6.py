@@ -1,5 +1,6 @@
 import glob
 import json
+import logging
 import os
 from copy import deepcopy
 from pathlib import Path
@@ -418,7 +419,7 @@ def gen_mixer6(
         for c_audio in audios:
             audioname = Path(c_audio).stem
             channel_num = int(audioname.split("_")[-1].strip("CH"))
-            if channel_num <= 3 and split in ["eval", "dev"]:
+            if channel_num <= 3 and split in ["eval"]:
                 continue
             new_name = "{}_CH{:02d}".format(tgt_sess_name, channel_num)
             os.symlink(
@@ -451,7 +452,7 @@ def gen_mixer6(
             sorted(devices_json.items(), key=lambda x: int(x[0].strip("CH")))
         )
 
-        if split not in ["dev", "eval"]:
+        if split not in ["eval"]:
             with open(out_json, "w") as f:
                 json.dump(devices_json, f, indent=4)
 
@@ -479,7 +480,7 @@ def gen_mixer6(
             parents=True, exist_ok=False
         )
 
-        if dest_split not in ["dev", "eval"]:
+        if dest_split not in ["eval"]:
             Path(os.path.join(output_dir, "transcriptions", dest_split)).mkdir(
                 parents=True, exist_ok=False
             )
@@ -491,7 +492,7 @@ def gen_mixer6(
                 os.path.join(corpus_dir, "splits", dest_split, "*.json")
             )
             list_file = os.path.join(corpus_dir, "splits", dest_split + ".list")
-        elif dest_split in ["dev", "train"]:
+        elif dest_split in ["train", "dev"]:
             use_version = "dev_a"  # alternative version is _b see data section
             ann_json = glob.glob(
                 os.path.join(corpus_dir, "splits", use_version, "*.json")
@@ -535,7 +536,7 @@ def gen_mixer6(
                 spk_map[subject],
             )
 
-            if dest_split not in ["dev", "eval"]:
+            if dest_split not in ["eval"]:
                 with open(
                     os.path.join(
                         output_dir,
@@ -586,3 +587,5 @@ def gen_mixer6(
             to_uem = sorted(to_uem)
             with open(os.path.join(output_dir, "uem", dest_split, "all.uem"), "w") as f:
                 f.writelines(to_uem)
+
+        logging.info(f"Mixer 6 Speech {dest_split} set generated successfully.")
