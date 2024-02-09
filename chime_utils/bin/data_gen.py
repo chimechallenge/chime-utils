@@ -1,4 +1,5 @@
 import logging
+import os.path
 
 import click
 
@@ -106,25 +107,38 @@ def gen_all_dasr(dasr_dir, download_dir, mixer6_dir, part, challenge="chime8"):
     be downloaded automatically.
     Refer to https://www.chimechallenge.org/current/task1/data for further details. # noqa E501
 
-    DOWNLOAD_DIR: Pathlike, where the original core datasets will be downloaded.\n
     DASR_DIR: Pathlike, where the final prepared DASR data will be stored.\n
+    DOWNLOAD_DIR: Pathlike, where the original core datasets will be downloaded.\n
     MIXER6_DIR: Pathlike, path to Mixer 6 Speech root folder.
     """
     for c_part in part.split(","):
-        if c_part == "public_eval":
-            # only prep notsofar1 here
-            continue
-        # prep chime6
-        gen_chime6(dasr_dir, download_dir, True, c_part, challenge)
-        if c_part in ["dev", "eval"]:
-            gen_dipco(dasr_dir, download_dir, True, c_part, challenge)
+        gen_chime6(
+            os.path.join(dasr_dir, "chime6"),
+            os.path.join(download_dir, "chime6"),
+            True,
+            c_part,
+            challenge,
+        )
+        gen_dipco(
+            os.path.join(dasr_dir, "dipco"),
+            os.path.join(download_dir, "dipco"),
+            True,
+            c_part,
+            challenge,
+        )
         if c_part.startswith("train"):
-            for c_part in ["train_call", "train_intv"]:
+            for c_part in ["train_call", "train_intv", "train"]:
                 gen_mixer6(dasr_dir, mixer6_dir, c_part, challenge)
         else:
             # dev or eval
-            gen_mixer6(dasr_dir, mixer6_dir, c_part, challenge)
-        # notsofar1 here
+            gen_mixer6(os.path.join(dasr_dir, "mixer6"), mixer6_dir, c_part, challenge)
+        gen_notsofar1(
+            os.path.join(dasr_dir, "notsofar1"),
+            os.path.join(download_dir, "notsofar1"),
+            True,
+            c_part,
+            challenge,
+        )
 
 
 @dgen.command(name="chime6")
