@@ -77,6 +77,15 @@ def checksum_data(data_folder, check_eval, checksum_json, forgive_missing, creat
 @click.argument("mixer6-dir", type=click.Path(exists=True))
 @click.argument("dasr-dir", type=click.Path(exists=False))
 @click.option(
+    "--download",
+    "-d",
+    is_flag=True,
+    default=False,
+    help=(
+        "Whether to download the datasets or not (you may have it already in storage)."
+    ),
+)
+@click.option(
     "--part",
     "-p",
     type=str,
@@ -99,7 +108,9 @@ def checksum_data(data_folder, check_eval, checksum_json, forgive_missing, creat
         "dev and eval and the text normalization used."
     ),
 )
-def gen_all_dasr(download_dir, mixer6_dir, dasr_dir, part, challenge="chime8"):
+def gen_all_dasr(
+    download_dir, mixer6_dir, dasr_dir, download, part, challenge="chime8"
+):
     """
     This script downloads and prepares all DASR data for the four core scenarios:
     CHiME-6, DiPCo, Mixer 6 Speech and NOTSOFAR1.
@@ -115,30 +126,35 @@ def gen_all_dasr(download_dir, mixer6_dir, dasr_dir, part, challenge="chime8"):
         gen_chime6(
             os.path.join(dasr_dir, "chime6"),
             os.path.join(download_dir, "chime6"),
-            True,
+            download,
             c_part,
             challenge,
         )
+        logging.info(f"CHiME-6 {c_part} set generated successfully.")
         gen_dipco(
             os.path.join(dasr_dir, "dipco"),
             os.path.join(download_dir, "dipco"),
-            True,
+            download,
             c_part,
             challenge,
         )
+        logging.info(f"DiPCo {c_part} set generated successfully.")
         if c_part.startswith("train"):
-            for c_part in ["train_call", "train_intv", "train"]:
-                gen_mixer6(dasr_dir, mixer6_dir, c_part, challenge)
+            for mixer_part in ["train_call", "train_intv", "train"]:
+                gen_mixer6(dasr_dir, mixer6_dir, mixer_part, challenge)
+                logging.info(f"Mixer 6 Speech {mixer_part} set generated successfully.")
         else:
             # dev or eval
             gen_mixer6(os.path.join(dasr_dir, "mixer6"), mixer6_dir, c_part, challenge)
+            logging.info(f"Mixer 6 Speech {c_part} set generated successfully.")
         gen_notsofar1(
             os.path.join(dasr_dir, "notsofar1"),
             os.path.join(download_dir, "notsofar1"),
-            True,
+            download,
             c_part,
             challenge,
         )
+        logging.info(f"NOTSOFAR1 {c_part} set generated successfully.")
 
 
 @dgen.command(name="chime6")
