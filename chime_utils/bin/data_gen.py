@@ -73,9 +73,9 @@ def checksum_data(data_folder, check_eval, checksum_json, forgive_missing, creat
 
 
 @dgen.command(name="dasr")
-@click.argument("dasr-dir", type=click.Path(exists=False))
 @click.argument("download-dir", type=click.Path(exists=False))
 @click.argument("mixer6-dir", type=click.Path(exists=True))
+@click.argument("dasr-dir", type=click.Path(exists=False))
 @click.option(
     "--part",
     "-p",
@@ -99,7 +99,7 @@ def checksum_data(data_folder, check_eval, checksum_json, forgive_missing, creat
         "dev and eval and the text normalization used."
     ),
 )
-def gen_all_dasr(dasr_dir, download_dir, mixer6_dir, part, challenge="chime8"):
+def gen_all_dasr(download_dir, mixer6_dir, dasr_dir, part, challenge="chime8"):
     """
     This script downloads and prepares all DASR data for the four core scenarios:
     CHiME-6, DiPCo, Mixer 6 Speech and NOTSOFAR1.
