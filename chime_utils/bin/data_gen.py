@@ -285,9 +285,4 @@ def notsofar1(corpus_dir, output_dir, download, part):
     parts = part.split(",")
     for p in parts:
         gen_notsofar1(output_dir, corpus_dir, download, p)
-
-
-def split_tr_validation(
-    corpus_dir, output_dir, split_from="train", split_ratio=0.1, seed=777
-):
-    pass
+        logging.info(f"NOTSOFAR1 {p} set generated successfully.")

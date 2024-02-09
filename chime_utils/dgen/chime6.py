@@ -1,5 +1,6 @@
 import glob
 import json
+import logging
 import os
 import tarfile
 from copy import deepcopy
@@ -122,7 +123,7 @@ def gen_chime6(
         Path(os.path.join(output_dir, "audio", split)).mkdir(
             parents=True, exist_ok=True
         )
-        if split not in ["dev", "eval"]:
+        if split not in ["eval"]:
             Path(os.path.join(output_dir, "transcriptions", split)).mkdir(
                 parents=True, exist_ok=True
             )
@@ -182,7 +183,7 @@ def gen_chime6(
                     }
                 devices_json[c_device] = d_type
 
-            if split not in ["dev", "eval"]:
+            if split not in ["eval"]:
                 devices_json = dict(sorted(devices_json.items(), key=lambda x: x[0]))
                 with open(
                     os.path.join(output_dir, "devices", split, c_sess + ".json"), "w"
@@ -202,7 +203,6 @@ def gen_chime6(
             # create symlinks too
             for x in sess2audio[sess_name]:
                 if Path(x).stem.split("_")[-1].startswith("P") and split in [
-                    "dev",
                     "eval",
                 ]:
                     continue
@@ -211,7 +211,7 @@ def gen_chime6(
                     os.path.join(output_dir, "audio", split, Path(x).stem) + ".wav",
                 )
 
-            if split not in ["dev", "eval"]:
+            if split not in ["eval"]:
                 with open(
                     os.path.join(
                         output_dir, "transcriptions", split, sess_name + ".json"
@@ -246,3 +246,5 @@ def gen_chime6(
             c_uem = sorted(c_uem)
             with open(os.path.join(output_dir, "uem", k, "all.uem"), "w") as f:
                 f.writelines(c_uem)
+
+        logging.info(f"CHiME-6 {k} set generated successfully.")

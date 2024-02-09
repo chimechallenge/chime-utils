@@ -134,7 +134,7 @@ def gen_dipco(
         Path(os.path.join(output_dir, "audio", dest_split)).mkdir(
             parents=True, exist_ok=True
         )
-        if dest_split not in ["eval", "dev"]:
+        if dest_split not in ["eval"]:
             Path(os.path.join(output_dir, "transcriptions", dest_split)).mkdir(
                 parents=True, exist_ok=True
             )
@@ -224,7 +224,7 @@ def gen_dipco(
                     }
 
                 if not (
-                    dest_split in ["eval", "dev"]
+                    dest_split in ["eval"]
                     and Path(x).stem.split("_")[-1].startswith("P")
                 ):
                     os.symlink(
@@ -236,7 +236,7 @@ def gen_dipco(
 
             devices_info = dict(sorted(devices_info.items(), key=lambda x: x[0]))
 
-            if dest_split not in ["dev", "eval"]:
+            if dest_split not in ["eval"]:
                 with open(
                     os.path.join(
                         output_dir, "devices", dest_split, sess_map[sess_name] + ".json"
@@ -280,3 +280,5 @@ def gen_dipco(
             to_uem = sorted(to_uem)
             with open(os.path.join(output_dir, "uem", dest_split, "all.uem"), "w") as f:
                 f.writelines(to_uem)
+
+        logging.info(f"DiPCo {dest_split} set generated successfully.")
