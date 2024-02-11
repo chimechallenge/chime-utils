@@ -129,6 +129,9 @@ def chime6(
                 use_problematic,
                 txt_norm,
             )
+            logging.info(
+                f"CHiME-6 {d} set lhotse manifests generated successfully for {m} mic."
+            )
 
 
 @lhotse_prep.command(name="dipco")
@@ -138,7 +141,7 @@ def chime6(
     "--dset-part",
     "-d",
     type=str,
-    default="dev",
+    default="train,dev",
     required=False,
     show_default=True,
     help=(
@@ -205,6 +208,9 @@ def dipco(
     for d in dset_part:
         for m in mic:
             prepare_dipco(corpus_dir, output_dir, d, m, json_dir, txt_norm)
+            logging.info(
+                f"DiPCo {d} set lhotse manifests generated successfully for {m} mic."
+            )
 
 
 @lhotse_prep.command(name="mixer6")
@@ -280,6 +286,9 @@ def mixer6(
     for d in dset_part:
         for m in mic:
             prepare_mixer6(corpus_dir, output_dir, d, m, json_dir, txt_norm)
+            logging.info(
+                f"Mixer 6 {d} set lhotse manifests generated successfully for {m} mic."
+            )
 
 
 @lhotse_prep.command(name="notsofar1")
@@ -354,6 +363,9 @@ def notsofar1(
     for d in dset_part:
         for m in mic:
             prepare_notsofar1(corpus_dir, output_dir, d, m, json_dir, txt_norm)
+            logging.info(
+                f"NOTSOFAR1 {d} set lhotse manifests generated successfully for {m} mic."
+            )
 
 
 @lhotse_prep.command(name="txt-norm")

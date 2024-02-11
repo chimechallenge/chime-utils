@@ -207,7 +207,6 @@ def gen_dipco(
                     filename = filename.split("_")[0] + "_{}".format(
                         spk_map[speaker_id]
                     )
-
                     devices_info[filename] = {
                         "is_close_talk": True,
                         "speaker": spk_map[speaker_id],
@@ -217,7 +216,7 @@ def gen_dipco(
                     }
                 else:
                     channel = Path(x).stem.split(".")[-1]
-                    devices_info[Path(x).stem.lstrip(sess_name)] = {
+                    devices_info[filename] = {
                         "is_close_talk": False,
                         "speaker": None,
                         "channel": channel,

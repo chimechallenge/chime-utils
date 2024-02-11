@@ -155,7 +155,7 @@ def convert2chime(
             "tot_channels": 1,
             "device_type": "close_talk_lapel",
         }
-        devices_info[device2spk[filename]] = d_type
+        devices_info[f"{session_name}_{device2spk[filename]}"] = d_type
 
     # load now transcription JSON and make some modifications
     with open(os.path.join(Path(audio_dir).parent, "gt_transcription.json"), "r") as f:

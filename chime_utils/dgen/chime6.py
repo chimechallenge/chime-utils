@@ -183,7 +183,7 @@ def gen_chime6(
                         "tot_channels": 4,
                         "device_type": "kinect_array",
                     }
-                devices_json[c_device] = d_type
+                devices_json[Path(audio).stem] = d_type
 
             devices_json = dict(sorted(devices_json.items(), key=lambda x: x[0]))
             with open(
