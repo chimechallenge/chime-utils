@@ -54,7 +54,7 @@ Hereafter we describe each command/function in detail.
 ### ⚡ All DASR data in one go
 
 You can generate all CHiME-8 DASR data in one go with: <br>
-`chime-utils dgen dasr ./download /path/to/mixer6_root ./chime8_dasr --part train,dev` <br>
+`chime-utils dgen dasr ./download /path/to/mixer6_root ./chime8_dasr --part train,dev --download` <br>
 If unsure you can always use some `--help`.
 
 This script will download CHiME-6, DiPCo and NOTSOFAR1 automatically in `./download` <br>
@@ -81,10 +81,19 @@ mixer6_root
 
 🔐 You can check if the data has been successfully prepared with: <br>
 `chime-utils dgen checksum ./chime8_dasr` <br>
-It is better to run this also for the evaluation part, when evaluation will be released. 
+The resulting `./chime8_dasr` should look like this: 
+
+```
+chime8_official_cleaned/
+├── chime6/
+├── dipco/
+├── mixer6/
+└── notsofar1/
+```
+
+For more information about CHiME-8 data you should look at the website data page: [chimechallenge.org/current/task1/data](https://www.chimechallenge.org/current/task1/data).
 
 ### 🐢 Single Dataset Scripts
-
 
 We provide scripts for obtaining each core dataset independently if needed. <br>
 Command basic usage: `chime-utils dgen <DATASET> <DOWNLOAD_DIR> <OUTPUT_DIR> --download` <br>
@@ -100,15 +109,14 @@ Command basic usage: `chime-utils dgen <DATASET> <DOWNLOAD_DIR> <OUTPUT_DIR> --d
        - `chime-utils dgen dipco /path/to/dipco ./chime8_dasr/dipco --part train,dev`
 - Mixer 6 Speech
     - `chime-utils dgen mixer6 /path/to/mixer6_root ./chime8_dasr/mixer6 --part train_call,train_intv,train,dev`
-      - It must be obtained via LDC ([see CHiME-8 data page](https://www.chimechallenge.org/current/task1/data)) and extracted manually. 
+      - It must be obtained via LDC ([again, see CHiME-8 data page](https://www.chimechallenge.org/current/task1/data)) and extracted manually. 
 - NOTSOFAR1
    - `chime-utils dgen notsofar1 ./download/notsofar1 ./chime8_dasr/notsofar1 --part train,dev --download` 
      - If it is already in storage in `/path/to/notsofar1` instead you can use:
        - `chime-utils dgen notsofar1 /path/to/notsofar1 ./chime8_dasr/notsofar1 --part train,dev`
  
-## Data preparation
 
-### 🚀 NVIDIA NeMo Official Baseline 
+## 🚀 NVIDIA NeMo Official Baseline 
  
 [![nVIDIA](https://img.shields.io/badge/nVIDIA-%2376B900.svg?style=for-the-badge&logo=nVIDIA&logoColor=white)](https://github.com/NVIDIA/NeMo)
 
@@ -117,68 +125,14 @@ This year CHiME-8 DASR baseline is built directly upon [NVIDIA NeMo](https://git
 It is available at FIXME
 
 
-### Other Toolkits
+## Data preparation
 
 For convenience, we also offer here data preparation scripts for different toolkits:
 - [Kaldi](https://github.com/kaldi-asr/kaldi) and [K2/Icefall](https://github.com/k2-fsa/icefall) (with [lhotse](https://github.com/lhotse-speech/lhotse))
 - [ESPNet](https://github.com/espnet/espne) (with [lhotse](https://github.com/lhotse-speech/lhotse))
 - [SpeechBrain](https://github.com/speechbrain/speechbrain)
 
-⚠️ **NOTE** <br>
-In all manifests preparation scripts you can choose which text normalization you 
-want to apply on each utterance using as an additional argument: <br> 
-
-- `--txt-norm chime8`
-   - this is 
-- chime7
-- chime6 
-
-### K2/Icefall/Lhotse
-
-You can prepare Lhotse manifests compatible with [K2/Icefall](https://github.com/k2-fsa/icefall) for all core datasets easily.
-
-For example, for CHiME-6:
-- e.g. to prepare manifests for far-field arrays and training, development partition: 
-    - `chime-utils lhotse-prep chime6 ./chime8_dasr/chime6 ./manifests/lhotse/chime6 --dset-part train,dev --mic mdm`
-- you can also prepare manifests for on speakers close-talk mics: 
-    - `chime-utils lhotse-prep chime6 ./chime8_dasr/chime6 ./manifests/lhotse/chime6 --dset-part train,dev --mic ihm`
-
-Similarly, you can use `chime-utils lhotse-prep dipco`, `chime-utils lhotse-prep mixer6` and `chime-utils lhotse-prep notsofar1`
-commands to prepare manifests for the other three scenarios. 
-
-
-### ESPNet and Kaldi
-
-You can prepare Kaldi and ESPNet manifests for all core datasets easily. <br>
-
-For example, for CHiME-6:
-- e.g. to prepare manifests for far-field arrays and training, development partition: 
-    - `chime-utils espnet-prep chime6 ./chime8_dasr/chime6 ./manifests/espnet/chime6 --dset-part train,dev --mic mdm`
-- you can also prepare manifests for on speakers close-talk mics: 
-    - `chime-utils espnet-prep chime6 ./chime8_dasr/chime6 ./manifests/espnet/chime6 --dset-part train,dev --mic ihm`
-
-Similarly, you can use `chime-utils espnet-prep dipco`, `chime-utils espnet-prep mixer6` and `chime-utils espnet-prep notsofar1`
-commands to prepare manifests for the other three scenarios. 
-
-
-### Speechbrain
-
-You can prepare [Speechbrain](https://github.com/speechbrain/speechbrain) compatible JSON annotation (with multichannel support !)
-easily.
-
-For example, for CHiME-6:
-- e.g. to prepare manifests for far-field arrays and training, development partition: 
-    - `chime-utils speechbrain-prep chime6 ./chime8_dasr/chime6 ./manifests/speechbrain/chime6 --dset-part train,dev --mic mdm`
-- you can also prepare manifests for on speakers close-talk mics: 
-    - `chime-utils speechbrain-prep chime6 ./chime8_dasr/chime6 ./manifests/speechbrain/chime6 --dset-part train,dev --mic ihm`
-- or both together:
-    - `chime-utils speechbrain-prep chime6 ./chime8_dasr/chime6 ./manifests/speechbrain/chime6 --dset-part train,dev --mic all`
-
-Similarly, you can use `chime-utils speechbrain-prep dipco`, `chime-utils speechbrain-prep mixer6` and `chime-utils speechbrain-prep notsofar1`
-commands to prepare manifests for the other three scenarios. 
-
-You can also use `chime-utils speechbrain-prep combine manifest1 manifest2 .... manifestN` to combine Speechbrain manifests together to train/validate 
-on all scenarios simultaneously. 
+See [DataPrep.md](./DataPrep.md). 
 
 
 ## Scoring
@@ -201,7 +155,7 @@ dicts (one for each utterance) with the following keys:
     }
 ```
 
-Please head over to [CHiME-8 DASR Submission instructions](https://www.chimechallenge.org/current/task1/submission) to know more about scoring and text normalization and also ranking.
+Please head over to [CHiME-8 DASR Submission instructions](https://www.chimechallenge.org/current/task1/submission) to know more about scoring and text normalization.
 
 The scripts may accept a single SegLST JSON or a folder where multiple SegLST JSON files are contained. <br>
 E.g. one per each scenario as requested in [CHiME-8 DASR Submission instructions](https://www.chimechallenge.org/current/task1/submission). <br>
@@ -216,8 +170,6 @@ dev
 ```
 
 ### CHiME-8 DASR Ranking Score
-
-
 
 
 ### Text Normalization
@@ -259,8 +211,6 @@ so that systems output can be more in-depth analyzed.
 - [Rich Transcription Time Marked](https://web.archive.org/web/20170119114252/http://www.itl.nist.gov/iad/mig/tests/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf) `.rttm` format conversion:
    - `chime-utils score segslt2rttm input-dir output-dir`
        - this allows to use other diarization scoring tools such as [dscore](https://github.com/nryant/dscore).
-- Audacity labels (see [Audacity manual page](https://manual.audacityteam.org/man/label_tracks.html)) format conversion:
-    -  `chime-utils score segslt2aud input-dir output-dir`
 
 
 #### 🔍 MeetEval meeting recognition visualization (recommended)

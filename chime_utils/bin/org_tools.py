@@ -230,6 +230,7 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, corpus_name):
     "--corpus-name",
     "-c",
     type=str,
+    default="chime6",
     help="Name of corpus, e.g. chime6,dipco etc.",
 )
 def compute_stats(dasr_root, corpus_name):  # compute speech stats from JSONs

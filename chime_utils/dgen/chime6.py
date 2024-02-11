@@ -163,6 +163,8 @@ def gen_chime6(
             for audio in c_sess_audio_f:
                 c_device = Path(audio).stem.lstrip(c_sess + "_")
                 if c_device.startswith("P"):
+                    if split in ["dev", "eval"]:
+                        continue
                     # close talk device
                     d_type = {
                         "is_close_talk": True,
@@ -183,12 +185,11 @@ def gen_chime6(
                     }
                 devices_json[c_device] = d_type
 
-            if split not in ["eval"]:
-                devices_json = dict(sorted(devices_json.items(), key=lambda x: x[0]))
-                with open(
-                    os.path.join(output_dir, "devices", split, c_sess + ".json"), "w"
-                ) as f:
-                    json.dump(devices_json, f, indent=4)
+            devices_json = dict(sorted(devices_json.items(), key=lambda x: x[0]))
+            with open(
+                os.path.join(output_dir, "devices", split, c_sess + ".json"), "w"
+            ) as f:
+                json.dump(devices_json, f, indent=4)
 
         # for each json file
         for j_file in ann_json:
@@ -203,6 +204,7 @@ def gen_chime6(
             # create symlinks too
             for x in sess2audio[sess_name]:
                 if Path(x).stem.split("_")[-1].startswith("P") and split in [
+                    "dev",
                     "eval",
                 ]:
                     continue

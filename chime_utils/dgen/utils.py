@@ -58,10 +58,9 @@ def data_check(
     if input_json is None:
         input_json = os.path.join(os.path.dirname(__file__), "chime8_dasr_md5.json")
 
-    open_option = "w" if create else "r"
-
-    with open(input_json, open_option) as f:
-        input_json = json.load(f)
+    if not create:
+        with open(input_json, "r") as f:
+            input_json = json.load(f)
 
     all_files = []
     for ext in [".json", ".uem", ".wav", ".flac"]:

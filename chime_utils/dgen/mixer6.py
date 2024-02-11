@@ -419,7 +419,7 @@ def gen_mixer6(
         for c_audio in audios:
             audioname = Path(c_audio).stem
             channel_num = int(audioname.split("_")[-1].strip("CH"))
-            if channel_num <= 3 and split in ["eval"]:
+            if channel_num <= 3 and split in ["eval", "dev"]:
                 continue
             new_name = "{}_CH{:02d}".format(tgt_sess_name, channel_num)
             os.symlink(
@@ -430,7 +430,7 @@ def gen_mixer6(
                 c_spk_mic_name = (
                     interviewer_name if channel_num in [1, 3] else subject_name
                 )
-                devices_json["CH{}".format(channel_num)] = {
+                devices_json[audioname] = {
                     "is_close_talk": True,
                     "speaker": c_spk_mic_name,
                     "channel": 1,
@@ -438,7 +438,7 @@ def gen_mixer6(
                     "device_type": devices2type["CH{:02d}".format(channel_num)],
                 }
             else:
-                devices_json["CH{}".format(channel_num)] = {
+                devices_json[audioname] = {
                     "is_close_talk": False,
                     "speaker": None,
                     "channel": 1,
@@ -449,7 +449,7 @@ def gen_mixer6(
         out_json = os.path.join(output_dir, "devices", split, f"{tgt_sess_name}.json")
         Path(out_json).parent.mkdir(exist_ok=True, parents=True)
         devices_json = dict(
-            sorted(devices_json.items(), key=lambda x: int(x[0].strip("CH")))
+            sorted(devices_json.items(), key=lambda x: x[0].split("_")[-1])
         )
 
         if split not in ["eval"]:

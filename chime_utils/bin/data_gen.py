@@ -57,7 +57,7 @@ def dgen():
 )
 @click.option(
     "--create",
-    type=bool,
+    is_flag=True,
     default=False,
     help="Organizers-only, create checksum.",
 )
@@ -130,7 +130,7 @@ def gen_all_dasr(
             c_part,
             challenge,
         )
-        logging.info(f"CHiME-6 {c_part} set generated successfully.")
+
         gen_dipco(
             os.path.join(dasr_dir, "dipco"),
             os.path.join(download_dir, "dipco"),
@@ -138,15 +138,17 @@ def gen_all_dasr(
             c_part,
             challenge,
         )
-        logging.info(f"DiPCo {c_part} set generated successfully.")
+
         if c_part.startswith("train"):
             for mixer_part in ["train_call", "train_intv", "train"]:
-                gen_mixer6(dasr_dir, mixer6_dir, mixer_part, challenge)
-                logging.info(f"Mixer 6 Speech {mixer_part} set generated successfully.")
+                gen_mixer6(
+                    os.path.join(dasr_dir, "mixer6"), mixer6_dir, mixer_part, challenge
+                )
+
         else:
             # dev or eval
             gen_mixer6(os.path.join(dasr_dir, "mixer6"), mixer6_dir, c_part, challenge)
-            logging.info(f"Mixer 6 Speech {c_part} set generated successfully.")
+
         gen_notsofar1(
             os.path.join(dasr_dir, "notsofar1"),
             os.path.join(download_dir, "notsofar1"),
@@ -154,7 +156,6 @@ def gen_all_dasr(
             c_part,
             challenge,
         )
-        logging.info(f"NOTSOFAR1 {c_part} set generated successfully.")
 
 
 @dgen.command(name="chime6")

@@ -201,6 +201,8 @@ def gen_dipco(
             for x in sess2audio[sess_name]:
                 filename = new_sess_name + "_" + "_".join(Path(x).stem.split("_")[1:])
                 if filename.split("_")[1].startswith("P"):
+                    if dest_split in ["dev", "eval"]:
+                        continue
                     speaker_id = filename.split("_")[1]
                     filename = filename.split("_")[0] + "_{}".format(
                         spk_map[speaker_id]
@@ -236,15 +238,15 @@ def gen_dipco(
 
             devices_info = dict(sorted(devices_info.items(), key=lambda x: x[0]))
 
-            if dest_split not in ["eval"]:
-                with open(
-                    os.path.join(
-                        output_dir, "devices", dest_split, sess_map[sess_name] + ".json"
-                    ),
-                    "w",
-                ) as f:
-                    json.dump(devices_info, f, indent=4)
+            with open(
+                os.path.join(
+                    output_dir, "devices", dest_split, sess_map[sess_name] + ".json"
+                ),
+                "w",
+            ) as f:
+                json.dump(devices_info, f, indent=4)
 
+            if dest_split not in ["eval"]:
                 with open(
                     os.path.join(
                         output_dir,
