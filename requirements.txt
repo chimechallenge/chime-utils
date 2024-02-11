@@ -1,5 +1,5 @@
 meeteval[cli] @ git+https://github.com/fgnt/meeteval
-jiwer
+jiwer>=3.0.0
 pyannote.metrics
 lhotse
 click
