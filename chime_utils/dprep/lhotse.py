@@ -224,7 +224,7 @@ def get_sess_audio(
 
             spk_id = c_device["speaker"]
             assert spk_id is not None
-            channels = [0, 1] if corpus_name != "chime6" else [0]
+            channels = [0, 1] if corpus_name == "chime6" else [0]
             if spk_id not in spk2rec.keys():
                 spk2rec[spk_id] = []
             spk2rec[spk_id].append(
