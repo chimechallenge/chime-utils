@@ -3,7 +3,12 @@ import logging
 import click
 
 from chime_utils.bin.base import cli
-from chime_utils.dprep.espnet import prepare_chime6, prepare_dipco, prepare_mixer6
+from chime_utils.dprep.espnet import (
+    prepare_chime6,
+    prepare_dipco,
+    prepare_mixer6,
+    prepare_notsofar1,
+)
 
 logging.basicConfig(
     format=(
@@ -271,3 +276,79 @@ def mixer6(
     for d in dset_part:
         for m in mic:
             prepare_mixer6(corpus_dir, output_dir, d, m, json_dir, txt_norm)
+
+
+@espnet_prep.command(name="notsofar1")
+@click.argument("corpus-dir", type=click.Path(exists=True))
+@click.argument("output-dir", type=click.Path(exists=False))
+@click.option(
+    "--dset-part",
+    "-d",
+    type=str,
+    default="train,dev",
+    required=False,
+    show_default=True,
+    help=(
+        "For which part of the dataset you want to prepare lhotse manifests.\n"
+        "Choose between 'train', 'dev' and 'eval'."
+        "You can choose multiple by using commas e.g. 'dev,eval'."
+    ),
+)
+@click.option(
+    "--mic",
+    "-m",
+    type=str,
+    default="mdm",
+    required=False,
+    show_default=True,
+    help=(
+        "the microphone type to use, choose from "
+        '"ihm" (close-talk) or "mdm" (multi-microphone array) settings. '
+        "For MDM, there are 7 channels and one circular array only."
+    ),
+)
+@click.option(
+    "--json-dir",
+    "-j",
+    type=click.Path(exists=False),
+    required=False,
+    default=None,
+    show_default=True,
+    help=(
+        "Override the JSON annotation directory"
+        "of the current dataset partition (e.g. dev)"
+        "this allows for example to create a manifest from for example a JSON"
+        "created with forced alignment available at"
+        "https://github.com/chimechallenge/CHiME7_DASR_falign."
+    ),
+)
+@click.option(
+    "--txt-norm",
+    "-t",
+    type=str,
+    required=False,
+    default="chime8",
+    show_default=True,
+    help=(
+        "Which text normalization to use."
+        "Choose between 'None', 'chime6', 'chime7' and 'chime8'"
+    ),
+)
+def notsofar1(
+    corpus_dir: str,
+    output_dir: str,
+    dset_part: str,
+    mic: str,
+    json_dir=None,
+    txt_norm: str = "chime8",
+):
+    """
+    This function prepares NOTSOFAR1 data to Kaldi manifest format.\n
+    CORPUS_DIR: Path to the NOTSOFAR1 root directory.\n
+    OUTPUT_DIR: Path to the output directory where the lhotse manifests will be stored.
+    """
+    dset_part = dset_part.split(",")
+    mic = mic.split(",")
+    for d in dset_part:
+        for m in mic:
+            prepare_notsofar1(corpus_dir, output_dir, d, m, json_dir, txt_norm)
