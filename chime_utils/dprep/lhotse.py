@@ -76,7 +76,7 @@ def prepare_chime6(
         output_dir,
         dset_part,
         mic,
-        "dipco",
+        "chime6",
         json_dir,
         txt_norm,
         discard_problematic,
