@@ -2,5 +2,7 @@ include requirements.txt
 include README.md
 include LICENSE
 include chime_utils/text_norm/whisper_like/english.json
+include chime_utils/text_norm/whisper_like/pre_english.json
 include chime_utils/dgen/chime8_dasr_md5.json
 include chime_utils/dgen/c8map.json
+

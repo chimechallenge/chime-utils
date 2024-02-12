@@ -572,7 +572,7 @@ def gen_mixer6(
                     "{:.3f}".format(float(uem_end)),
                 )
                 to_uem.append(c_uem)
-            elif dest_split == "eval":
+            elif dest_split in ["eval", "train_call", "train_intv"]:
                 uem_start = 0
                 uem_end = max([sf.SoundFile(x).frames for x in sess2audio[sess_name]])
                 c_uem = "{} 1 {} {}\n".format(

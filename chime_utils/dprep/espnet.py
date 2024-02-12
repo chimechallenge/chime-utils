@@ -140,3 +140,43 @@ def prepare_mixer6(
             prefix_spk_id=False,  # already appended
             map_underscores_to="-",
         )
+
+
+def prepare_notsofar1(
+    corpus_dir: Pathlike,
+    output_dir: Optional[Pathlike] = None,
+    dset_part="dev",
+    mic: Optional[str] = "mdm",
+    json_dir: Optional[
+        Pathlike
+    ] = None,  # alternative annotation e.g. from non-oracle diarization
+    txt_norm: Optional[str] = "chime8",
+) -> Dict[str, Dict[str, Union[RecordingSet, SupervisionSet]]]:
+    """
+    Creates Kaldi-style manifests for NOTSOFAR1.
+    :param corpus_dir: Pathlike, the path of NOTSOFAR1 main directory.
+    :param output_dir: Pathlike, the path where to write the manifests.
+    :param mic: str, the microphone type to use,
+    choose from "ihm" (close-talk) or "mdm"
+        (multi-microphone array) settings.
+        For MDM, there are 11 channels.
+    :param txt_norm: str, which text normalization preprocessing
+        one wishes to use; choose between 'chime7' and 'chime8' or None.
+    :return dict: Dict whose key is the dataset part
+    ("train", "dev" and "eval"), and the
+        value is Dicts with the keys 'recordings' and 'supervisions'.
+    """
+    manifests = lhotse_prep.prepare_notsofar1(
+        corpus_dir, None, dset_part, mic, json_dir, txt_norm
+    )
+    # now we need to convert manifests to kaldi format via lhotse
+    for k in manifests.keys():
+        c_out_dir = os.path.join(output_dir, k)
+        os.makedirs(c_out_dir, exist_ok=True)
+        export_to_kaldi(
+            manifests[k]["recordings"],
+            manifests[k]["supervisions"],
+            c_out_dir,
+            prefix_spk_id=False,  # already appended
+            map_underscores_to="-",
+        )
