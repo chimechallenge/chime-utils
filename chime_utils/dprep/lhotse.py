@@ -390,8 +390,8 @@ def prep_lhotse_shared(
 
                     # dump only with
                 ex_id = (
-                    f"{spk_id}-{corpus_name}-{sess_name}-{idx}-"
-                    f"{round(100 * start):06d}-{round(100 * end):06d}-{mic}"
+                    f"{spk_id}_{corpus_name}_{sess_name}_{idx}-"
+                    f"{round(100 * start):06d}_{round(100 * end):06d}-{mic}"
                 )
                 # spk-first as in kaldi convention
                 supervisions.append(
