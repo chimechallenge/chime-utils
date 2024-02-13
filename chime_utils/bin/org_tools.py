@@ -63,12 +63,15 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, corpus_name):
         all_sessions = []
         all_spk = []
         for corp in mapping["sessions_map"].keys():
-            all_sessions.extend(list(mapping["sessions_map"][corp].keys()))
-            all_spk.extend(list(mapping["spk_map"][corp].keys()))
+            all_sessions.extend([v for k, v in mapping["sessions_map"][corp].items()])
+            all_spk.extend([v for k, v in mapping["spk_map"][corp].items()])
 
         all_sessions = [x for x in all_sessions if x.startswith("S")]
-        last_sess = sorted(all_sessions, reverse=True)[0]
-        last_spk = sorted(all_spk, reverse=True)[0]
+        last_sess = sorted(
+            all_sessions, reverse=True, key=lambda x: int(x.lstrip("S"))
+        )[0]
+
+        last_spk = sorted(all_spk, reverse=True, key=lambda x: int(x.lstrip("P")))[0]
         # filter sessions, we care about only chime-style sessions, mixer6 ones
         # can actually remain as they are
         return mapping, last_sess, last_spk
@@ -147,11 +150,12 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, corpus_name):
         for split in ["train", "dev"]:
             if split == "train":
                 split_dir = os.path.join(
-                    corpus_dir, "train/train_set/240130.1_train/MTG/"
+                    corpus_dir, "train/train_set/240208.2_train/MTG/"
                 )  # os.path.join(corpus_dir, "240121_dev", "MTG")
             elif split == "dev":
                 split_dir = os.path.join(
-                    corpus_dir, "dev/dev_set/240130.1_dev_with_GT_delme/MTG"
+                    corpus_dir,
+                    "private-share/benchmark-datasets/dev_set/240208.2_dev_with_GT/MTG",
                 )
 
             split_dir = Path(split_dir)
@@ -164,9 +168,6 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, corpus_name):
                 "containing directories with name starting with MTG."
             )
 
-            import pdb
-
-            pdb.set_trace()
             for meet_dir in split_dir.iterdir():
                 # load gtfile
                 with open(os.path.join(meet_dir, "gt_transcription.json")) as f:
