@@ -345,67 +345,68 @@ def prep_lhotse_shared(
         recordings.extend(c_recs)
 
     # now prepare supervisions if possible
-    transcriptions_dir = os.path.join(corpus_dir, "transcriptions", dset_part)
+
     if ann_dir is not None:
-        logger.warning("")
-        raise NotImplementedError
+        logger.warning(f"Using alternative annotation in {ann_dir}.")
+        transcriptions_dir = ann_dir
+    else:
+        transcriptions_dir = os.path.join(corpus_dir, "transcriptions", dset_part)
 
-    elif os.path.exists(transcriptions_dir):
-        supervisions = []
-        for sess_name in uem.keys():
-            c_recs = sess2rec[sess_name]
+    supervisions = []
+    for sess_name in uem.keys():
+        c_recs = sess2rec[sess_name]
+        if mic != "ihm":
+            assert (
+                len(c_recs) == 1
+            ), "If mic is mdm then there is one recording for each session, containing all far-field arrays."
+
+        with open(os.path.join(transcriptions_dir, sess_name + ".json"), "r") as f:
+            c_ann = json.load(f)
+
+        for idx, utt in enumerate(c_ann):
+            spk_id = utt["speaker"]
+            start = float(utt["start_time"])
+            end = float(utt["end_time"])
             if mic != "ihm":
-                assert (
-                    len(c_recs) == 1
-                ), "If mic is mdm then there is one recording for each session, containing all far-field arrays."
+                channels = list(range(len(c_recs[0].sources)))
+                rec_id = sess_name
+            else:
+                rec_id = "{}-{}".format(sess_name, spk_id)
 
-            with open(os.path.join(transcriptions_dir, sess_name + ".json"), "r") as f:
-                c_ann = json.load(f)
+                if corpus_name == "mixer6":
+                    with open(
+                        os.path.join(
+                            corpus_dir, "devices", dset_part, sess_name + ".json"
+                        ),
+                        "r",
+                    ) as f:
+                        c_devices = json.load(f)
 
-            for idx, utt in enumerate(c_ann):
-                spk_id = utt["speaker"]
-                start = float(utt["start_time"])
-                end = float(utt["end_time"])
-                if mic != "ihm":
-                    channels = list(range(len(c_recs[0].sources)))
-                    rec_id = sess_name
+                    dev2spk = [
+                        1 for k, v in c_devices.items() if v["speaker"] == spk_id
+                    ]
+                    channels = list(range(len(dev2spk)))
+                    assert channels in [[0], [0, 1]]
                 else:
-                    rec_id = "{}-{}".format(sess_name, spk_id)
+                    channels = [0, 1] if corpus_name == "chime6" else [0]
 
-                    if corpus_name == "mixer6":
-                        with open(
-                            os.path.join(
-                                corpus_dir, "devices", dset_part, sess_name + ".json"
-                            ),
-                            "r",
-                        ) as f:
-                            c_devices = json.load(f)
-
-                        dev2spk = [
-                            1 for k, v in c_devices.items() if v["speaker"] == spk_id
-                        ]
-                        channels = list(range(len(dev2spk)))
-                        assert channels in [[0], [0, 1]]
-                    else:
-                        channels = [0, 1] if corpus_name == "chime6" else [0]
-
-                    # dump only with
-                ex_id = (
-                    f"{spk_id}-{corpus_name}-{sess_name}-{idx}-"
-                    f"{round(100 * start):06d}-{round(100 * end):06d}-{mic}"
+                # dump only with
+            ex_id = (
+                f"{spk_id}-{corpus_name}-{sess_name}-{idx}-"
+                f"{round(100 * start):06d}-{round(100 * end):06d}-{mic}"
+            )
+            # spk-first as in kaldi convention
+            supervisions.append(
+                SupervisionSegment(
+                    id=ex_id,
+                    recording_id=rec_id,
+                    start=start,
+                    duration=end - start,
+                    channel=channels,
+                    text=utt["words"],
+                    speaker=utt["speaker"],
                 )
-                # spk-first as in kaldi convention
-                supervisions.append(
-                    SupervisionSegment(
-                        id=ex_id,
-                        recording_id=rec_id,
-                        start=start,
-                        duration=end - start,
-                        channel=channels,
-                        text=utt["words"],
-                        speaker=utt["speaker"],
-                    )
-                )
+            )
 
         # using regular annotation
     else:
