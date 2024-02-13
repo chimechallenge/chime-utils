@@ -346,10 +346,10 @@ def prep_lhotse_shared(
 
     # now prepare supervisions if possible
     transcriptions_dir = os.path.join(corpus_dir, "transcriptions", dset_part)
-    if ann_dir is not None:
-        logger.warning(f"Using alternative annotation in {ann_dir}.")
-        transcriptions_dir = ann_dir
-    elif ann_dir is None and os.path.exists(transcriptions_dir):
+    if ann_dir is not None or os.path.exists(transcriptions_dir):
+        if ann_dir is not None:
+            logger.warning(f"Using alternative annotation in {ann_dir}.")
+            transcriptions_dir = ann_dir
         supervisions = []
         for sess_name in uem.keys():
             c_recs = sess2rec[sess_name]
