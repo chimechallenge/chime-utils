@@ -111,3 +111,62 @@ def get_mappings(challenge):
     else:
         raise NotImplementedError
     return mapping
+
+
+def symlink(source, link_name):
+    """
+    Create a link to source at link_name.
+    Similar to "ln -s <source> <link_name>"
+
+    Special properties:
+     - Try os.symlink
+     - except link_name already point to source: pass
+     - except link_name exists and point somewhere else: ImproveExceptionMsg
+     - except link_name exists and is not a symlink: reraise
+     - except link_name.parent does not exists: ImproveExceptionMsg
+
+    Copied from paderbox/io/file_handling.py
+    """
+    try:
+        os.symlink(source, link_name)
+    except FileExistsError:
+        link_name = Path(link_name)
+
+        # link_name.exists() is False when the link does not exist
+        if link_name.is_symlink():
+            link = os.readlink(link_name)
+            if link == str(source):
+                pass
+            else:
+                raise FileExistsError(
+                    "File exist.\n"
+                    f"Try:       {source} -> {link_name}\n"
+                    f"Currently: {link} -> {link_name}"
+                )
+        elif link_name.exists():
+            raise
+        else:
+            assert not link_name.parent.exists(), "Should not happen."
+            raise FileNotFoundError(
+                f"The parent directory of the dst {link_name} does not exist"
+                f"{link_name}"
+            )
+
+
+class DoneFile:
+    def __init__(self, file):
+        from pathlib import Path
+        self.file = Path(file)
+
+    def exists(self):
+        return self.file.exists()
+
+    def __str__(self):
+        return os.fspath(self.file)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type is None and exc_val is None and exc_tb is None:
+            self.file.touch()
