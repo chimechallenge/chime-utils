@@ -12,7 +12,7 @@ from typing import Optional
 import soundfile as sf
 from lhotse.utils import Pathlike, resumable_download
 
-from chime_utils.dgen.utils import get_mappings, tar_strip_members
+from chime_utils.dgen.utils import DoneFile, get_mappings, symlink, tar_strip_members
 from chime_utils.text_norm import get_txt_norm
 
 logging.basicConfig(
@@ -228,7 +228,7 @@ def gen_dipco(
                     dest_split in ["eval"]
                     and Path(x).stem.split("_")[-1].startswith("P")
                 ):
-                    os.symlink(
+                    symlink(
                         x,
                         os.path.join(
                             output_dir, "audio", dest_split, filename + ".wav"
@@ -277,7 +277,9 @@ def gen_dipco(
             to_uem.append(c_uem)
 
         if len(to_uem) > 0:
-            Path(os.path.join(output_dir, "uem", dest_split)).mkdir(parents=True)
+            Path(os.path.join(output_dir, "uem", dest_split)).mkdir(
+                parents=True, exist_ok=True
+            )
             to_uem = sorted(to_uem)
             with open(os.path.join(output_dir, "uem", dest_split, "all.uem"), "w") as f:
                 f.writelines(to_uem)

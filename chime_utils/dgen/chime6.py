@@ -11,7 +11,7 @@ import soundfile as sf
 from lhotse.recipes.chime6 import TimeFormatConverter
 from lhotse.utils import Pathlike, resumable_download
 
-from chime_utils.dgen.utils import tar_strip_members
+from chime_utils.dgen.utils import DoneFile, symlink, tar_strip_members
 from chime_utils.text_norm import get_txt_norm
 
 CORPUS_URL = "https://us.openslr.org/resources/150/"
@@ -208,7 +208,7 @@ def gen_chime6(
                     "eval",
                 ]:
                     continue
-                os.symlink(
+                symlink(
                     x,
                     os.path.join(output_dir, "audio", split, Path(x).stem) + ".wav",
                 )

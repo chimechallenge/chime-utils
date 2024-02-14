@@ -8,7 +8,7 @@ from pathlib import Path
 import soundfile as sf
 
 from chime_utils.dgen.azure_storage import download_meeting_subset
-from chime_utils.dgen.utils import get_mappings
+from chime_utils.dgen.utils import get_mappings, symlink
 from chime_utils.text_norm import get_txt_norm
 
 logging.basicConfig(
@@ -120,7 +120,7 @@ def convert2chime(
             output_audio_f,
             "{}.wav".format(device_name),
         )
-        os.symlink(elem, tgt_name)
+        symlink(elem, tgt_name)
         dev_type = "circular_array" if not is_sc else "array_after_acoustic_frontend"
         d_type = {
             "is_close_talk": False,
@@ -147,7 +147,7 @@ def convert2chime(
             output_audio_f,
             "{}_{}.wav".format(session_name, device2spk[filename]),
         )
-        os.symlink(elem, tgt_name)
+        symlink(elem, tgt_name)
         d_type = {
             "is_close_talk": True,
             "speaker": device2spk[filename],
