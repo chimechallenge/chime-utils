@@ -368,6 +368,28 @@ def read_list_file(list_f):
     return out
 
 
+def check_not_old_dev(ann_jsons):
+    """
+    check if you are not using old Mixer 6 by mistake.
+    """
+
+    ann_jsons = [x for x in ann_jsons if Path(x).stem == "20090714_134807_LDC_120290"]
+
+    # read now this one
+    assert len(ann_jsons) == 1
+    with open(ann_jsons[0], "r") as f:
+        utts = json.load(f)
+
+    utts = sorted(utts, key=lambda x: float(x["start_time"]))[-1]
+    if not utts["words"] == "it says participant screen off":
+        logging.error(
+            "Development set has been re-annotated and it is a bit different. You are probably using the older Mixer 6 from CHiME-7."
+            "Please see https://www.chimechallenge.org/current/task1/data on how to acquire the new dev set annotation."
+        )
+
+        raise FileNotFoundError
+
+
 def gen_mixer6(
     output_dir,
     corpus_dir,
@@ -497,6 +519,7 @@ def gen_mixer6(
             ann_json = glob.glob(
                 os.path.join(corpus_dir, "splits", use_version, "*.json")
             )
+            check_not_old_dev(ann_json)
             # filter it here
             ann_json = [
                 x for x in ann_json if c8_mixer6_sess2split[Path(x).stem] == dest_split
