@@ -106,16 +106,12 @@ def seglst2stm(input_dir, output_dir):
             print(textwrap.indent(traceback.format_exc(), " | "))
 
 
-def _load_and_prepare(
-    hyp_folder,
-    dasr_root,
-    text_norm,
-):
+def _load_and_prepare(hyp_folder, dasr_root, dset_part, text_norm, ignore_missing):
     import meeteval
 
     text_norm_fn = get_txt_norm(text_norm)
 
-    def load_files(files, nodata_msg) -> meeteval.io.SegLST:
+    def load_files(files, nodata_msg="") -> meeteval.io.SegLST:
         seglst = []
         for file in files:
             try:
@@ -126,7 +122,7 @@ def _load_and_prepare(
             assert data, f"Could not load data from {file}."
             seglst.extend(data)
         if len(seglst) == 0:
-            raise RuntimeError(nodata_msg)
+            raise FileNotFoundError(nodata_msg)
         seglst = meeteval.io.SegLST(seglst)
         return seglst
 
@@ -134,13 +130,24 @@ def _load_and_prepare(
 
     for scenario in ["chime6", "mixer6", "dipco", "notsofar1"]:
         scenario_dir = dasr_root / scenario
-        for deveval in ["dev", "eval"]:
+        for deveval in [dset_part]:
             folder = scenario_dir / "transcriptions_scoring" / deveval
-            r = load_files(
-                folder.glob("*.json"),
-                f"{folder} should contain the reference jsons, "
-                f"but couldn't find them.",
-            )
+
+            try:
+                r = load_files(folder.glob("*.json"))
+            except FileNotFoundError:
+                if not ignore_missing:
+                    logging.error(
+                        f"{folder} should contain the reference jsons, "
+                        f"but couldn't find them. We cannot score {scenario}. "
+                        f"You can use --ignore-missing to skip scoring for some scenarios."
+                    )
+                else:
+                    logging.warning(
+                        f"{folder} should contain the reference jsons, "
+                        f"but couldn't find them. We cannot score {scenario}. Skipping since --ignore-missing is set."
+                    )
+                    continue
 
             # Issue in S21 for P45, where start is 3561.700 and end 3561.490
             def fix_negative_duration(segment):
@@ -165,26 +172,18 @@ def _load_and_prepare(
             if file.exists():
                 h = load_files(
                     [file],
-                    f"{hyp_folder} should contain the hyp jsons, "
-                    f"but couldn't find {file.relative_to(hyp_folder)}.",
                 )
             else:
-                print(
-                    f"WARNING: The file {file} doesn't exists. "
-                    f"Use a dummy estimate for it."
-                )
-                h = meeteval.io.SegLST(
-                    [  # noqa
-                        {
-                            "words": "",
-                            "start_time": min(r.T["start_time"]),
-                            "end_time": max(r.T["end_time"]),
-                            "session_id": session_id,
-                            "speaker": "0",
-                        }
-                        for session_id in set(r.T["session_id"])
-                    ]
-                )
+                if not ignore_missing:
+                    logging.error(
+                        f"The file {file} doesn't exists. We cannot score {scenario}. Exiting. "
+                        f"You can use --ignore-missing to skip scoring for some scenarios."
+                    )
+                else:
+                    logging.warning(
+                        f"The file {file} doesn't exists. We cannot score {scenario}. Skipping since --ignore-missing is set."
+                    )
+                    continue
 
             def word_normalizer(segment):
                 words = segment["words"]
@@ -260,8 +259,16 @@ def _dump_json(obj, file):
 @click.option(
     "-r",
     "--dasr_root",
-    help="Folder containing the main folder of CHiME-7 DASR dataset.",
+    help="Folder containing the main folder of CHiME-8 DASR dataset.",
     type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path),
+)
+@click.option(
+    "-d",
+    "--dset-part",
+    help="which part do you want to score choose between 'dev' and 'eval', or 'dev,eval' for both.",
+    default="dev",
+    type=str,
+    show_default=True,
 )
 @click.option(
     "-o",
@@ -273,16 +280,35 @@ def _dump_json(obj, file):
     "--text-norm",
     help="Text normalization that is applied to the words.",
     default="chime8",
-    type=click.Choice(["chime6", "chime7", "chime8", None]),
+    type=click.Choice(["chime6", "chime7", "chime8", None, "none"]),
+    show_default=True,
+)
+@click.option(
+    "-i",
+    "--ignore-missing",
+    help="Ignore missing datasets e.g. skip scoring CHiME-6 if the .json is not found.",
+    default=False,
+    is_flag=True,
     show_default=True,
 )
 def tcpwer(
     hyp_folder,
     dasr_root,
+    dset_part,
     output_folder=None,
     text_norm="chime8",
+    ignore_missing=False,
 ):
-    _wer(hyp_folder, dasr_root, output_folder, text_norm, "tcpWER")
+    for c_part in dset_part.split(","):
+        _wer(
+            hyp_folder,
+            dasr_root,
+            c_part,
+            output_folder,
+            text_norm,
+            ignore_missing,
+            "tcpWER",
+        )
 
 
 @score.command()
@@ -301,6 +327,14 @@ def tcpwer(
     type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path),
 )
 @click.option(
+    "-d",
+    "--dset-part",
+    help="which part do you want to score choose between 'dev' and 'eval', or 'dev,eval' for both.",
+    default="dev",
+    type=str,
+    show_default=True,
+)
+@click.option(
     "-o",
     "--output_folder",
     help="Path for the output folder where we dump all logs and useful statistics.",
@@ -313,16 +347,35 @@ def tcpwer(
     type=click.Choice(["chime6", "chime7", "chime8", None]),
     show_default=True,
 )
+@click.option(
+    "-i",
+    "--ignore-missing",
+    help="Ignore missing datasets e.g. skip scoring CHiME-6 if the .json is not found.",
+    default=False,
+    is_flag=True,
+    show_default=True,
+)
 def cpwer(
     hyp_folder,
     dasr_root,
+    dset_part,
     output_folder=None,
     text_norm="chime8",
+    ignore_missing=False,
 ):
-    _wer(hyp_folder, dasr_root, output_folder, text_norm, "cpWER")
+    for c_part in dset_part.split(","):
+        _wer(
+            hyp_folder,
+            dasr_root,
+            c_part,
+            output_folder,
+            text_norm,
+            ignore_missing,
+            "cpWER",
+        )
 
 
-def _wer(hyp_folder, dasr_root, output_folder, text_norm, metric):
+def _wer(hyp_folder, dasr_root, c_part, output_folder, text_norm, ignore, metric):
     import meeteval
 
     if output_folder is None:
@@ -331,7 +384,9 @@ def _wer(hyp_folder, dasr_root, output_folder, text_norm, metric):
     result = collections.defaultdict(dict)
     details = collections.defaultdict(dict)
 
-    data = _load_and_prepare(hyp_folder, dasr_root, text_norm=text_norm)
+    data = _load_and_prepare(
+        hyp_folder, dasr_root, c_part, text_norm=text_norm, ignore_missing=ignore
+    )
     for deveval, scenario, h, r, uem in data:
         if metric == "tcpWER":
             error_rates = meeteval.wer.tcpwer(
@@ -378,7 +433,9 @@ def _wer(hyp_folder, dasr_root, output_folder, text_norm, metric):
     )
 
     if output_folder is None:
-        print("Skip write of details to the disk, because ")
+        logging.warning(
+            "Skip write of details to the disk, because --output_folder is not given"
+        )
     else:
         output_folder = Path(output_folder)
         output_folder.mkdir(parents=True, exist_ok=True)
