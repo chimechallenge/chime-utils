@@ -28,6 +28,9 @@ def org_tools():
     pass
 
 
+device2num = {"plaza": 1, "rockfall": 2, "meetup": 3}
+
+
 @org_tools.command(name="gen-mapping")  # refactor to do one at a time
 @click.argument("corpus-dir", type=click.Path(exists=True))
 @click.argument("output-file", type=click.Path(exists=False))
@@ -155,7 +158,7 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, corpus_name):
             elif split == "dev":
                 split_dir = os.path.join(
                     corpus_dir,
-                    "private-share/benchmark-datasets/dev_set/240208.2_dev_with_GT/MTG",
+                    "dev/dev_set/240208.2_dev/MTG",
                 )
 
             split_dir = Path(split_dir)
@@ -184,15 +187,19 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, corpus_name):
                     for x in devices_info
                     if x["is_close_talk"] is False and x["is_mc"] is True
                 ]
+
                 for mc_dev in mc_devices:
                     # create a session
-                    new_name = "S{:02d}".format(int(last_sess.strip("S")) + 1)
                     meeting_name = Path(meet_dir).stem
-                    device_name = mc_dev["device_name"]
+                    meeting_number = Path(meet_dir).stem.split("_")[-1]
+                    device_name, device_num = mc_dev["device_name"].split("_")
+                    new_name = (
+                        f"S{meeting_number}{device2num[device_name]}{device_num}7"
+                    )
+
                     mapping["sessions_map"][corpus_name][
-                        f"{meeting_name}_{device_name}_mc"
+                        f"{meeting_name}_{device_name}_{device_num}_mc"
                     ] = new_name
-                    last_sess = new_name
 
                 sc_devices = [
                     x
@@ -202,13 +209,15 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, corpus_name):
 
                 for sc_dev in sc_devices:
                     # create a session
-                    new_name = "S{:02d}".format(int(last_sess.strip("S")) + 1)
                     meeting_name = Path(meet_dir).stem
-                    device_name = sc_dev["device_name"]
+                    meeting_number = Path(meet_dir).stem.split("_")[-1]
+                    device_name, device_num = sc_dev["device_name"].split("_")
+                    new_name = (
+                        f"S{meeting_number}{device2num[device_name]}{device_num}1"
+                    )
                     mapping["sessions_map"][corpus_name][
-                        f"{meeting_name}_{device_name}_sc"
+                        f"{meeting_name}_{device_name}_{device_num}_sc"
                     ] = new_name
-                    last_sess = new_name
 
         all_speakers = list(all_speakers)
         # remap all speakers

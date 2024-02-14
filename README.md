@@ -20,11 +20,6 @@ For any issue/bug/question with this package feel free to raise an issue here or
 
 ## Installation
 
-I recommend making a fresh conda env before: 
-
-`conda create --name chimeutils python=3.8` <br>
-`conda activate chimeutils` 
-
 You can install with: 
 
 `pip install git+https://github.com/chimechallenge/chime-utils`
@@ -120,9 +115,10 @@ Command basic usage: `chime-utils dgen <DATASET> <DOWNLOAD_DIR> <OUTPUT_DIR> --d
  
 [![nVIDIA](https://img.shields.io/badge/nVIDIA-%2376B900.svg?style=for-the-badge&logo=nVIDIA&logoColor=white)](https://github.com/NVIDIA/NeMo)
 
-This year CHiME-8 DASR baseline is built directly upon [NVIDIA NeMo](https://github.com/NVIDIA/NeMo) last year CHiME-7 DASR Submission [1]. <br>
+This year CHiME-8 DASR baseline is built directly upon NVIDIA NeMo team last year CHiME-7 DASR Submission [1]. <br>
 
-It is available at FIXME
+It is available at [](), we used our own fork of NeMo because it will be easier to maintain during the challenge.
+
 
 
 ## Data preparation
@@ -130,9 +126,8 @@ It is available at FIXME
 For convenience, we also offer here data preparation scripts for different toolkits:
 - [Kaldi](https://github.com/kaldi-asr/kaldi) and [K2/Icefall](https://github.com/k2-fsa/icefall) (with [lhotse](https://github.com/lhotse-speech/lhotse))
 - [ESPNet](https://github.com/espnet/espne) (with [lhotse](https://github.com/lhotse-speech/lhotse))
-- [SpeechBrain](https://github.com/speechbrain/speechbrain)
 
-See [DataPrep.md](./DataPrep.md). 
+See [DATAPREP.md](./DATAPREP.md). 
 
 
 ## Scoring
@@ -185,13 +180,11 @@ Examples are available here: [./tests/test_normalizer.py](./tests/test_normalize
 In detail, we provide scripts to compute common ASR metrics for long-form meeting scenarios. 
 These scores are computed through the awesome [Meeteval](https://github.com/fgnt/meeteval) [2] toolkit. 
 
-- tcpWER
+- tcpWER [2]
 - concatenated minimum-permutation word error rate (cpWER) [3]
-- diarization-assigned minimum permutation word error rate (DA-WER) [4]
 
 You can also use `chime-utils score segslt2ctm input-dir output-dir` to automatically convert all SegLST JSON files in `input-dir` and its subfolders to `.ctm` files. <br> 
 This allows to use easily also other ASR metrics tools such as [NIST Asclite](https://mig.nist.gov/MIG_Website/tools/asclite.html). 
-
 
 ### Diarization 
 

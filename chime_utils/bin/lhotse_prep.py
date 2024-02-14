@@ -446,7 +446,7 @@ def discard_length(
             )
             final_length = len(original_manifest)
             logger.info(
-                f"Discarded {orig_length - final_length} supervisions from {input_sup} because longer than {max_len} or shorter than {min_len}.\n"
+                f"Discarded {orig_length - final_length} supervisions from {input_sup} because longer than {max_len} or shorter than {min_len}. "
                 f"Original length: {orig_length}, New length: {final_length}."
             )
         original_manifest.to_file(output_sup)
