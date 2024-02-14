@@ -156,6 +156,7 @@ def gen_all_dasr(
             c_part,
             challenge,
         )
+        logging.info(f"NOTSOFAR1 {c_part} set generated successfully.")
 
 
 @dgen.command(name="chime6")
