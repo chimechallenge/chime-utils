@@ -106,11 +106,6 @@ def seglst2stm(input_dir, output_dir):
             print(textwrap.indent(traceback.format_exc(), " | "))
 
 
-def da_wer():
-    # for legacy
-    pass
-
-
 def _load_and_prepare(
     hyp_folder,
     dasr_root,
@@ -389,15 +384,3 @@ def _wer(hyp_folder, dasr_root, output_folder, text_norm, metric):
         output_folder.mkdir(parents=True, exist_ok=True)
         _dump_json(details, str(output_folder / f"{metric}_per_session.json"))
         _dump_json(details, str(output_folder / f"{metric}_per_scenario.json"))
-
-
-def diarization_score():
-    pass
-
-
-def der():
-    pass
-
-
-def jer():
-    pass
