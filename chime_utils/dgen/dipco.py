@@ -55,9 +55,22 @@ def download_dipco(
     target_dir = Path(target_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
     tar_path = os.path.join(target_dir, "DiPCo.tgz")
-    resumable_download(CORPUS_URL, filename=tar_path, force_download=force_download)
-    with tarfile.open(tar_path) as tar:
-        tar.extractall(path=target_dir, members=tar_strip_members(target_dir, tar, 1))
+
+    with DoneFile(target_dir / ".done_untar") as donefile:
+        if donefile.exists():
+            logging.info(f"Skip DiPCo download and untar, because {donefile} exists.")
+            return target_dir
+
+        resumable_download(
+            CORPUS_URL,
+            filename=tar_path,
+            force_download=force_download,
+            completed_file_size=13415522146,
+        )
+        with tarfile.open(tar_path) as tar:
+            tar.extractall(
+                path=target_dir, members=tar_strip_members(target_dir, tar, 1)
+            )
 
     return target_dir
 
