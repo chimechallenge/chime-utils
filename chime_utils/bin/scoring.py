@@ -31,10 +31,10 @@ def score():
 
 @score.command()
 @click.argument(
-    "input_dir", type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path)
+    "input-dir", type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path)
 )
 @click.argument(
-    "output_dir", type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path)
+    "output-dir", type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path)
 )
 def seglst2ctm(input_dir, output_dir):
     import meeteval
@@ -66,10 +66,10 @@ def seglst2ctm(input_dir, output_dir):
 
 @score.command()
 @click.argument(
-    "input_dir", type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path)
+    "input-dir", type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path)
 )
 @click.argument(
-    "output_dir", type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path)
+    "output-dir", type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path)
 )
 def seglst2rttm(input_dir, output_dir):
     import meeteval
@@ -87,10 +87,10 @@ def seglst2rttm(input_dir, output_dir):
 
 @score.command()
 @click.argument(
-    "input_dir", type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path)
+    "input-dir", type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path)
 )
 @click.argument(
-    "output_dir", type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path)
+    "output-dir", type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path)
 )
 def seglst2stm(input_dir, output_dir):
     import meeteval
@@ -198,7 +198,7 @@ def _load_and_prepare(hyp_folder, dasr_root, dset_part, text_norm, ignore_missin
                     words = words2
                 else:
                     raise RuntimeError(
-                        "Text normalizer is not idempotence."
+                        "Text normalizer is not idempotent."
                         "This should never happen, please open an issue on "
                         "https://github.com/chimechallenge/chime-utils",
                         segment["words"],
@@ -250,7 +250,7 @@ def _dump_json(obj, file):
 @score.command()
 @click.option(
     "-s",
-    "--hyp_folder",
+    "--hyp-folder",
     help="Folder containing the JSON files relative to the system output. "
     "One file for each scenario: chime6.json, dipco.json and mixer6.json. "
     "These should contain all sessions in e.g. eval set.",
@@ -258,7 +258,7 @@ def _dump_json(obj, file):
 )
 @click.option(
     "-r",
-    "--dasr_root",
+    "--dasr-root",
     help="Folder containing the main folder of CHiME-8 DASR dataset.",
     type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path),
 )
@@ -272,7 +272,7 @@ def _dump_json(obj, file):
 )
 @click.option(
     "-o",
-    "--output_folder",
+    "--output-folder",
     help="Path for the output folder where we dump all logs and useful statistics.",
     type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path),
 )
@@ -314,7 +314,7 @@ def tcpwer(
 @score.command()
 @click.option(
     "-s",
-    "--hyp_folder",
+    "--hyp-folder",
     help="Folder containing the JSON files relative to the system output. "
     "One file for each scenario: chime6.json, dipco.json and mixer6.json. "
     "These should contain all sessions in e.g. eval set.",
@@ -322,7 +322,7 @@ def tcpwer(
 )
 @click.option(
     "-r",
-    "--dasr_root",
+    "--dasr-root",
     help="Folder containing the main folder of CHiME-7 DASR dataset.",
     type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path),
 )
@@ -336,7 +336,7 @@ def tcpwer(
 )
 @click.option(
     "-o",
-    "--output_folder",
+    "--output-folder",
     help="Path for the output folder where we dump all logs and useful statistics.",
     type=click.Path(exists=False, file_okay=False, path_type=pathlib.Path),
 )
