@@ -122,11 +122,11 @@ def gen_all_dasr(
     DOWNLOAD_DIR: Pathlike, where the original core datasets will be downloaded.\n
     MIXER6_DIR: Pathlike, path to Mixer 6 Speech root folder.
     """
-    for c_part in part.split(","):
+    for i, c_part in enumerate(part.split(",")):
         gen_chime6(
             os.path.join(dasr_dir, "chime6"),
             os.path.join(download_dir, "chime6"),
-            download,
+            download if i == 0 else False,
             c_part,
             challenge,
         )
@@ -134,7 +134,7 @@ def gen_all_dasr(
         gen_dipco(
             os.path.join(dasr_dir, "dipco"),
             os.path.join(download_dir, "dipco"),
-            download,
+            download if i == 0 else False,
             c_part,
             challenge,
         )
