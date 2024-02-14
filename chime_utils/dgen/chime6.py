@@ -11,7 +11,7 @@ import soundfile as sf
 from lhotse.recipes.chime6 import TimeFormatConverter
 from lhotse.utils import Pathlike, resumable_download
 
-from chime_utils.dgen.utils import tar_strip_members
+from chime_utils.dgen.utils import DoneFile, symlink, tar_strip_members
 from chime_utils.text_norm import get_txt_norm
 
 CORPUS_URL = "https://us.openslr.org/resources/150/"
@@ -54,23 +54,30 @@ def download_chime6(
 
     target_dir = Path(target_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
-    for c_file in [
-        "CHiME6_train.tar.gz",
-        "CHiME6_dev.tar.gz",
-        "CHiME6_eval.tar.gz",
-        "CHiME6_transcriptions.tar.gz",
-    ]:
-        download_url = os.path.join(CORPUS_URL, c_file)
-        tar_path = os.path.join(target_dir, c_file)
-        resumable_download(
-            download_url, filename=tar_path, force_download=force_download
-        )
-        if c_file.endswith(".tar.gz"):
-            with tarfile.open(tar_path) as tar:
-                strip = 2 if not c_file.endswith("transcriptions.tar.gz") else 1
-                tar.extractall(
-                    path=target_dir, members=tar_strip_members(target_dir, tar, strip)
-                )
+
+    with DoneFile(target_dir / ".done_untar") as donefile:
+        if donefile.exists():
+            logging.info(f"Skip CHiME-6 download and untar, because {donefile} exists.")
+            return target_dir
+
+        for c_file in [
+            "CHiME6_train.tar.gz",
+            "CHiME6_dev.tar.gz",
+            "CHiME6_eval.tar.gz",
+            "CHiME6_transcriptions.tar.gz",
+        ]:
+            download_url = os.path.join(CORPUS_URL, c_file)
+            tar_path = os.path.join(target_dir, c_file)
+            resumable_download(
+                download_url, filename=tar_path, force_download=force_download
+            )
+            if c_file.endswith(".tar.gz"):
+                with tarfile.open(tar_path) as tar:
+                    strip = 2 if not c_file.endswith("transcriptions.tar.gz") else 1
+                    tar.extractall(
+                        path=target_dir,
+                        members=tar_strip_members(target_dir, tar, strip),
+                    )
 
     return target_dir
 
@@ -208,7 +215,7 @@ def gen_chime6(
                     "eval",
                 ]:
                     continue
-                os.symlink(
+                symlink(
                     x,
                     os.path.join(output_dir, "audio", split, Path(x).stem) + ".wav",
                 )

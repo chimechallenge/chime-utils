@@ -7,7 +7,7 @@ from pathlib import Path
 
 import soundfile as sf
 
-from chime_utils.dgen.utils import get_mappings
+from chime_utils.dgen.utils import get_mappings, symlink
 from chime_utils.text_norm import get_txt_norm
 
 c8_mixer6_sess2split = {
@@ -422,7 +422,7 @@ def gen_mixer6(
             if channel_num <= 3 and split in ["eval", "dev"]:
                 continue
             new_name = "{}_CH{:02d}".format(tgt_sess_name, channel_num)
-            os.symlink(
+            symlink(
                 c_audio,
                 os.path.join(output_dir, "audio", split, new_name + ".flac"),
             )
@@ -477,12 +477,12 @@ def gen_mixer6(
     for dest_split in splits:
         assert dest_split in ["train_intv", "train_call", "train", "dev", "eval"]
         Path(os.path.join(output_dir, "audio", dest_split)).mkdir(
-            parents=True, exist_ok=False
+            parents=True, exist_ok=True
         )
 
         if dest_split not in ["eval"]:
             Path(os.path.join(output_dir, "transcriptions", dest_split)).mkdir(
-                parents=True, exist_ok=False
+                parents=True, exist_ok=True
             )
             Path(os.path.join(output_dir, "transcriptions_scoring", dest_split)).mkdir(
                 parents=True, exist_ok=True
@@ -583,7 +583,9 @@ def gen_mixer6(
                 to_uem.append(c_uem)
 
         if len(to_uem) > 0:
-            Path(os.path.join(output_dir, "uem", dest_split)).mkdir(parents=True)
+            Path(os.path.join(output_dir, "uem", dest_split)).mkdir(
+                parents=True, exist_ok=True
+            )
             to_uem = sorted(to_uem)
             with open(os.path.join(output_dir, "uem", dest_split, "all.uem"), "w") as f:
                 f.writelines(to_uem)

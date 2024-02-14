@@ -12,7 +12,7 @@ from typing import Optional
 import soundfile as sf
 from lhotse.utils import Pathlike, resumable_download
 
-from chime_utils.dgen.utils import get_mappings, tar_strip_members
+from chime_utils.dgen.utils import DoneFile, get_mappings, symlink, tar_strip_members
 from chime_utils.text_norm import get_txt_norm
 
 logging.basicConfig(
@@ -55,9 +55,22 @@ def download_dipco(
     target_dir = Path(target_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
     tar_path = os.path.join(target_dir, "DiPCo.tgz")
-    resumable_download(CORPUS_URL, filename=tar_path, force_download=force_download)
-    with tarfile.open(tar_path) as tar:
-        tar.extractall(path=target_dir, members=tar_strip_members(target_dir, tar, 1))
+
+    with DoneFile(target_dir / ".done_untar") as donefile:
+        if donefile.exists():
+            logging.info(f"Skip DiPCo download and untar, because {donefile} exists.")
+            return target_dir
+
+        resumable_download(
+            CORPUS_URL,
+            filename=tar_path,
+            force_download=force_download,
+            completed_file_size=13415522146,
+        )
+        with tarfile.open(tar_path) as tar:
+            tar.extractall(
+                path=target_dir, members=tar_strip_members(target_dir, tar, 1)
+            )
 
     return target_dir
 
@@ -228,7 +241,7 @@ def gen_dipco(
                     dest_split in ["eval"]
                     and Path(x).stem.split("_")[-1].startswith("P")
                 ):
-                    os.symlink(
+                    symlink(
                         x,
                         os.path.join(
                             output_dir, "audio", dest_split, filename + ".wav"
@@ -277,7 +290,9 @@ def gen_dipco(
             to_uem.append(c_uem)
 
         if len(to_uem) > 0:
-            Path(os.path.join(output_dir, "uem", dest_split)).mkdir(parents=True)
+            Path(os.path.join(output_dir, "uem", dest_split)).mkdir(
+                parents=True, exist_ok=True
+            )
             to_uem = sorted(to_uem)
             with open(os.path.join(output_dir, "uem", dest_split, "all.uem"), "w") as f:
                 f.writelines(to_uem)
