@@ -37,8 +37,6 @@ And new CLI commands: <br>
     - prepares CHiME-8 data lhotse manifests.
 - `chime-utils espnet-prep` <br>
     - prepares CHiME-8 data ESPNet/Kaldi-style manifests.
-- `chime-utils speechbrain-prep` <br>
-    - prepares CHiME-8 data Speechbrain-style JSON format.
 - `chime-utils score` <br>
     - scripts used for official scoring.
 
@@ -46,7 +44,7 @@ Hereafter we describe each command/function in detail.
 
 ## Data generation
 
-### ⚡ All DASR data in one go
+### ⚡ All DASR data in one go (recommended)
 
 You can generate all CHiME-8 DASR data in one go with: <br>
 `chime-utils dgen dasr ./download /path/to/mixer6_root ./chime8_dasr --part train,dev --download` <br>
@@ -79,7 +77,7 @@ mixer6_root
 The resulting `./chime8_dasr` should look like this: 
 
 ```
-chime8_official_cleaned/
+chime8_dasr/
 ├── chime6/
 ├── dipco/
 ├── mixer6/
@@ -94,7 +92,7 @@ We provide scripts for obtaining each core dataset independently if needed. <br>
 Command basic usage: `chime-utils dgen <DATASET> <DOWNLOAD_DIR> <OUTPUT_DIR> --download` <br>
 
 
-- CHiME-6
+- CHiME-6 (not CHiME-5 !)
    - `chime-utils dgen chime6 ./download/chime6 ./chime8_dasr/chime6 --part train,dev --download` 
      - If it is already in storage in `/path/to/chime6_root` instead you can use:
        - `chime-utils dgen chime6 /path/to/chime6_root ./chime8_dasr/chime6 --part train,dev`
@@ -109,21 +107,33 @@ Command basic usage: `chime-utils dgen <DATASET> <DOWNLOAD_DIR> <OUTPUT_DIR> --d
    - `chime-utils dgen notsofar1 ./download/notsofar1 ./chime8_dasr/notsofar1 --part train,dev --download` 
      - If it is already in storage in `/path/to/notsofar1` instead you can use:
        - `chime-utils dgen notsofar1 /path/to/notsofar1 ./chime8_dasr/notsofar1 --part train,dev`
- 
+
+NOTSOFAR download folder should look like this: 
+
+```
+.
+├── dev
+│   └── dev_set
+│       └── 240208.2_dev
+└── train
+    └── train_set
+        └── 240208.2_train
+```
+
 
 ## 🚀 NVIDIA NeMo Official Baseline 
  
 [![nVIDIA](https://img.shields.io/badge/nVIDIA-%2376B900.svg?style=for-the-badge&logo=nVIDIA&logoColor=white)](https://github.com/NVIDIA/NeMo)
 
-This year CHiME-8 DASR baseline is built directly upon NVIDIA NeMo team last year CHiME-7 DASR Submission [1]. <br>
+This year CHiME-8 DASR baseline is built directly upon NVIDIA NeMo team last year [CHiME-7 DASR Submission](https://arxiv.org/pdf/2310.12378.pdf) [1]. <br>
 
-It is available at [](), we used our own fork of NeMo because it will be easier to maintain during the challenge.
+It is available at [chimechallenge/C8DASR-Baseline-NeMo/tree/main/scripts/chime8](https://github.com/chimechallenge/C8DASR-Baseline-NeMo/tree/main/scripts/chime8), we used our own fork of NeMo because it will be easier to maintain during the challenge.
 
 
 
 ## Data preparation
 
-For convenience, we also offer here data preparation scripts for different toolkits:
+For convenience, we also offer here data preparation scripts for different toolkits (parsing the data into different manifests formats):
 - [Kaldi](https://github.com/kaldi-asr/kaldi) and [K2/Icefall](https://github.com/k2-fsa/icefall) (with [lhotse](https://github.com/lhotse-speech/lhotse))
 - [ESPNet](https://github.com/espnet/espne) (with [lhotse](https://github.com/lhotse-speech/lhotse))
 
@@ -171,7 +181,7 @@ dev
 
 
 Text normalization is applied automatically before scoring to your predictions. <br>
-In CHiME-8 DASR we use a more complex text normalization which is built on top of Whisper text normalization but is crucially different (less "aggressive"). <br>
+In CHiME-8 DASR we use a more complex text normalization which is built on top of Whisper text normalization but is crucially different (less "aggressive" and made idempotent). <br>
 Examples are available here: [./tests/test_normalizer.py](./tests/test_normalizer.py)
 
 
@@ -180,16 +190,17 @@ Examples are available here: [./tests/test_normalizer.py](./tests/test_normalize
 In detail, we provide scripts to compute common ASR metrics for long-form meeting scenarios. 
 These scores are computed through the awesome [Meeteval](https://github.com/fgnt/meeteval) [2] toolkit. 
 
-- tcpWER [2]
-- concatenated minimum-permutation word error rate (cpWER) [3]
+Command basic usage: `chime-utils score <SCORE_TYPE> -s <PREDICTIONS_DIR> <CHIME-8 ROOT> --dset-part <DEV or EVAL> --ignore-missing` <br>
+`--ignore-missing` will ignore from scoring the scenarios which do not have for that `--dset-part` system predictions or ground truth (e.g. NOTSOFAR1 dev).
+
+We expect the predictions folder to be in the format outlined previously (dev folder and then JSON SegLST for each scenario). <br>
+Two metrics are supported:
+
+- tcpWER [2] `chime-utils score tcpwer`
+- concatenated minimum-permutation word error rate (cpWER) [3] `chime-utils score cpwer`
 
 You can also use `chime-utils score segslt2ctm input-dir output-dir` to automatically convert all SegLST JSON files in `input-dir` and its subfolders to `.ctm` files. <br> 
 This allows to use easily also other ASR metrics tools such as [NIST Asclite](https://mig.nist.gov/MIG_Website/tools/asclite.html). 
-
-### Diarization 
-
-- DER
-- JER
 
 
 ### Error Analysis
