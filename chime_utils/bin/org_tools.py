@@ -2,7 +2,7 @@ import glob
 import json
 import logging
 import os
-from copy import deepcopy
+import time
 from pathlib import Path
 
 import click
@@ -272,15 +272,15 @@ def compute_stats(dasr_root, corpus_name):  # compute speech stats from JSONs
         return speech_stats, list(spk2indx.keys())
 
     transcriptions_folder = os.path.join(dasr_root, corpus_name, "transcriptions")
-
     # fetch splits
     for split_dir in Path(transcriptions_folder).iterdir():
         split_name = split_dir.stem
         # fetch all .json annotation
         annotations = glob.glob(os.path.join(split_dir, "*.json"))
 
-        split_stats = None
+        split_stats = [0] * (10)
         tot_speakers = set()
+        tot_utts = 0
         for ann in annotations:
             with open(ann, "r") as f:
                 c_segs = json.load(f)
@@ -291,17 +291,19 @@ def compute_stats(dasr_root, corpus_name):  # compute speech stats from JSONs
                     [utt["speaker"], float(utt["start_time"]), float(utt["end_time"])]
                 )
             c_segs = tmp
+            tot_utts += len(c_segs)
+
             current_stats = compute_stats(c_segs)
-            tot_speakers.union(set(current_stats[-1]))
-            if split_stats is None:
-                split_stats = deepcopy(current_stats[0])
-            else:
-                for indx in range(len(split_stats)):
-                    split_stats[indx] += current_stats[0][indx]
+            tot_speakers.update(set(current_stats[-1]))
+
+            for indx in range(len(current_stats[0])):
+                split_stats[indx] += current_stats[0][indx]
 
         tot_duration = sum(split_stats)
+
         print(
-            f"DATASET {corpus_name}, SPLIT {split_name}. TOT_SPK {len(tot_speakers)}\n"
+            f"DATASET {corpus_name}, SPLIT {split_name}. SESSIONS {len(annotations)} TOT_SPK {len(tot_speakers)}\n"
+            f"TOT_DURATION {time.strftime('%H:%M:%S', time.gmtime(tot_duration))} TOT UTTS {tot_utts} \n"
             f"TOT SIL {split_stats[0] / tot_duration}, TOT_SPEECH {sum(split_stats[1:]) / tot_duration}, TOT 1 SPK {split_stats[1] / tot_duration}, "
             f"TOT OVL {sum(split_stats[2:]) / tot_duration}"
         )
