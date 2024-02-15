@@ -156,6 +156,7 @@ def symlink(source, link_name):
 class DoneFile:
     def __init__(self, file):
         from pathlib import Path
+
         self.file = Path(file)
 
     def exists(self):
