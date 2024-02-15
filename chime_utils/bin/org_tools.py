@@ -28,7 +28,7 @@ def org_tools():
     pass
 
 
-device2num = {"plaza": 1, "rockfall": 2, "meetup": 3}
+device2num = {"plaza": 1, "rockfall": 2, "meetup": 3, "studio": 4, "panacast": 5}
 
 
 @org_tools.command(name="gen-mapping")  # refactor to do one at a time
