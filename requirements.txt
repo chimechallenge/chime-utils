@@ -1,9 +1,9 @@
 meeteval[cli] @ git+https://github.com/fgnt/meeteval
-jiwer>=3.0.0
-pyannote.metrics
-lhotse
-click
+jiwer==3.0.0
+pyannote.metrics==3.2.1
+lhotse==1.21.0
+click==8.1.7
 torchaudio
-regex
-more-itertools
-azure-cli
+regex==2.5.140
+more-itertools==10.2.0
+azure-cli==2.57.0
