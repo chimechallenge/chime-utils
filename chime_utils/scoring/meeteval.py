@@ -38,8 +38,6 @@ def _load_and_prepare(hyp_folder, dasr_root, dset_part, text_norm, ignore_missin
         seglst = meeteval.io.SegLST(seglst)
         return seglst
 
-    assert (hyp_folder / "dev").exists(), hyp_folder / "dev"
-
     for scenario in ["chime6", "mixer6", "dipco", "notsofar1"]:
         scenario_dir = dasr_root / scenario
         for deveval in [dset_part]:
