@@ -118,9 +118,9 @@ def gen_all_dasr(
     be downloaded automatically.
     Refer to https://www.chimechallenge.org/current/task1/data for further details. # noqa E501
 
-    DASR_DIR: Pathlike, where the final prepared DASR data will be stored.\n
     DOWNLOAD_DIR: Pathlike, where the original core datasets will be downloaded.\n
     MIXER6_DIR: Pathlike, path to Mixer 6 Speech root folder.
+    DASR_DIR: Pathlike, where the final prepared DASR data will be stored.\n
     """
     for i, c_part in enumerate(part.split(",")):
         gen_chime6(
