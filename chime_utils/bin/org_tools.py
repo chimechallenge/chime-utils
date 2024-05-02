@@ -1,8 +1,8 @@
+import datetime
 import glob
 import json
 import logging
 import os
-import time
 from pathlib import Path
 
 import click
@@ -244,7 +244,7 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, corpus_name):
     help="Name of corpus, e.g. chime6,dipco etc.",
 )
 def compute_stats(dasr_root, corpus_name):  # compute speech stats from JSONs
-    def compute_stats(segments, resolution=1000):
+    def compute_stats_helper(segments, resolution=1000):
         spk2indx = {
             x: indx for indx, x in enumerate(list(set([x[0] for x in segments])))
         }
@@ -269,7 +269,7 @@ def compute_stats(dasr_root, corpus_name):  # compute speech stats from JSONs
 
         speech_stats = [(x / resolution) for x in speech_stats]
 
-        return speech_stats, list(spk2indx.keys())
+        return speech_stats, list(spk2indx.keys()), last_seg[-1]
 
     transcriptions_folder = os.path.join(dasr_root, corpus_name, "transcriptions")
     # fetch splits
@@ -278,9 +278,10 @@ def compute_stats(dasr_root, corpus_name):  # compute speech stats from JSONs
         # fetch all .json annotation
         annotations = glob.glob(os.path.join(split_dir, "*.json"))
 
-        split_stats = [0] * (10)
+        split_stats = [0 for x in range(10)]
         tot_speakers = set()
         tot_utts = 0
+        tot_duration = 0
         for ann in annotations:
             with open(ann, "r") as f:
                 c_segs = json.load(f)
@@ -293,20 +294,20 @@ def compute_stats(dasr_root, corpus_name):  # compute speech stats from JSONs
             c_segs = tmp
             tot_utts += len(c_segs)
 
-            current_stats = compute_stats(c_segs)
-            tot_speakers.update(set(current_stats[-1]))
-
+            current_stats = compute_stats_helper(c_segs)
+            tot_speakers.update(set(current_stats[1]))
+            tot_duration += current_stats[-1]
             for indx in range(len(current_stats[0])):
                 split_stats[indx] += current_stats[0][indx]
 
-        tot_duration = sum(split_stats)
-
         print(
             f"DATASET {corpus_name}, SPLIT {split_name}. SESSIONS {len(annotations)} TOT_SPK {len(tot_speakers)}\n"
-            f"TOT_DURATION {time.strftime('%H:%M:%S', time.gmtime(tot_duration))} TOT UTTS {tot_utts} \n"
+            f"TOT_DURATION {str(datetime.timedelta(seconds=tot_duration))} TOT UTTS {tot_utts} \n"
             f"TOT SIL {split_stats[0] / tot_duration}, TOT_SPEECH {sum(split_stats[1:]) / tot_duration}, TOT 1 SPK {split_stats[1] / tot_duration}, "
             f"TOT OVL {sum(split_stats[2:]) / tot_duration}"
         )
+
+        print(f"SPEAKERS: {tot_speakers}")
 
 
 @org_tools.command(name="test-norm-consistency")  # refactor to do one at a time
