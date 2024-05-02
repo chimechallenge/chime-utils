@@ -205,7 +205,7 @@ def _wer(hyp_folder, dasr_root, c_part, output_folder, text_norm, ignore, metric
     )
 
     macro_wer = {
-        deveval: np.mean([e.error_rate for e in v.values()])
+        deveval: round(np.mean([e.error_rate for e in v.values()]), 3)
         for deveval, v in result.items()
     }
 
