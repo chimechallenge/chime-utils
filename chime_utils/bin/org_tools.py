@@ -1,8 +1,8 @@
+import datetime
 import glob
 import json
 import logging
 import os
-import datetime
 from pathlib import Path
 
 import click
