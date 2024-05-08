@@ -153,7 +153,7 @@ def gen_sess_spk_map_chime8(corpus_dir, output_file, corpus_name):
         for split in ["train", "dev"]:
             if split == "train":
                 split_dir = os.path.join(
-                    corpus_dir, "train/train_set/240415.1_train/MTG/"
+                    corpus_dir, "train/train_set/240501.1_train/MTG/"
                 )  # os.path.join(corpus_dir, "240121_dev", "MTG")
             elif split == "dev":
                 split_dir = os.path.join(
