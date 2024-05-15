@@ -22,7 +22,10 @@ def test_text_normalizer(std):
         std("o one of the most common errors is")
         == "o one of the most common errors is"
     )
-    assert std("well i guess i\u2019ll start with what i do um") == "well i guess i will start with what i do"
+    assert (
+        std("well i guess i\u2019ll start with what i do um")
+        == "well i guess i will start with what i do"
+    )
     assert std("goin") == "going"
     assert std("uhhh") == ""
     assert std("et voila") == "et voila"
