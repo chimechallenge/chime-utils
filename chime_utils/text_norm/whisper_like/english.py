@@ -573,6 +573,7 @@ class EnglishTextNormalizer:
     ):
         self.replacers = {
             # common non verbal sounds are mapped to the similar ones
+            r"\u2019": ("'"),
             r"\b(hm+)\b|\b(mhm)\b|\b(mm+)\b|\b(m+h)\b|\b(hm+)\b|\b(um+)\b|\b(uhm+)\b": (  # noqa e501
                 "hmm"
             ),
