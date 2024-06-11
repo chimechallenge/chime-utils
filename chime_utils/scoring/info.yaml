@@ -29,18 +29,25 @@ inference:
   num_cpus: # number of CPUs, if multiple nodes sum the total across all nodes
   cpus_type: # type of CPUs used if multiple type use commas epyc7F72,epyc7F52
 
+# component level analysis
 asr:
   external_models_used: # e.g. wavlm,hubert
   num_ensembled_sys: # 0 if no ensemble
   tot_parameters: # sum across all ensembled systems
+  lm:
+    type: # e.g. neural, n-gram statistical
+    external_models_used: # e.g. LLM model
+    tot_parameters:
   training: # also for this, sum across all ensembled systems
     approx_tot_time: # in hours e.g. 68 h report the sum here
     external_data_used: # e.g. AMI,LibriSpeech
     tot_hours_pre_augmentation: # tot hours of data before augmentation
-  lm:
-    type: # e.g. neural, n-gram
-    external_models_used: # e.g. llm model
-    tot_parameters:
+  inference:
+    approx_tot_time: # in hours e.g. 28 hours etc for inference on all evaluation
+      num_gpus: # number of GPUs, if multiple nodes sum the total across all nodes
+      gpu_type: # type of GPUs used if multiple types use commas h100,a100
+      num_cpus: # number of CPUs, if multiple nodes sum the total across all nodes
+      cpus_type: # type of CPUs used if multiple type use commas epyc7F72,epyc7F52
 
 diarization:
   external_models_used: # e.g. wavlm,hubert
@@ -50,6 +57,12 @@ diarization:
     approx_tot_time: # in hours e.g. 27 h, report the sum here
     external_data_used: # e.g. AMI,LibriSpeech
     tot_hours_pre_augmentation: # tot hours of data before augmentation
+  inference:
+    approx_tot_time: # in hours e.g. 28 hours etc for inference on all evaluation
+      num_gpus: # number of GPUs, if multiple nodes sum the total across all nodes
+      gpu_type: # type of GPUs used if multiple types use commas h100,a100
+      num_cpus: # number of CPUs, if multiple nodes sum the total across all nodes
+      cpus_type: # type of CPUs used if multiple type use commas epyc7F72,epyc7F52
 
 sse_frontend: # speech separation and enhancement frontend
   external_models_used: # e.g. wavlm,hubert
@@ -59,6 +72,9 @@ sse_frontend: # speech separation and enhancement frontend
     approx_tot_time: # in hours e.g. 68 h
     external_data_used: # e.g. AMI,LibriSpeech
     tot_hours_pre_augmentation: # tot hours of data before augmentation
-
-
-
+  inference:
+    approx_tot_time: # in hours e.g. 28 hours etc for inference on all evaluation
+      num_gpus: # number of GPUs, if multiple nodes sum the total across all nodes
+      gpu_type: # type of GPUs used if multiple types use commas h100,a100
+      num_cpus: # number of CPUs, if multiple nodes sum the total across all nodes
+      cpus_type: # type of CPUs used if multiple type use commas epyc7F72,epyc7F52
