@@ -1,16 +1,19 @@
 team_name:
 affiliation:
-submission_id: # unique name for this submission
+# unique name for this submission, please keep it the same in the technical description paper
+# so it helps reviewers for jury mention for practicality and efficiency.
+system_tag:
 cmt_paper_id: # cmt paper id
 contact_email: # your contact email
 
 ## NOTE, in the following if you want to put multiple answers please,
 ## separate with commas e.g. wavlm,wav2vec2,hubert
 ## If the attribute does not apply e.g. you don't have SSE (speech separation and enhancement), leave it blank.
-
+## In doubt, if you are unsure about a field, leave it blank.
 
 # ranking score as obtained on development set with the leaderboard
-# we use this to doublecheck that this submission is okay
+# we use this to doublecheck that this submission is okay.
+# if there are some errors etc. we will reach out.
 ranking_score:
   macro:
   chime6:
@@ -26,35 +29,52 @@ inference:
   num_cpus: # number of CPUs, if multiple nodes sum the total across all nodes
   cpus_type: # type of CPUs used if multiple type use commas epyc7F72,epyc7F52
 
+# component level analysis
 asr:
   external_models_used: # e.g. wavlm,hubert
   num_ensembled_sys: # 0 if no ensemble
-  tot_parameters: # sum across all ensembled systems, use YAML floats e.g. 1.0e+6 for 1M parameters
+  tot_parameters: # sum across all ensembled systems
+  lm:
+    type: # e.g. neural, n-gram statistical
+    external_models_used: # e.g. LLM model
+    tot_parameters:
   training: # also for this, sum across all ensembled systems
     approx_tot_time: # in hours e.g. 68 h report the sum here
     external_data_used: # e.g. AMI,LibriSpeech
     tot_hours_pre_augmentation: # tot hours of data before augmentation
-  lm:
-    external_models_used:
-    tot_parameters:
+  inference:
+    approx_tot_time: # in hours e.g. 28 hours etc for inference on all evaluation
+      num_gpus: # number of GPUs, if multiple nodes sum the total across all nodes
+      gpu_type: # type of GPUs used if multiple types use commas h100,a100
+      num_cpus: # number of CPUs, if multiple nodes sum the total across all nodes
+      cpus_type: # type of CPUs used if multiple type use commas epyc7F72,epyc7F52
 
 diarization:
   external_models_used: # e.g. wavlm,hubert
   num_ensembled_sys: # 0 if no ensemble
-  tot_parameters: # sum across all ensembled systems use python floats e.g. 1.0e+6 for 1M parameters
+  tot_parameters: # sum across all ensembled systems
   training: # also for this, sum across all ensembled systems
     approx_tot_time: # in hours e.g. 27 h, report the sum here
     external_data_used: # e.g. AMI,LibriSpeech
     tot_hours_pre_augmentation: # tot hours of data before augmentation
+  inference:
+    approx_tot_time: # in hours e.g. 28 hours etc for inference on all evaluation
+      num_gpus: # number of GPUs, if multiple nodes sum the total across all nodes
+      gpu_type: # type of GPUs used if multiple types use commas h100,a100
+      num_cpus: # number of CPUs, if multiple nodes sum the total across all nodes
+      cpus_type: # type of CPUs used if multiple type use commas epyc7F72,epyc7F52
 
 sse_frontend: # speech separation and enhancement frontend
   external_models_used: # e.g. wavlm,hubert
   num_ensembled_sys: # 0 if no ensemble
-  tot_parameters: # sum across all ensembled systems use python floats e.g. 1.0e+6 for 1M parameters
+  tot_parameters: # sum across all ensembled systems
   training: # also for this, sum across all ensembled systems
     approx_tot_time: # in hours e.g. 68 h
     external_data_used: # e.g. AMI,LibriSpeech
     tot_hours_pre_augmentation: # tot hours of data before augmentation
-
-
-
+  inference:
+    approx_tot_time: # in hours e.g. 28 hours etc for inference on all evaluation
+      num_gpus: # number of GPUs, if multiple nodes sum the total across all nodes
+      gpu_type: # type of GPUs used if multiple types use commas h100,a100
+      num_cpus: # number of CPUs, if multiple nodes sum the total across all nodes
+      cpus_type: # type of CPUs used if multiple type use commas epyc7F72,epyc7F52
