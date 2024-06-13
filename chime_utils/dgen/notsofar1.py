@@ -90,7 +90,7 @@ def convert2chime(
     output_devices_info = os.path.join(output_root, "devices", c_split)
     os.makedirs(output_devices_info, exist_ok=True)
 
-    if c_split in ["train", "train_sc"]:
+    if c_split in ["train", "train_sc", "dev"]:
         # dump transcriptions
         output_txt_f = os.path.join(output_root, "transcriptions", c_split)
         os.makedirs(output_txt_f, exist_ok=True)
@@ -131,7 +131,7 @@ def convert2chime(
         }
         devices_info[device_name] = d_type
 
-    if c_split not in ["train", "train_sc"]:
+    if c_split not in ["train", "train_sc", "dev"]:
         devices_info = dict(sorted(devices_info.items(), key=lambda x: x[0]))
         with open(os.path.join(output_devices_info, f"{session_name}.json"), "w") as f:
             json.dump(devices_info, f, indent=4)
