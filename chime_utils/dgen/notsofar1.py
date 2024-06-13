@@ -26,7 +26,7 @@ NOTSOFAR1_FS = 16000
 def download_notsofar1(download_dir, subset_name):
     if subset_name == "dev":
         subset_name = "dev_set"
-        version = "240415.2_dev"
+        version = "240415.2_dev_with_GT"
     elif subset_name == "train":
         subset_name = "train_set"
         version = "240501.1_train"
