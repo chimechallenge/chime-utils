@@ -137,9 +137,9 @@ def gen_chime6(
             Path(os.path.join(output_dir, "transcriptions_scoring", split)).mkdir(
                 parents=True, exist_ok=True
             )
-            Path(os.path.join(output_dir, "devices", split)).mkdir(
-                parents=True, exist_ok=True
-            )
+        Path(os.path.join(output_dir, "devices", split)).mkdir(
+            parents=True, exist_ok=True
+        )
 
         Path(os.path.join(output_dir, "uem", split)).mkdir(parents=True, exist_ok=True)
 
@@ -170,7 +170,7 @@ def gen_chime6(
             for audio in c_sess_audio_f:
                 c_device = Path(audio).stem.lstrip(c_sess + "_")
                 if c_device.startswith("P"):
-                    if split in ["dev", "eval"]:
+                    if split in ["eval"]:
                         continue
                     # close talk device
                     d_type = {
@@ -211,7 +211,6 @@ def gen_chime6(
             # create symlinks too
             for x in sess2audio[sess_name]:
                 if Path(x).stem.split("_")[-1].startswith("P") and split in [
-                    "dev",
                     "eval",
                 ]:
                     continue

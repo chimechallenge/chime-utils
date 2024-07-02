@@ -30,6 +30,9 @@ def download_notsofar1(download_dir, subset_name):
     elif subset_name == "train":
         subset_name = "train_set"
         version = "240501.1_train"
+    elif subset_name == "eval":
+        subset_name = "eval_set"
+        version = "240629.1_eval_small"
     else:
         raise RuntimeError("Evaluation data has not yet been released !")
     dev_meetings_dir = download_meeting_subset(
