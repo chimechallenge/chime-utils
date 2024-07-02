@@ -101,7 +101,7 @@ def data_check(
                         str(Path(f).relative_to(root_folder))
                     )
                 )
-            logger.info("Data has been generated correctly.")
+    logger.info("Data has been generated correctly.")
 
 
 def get_mappings(challenge):
