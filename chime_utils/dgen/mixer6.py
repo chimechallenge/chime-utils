@@ -441,7 +441,7 @@ def gen_mixer6(
         for c_audio in audios:
             audioname = Path(c_audio).stem
             channel_num = int(audioname.split("_")[-1].strip("CH"))
-            if channel_num <= 3 and split in ["eval", "dev"]:
+            if channel_num <= 3:  # and split in ["eval", "dev"]:
                 continue
             new_name = "{}_CH{:02d}".format(tgt_sess_name, channel_num)
             symlink(
@@ -474,7 +474,7 @@ def gen_mixer6(
             sorted(devices_json.items(), key=lambda x: x[0].split("_")[-1])
         )
 
-        if split not in ["eval"]:
+        if split not in ["dummy"]:
             with open(out_json, "w") as f:
                 json.dump(devices_json, f, indent=4)
 
@@ -582,7 +582,7 @@ def gen_mixer6(
                     json.dump(annotation_scoring, f, indent=4)
 
             # no uem for train_intv and train call
-            if dest_split in ["dev", "train", "eval"]:
+            if dest_split in ["dev", "train"]:
                 uem_start = sorted(
                     annotation_scoring, key=lambda x: float(x["start_time"])
                 )[0]["start_time"]

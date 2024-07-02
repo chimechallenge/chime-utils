@@ -155,9 +155,9 @@ def gen_dipco(
                 parents=True, exist_ok=True
             )
 
-            Path(os.path.join(output_dir, "devices", dest_split)).mkdir(
-                parents=True, exist_ok=True
-            )
+        Path(os.path.join(output_dir, "devices", dest_split)).mkdir(
+            parents=True, exist_ok=True
+        )
 
         # now we fetch all possible json files here, including evaluation ones
         ann_json = []
