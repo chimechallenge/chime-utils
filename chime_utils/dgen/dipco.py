@@ -238,7 +238,7 @@ def gen_dipco(
                     }
 
                 if not (
-                    dest_split in ["eval"]
+                    dest_split in ["eval", "dev"]
                     and Path(x).stem.split("_")[-1].startswith("P")
                 ):
                     symlink(

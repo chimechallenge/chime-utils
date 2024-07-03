@@ -441,7 +441,7 @@ def gen_mixer6(
         for c_audio in audios:
             audioname = Path(c_audio).stem
             channel_num = int(audioname.split("_")[-1].strip("CH"))
-            if channel_num <= 3 and split in ["eval"]:
+            if channel_num <= 3 and split in ["eval", "dev"]:
                 continue
             new_name = "{}_CH{:02d}".format(tgt_sess_name, channel_num)
             symlink(
