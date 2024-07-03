@@ -145,6 +145,8 @@ def convert2chime(
         os.path.join(Path(audio_dir).parent, "close_talk", "*.wav")
     )
     for elem in close_talk_audio:
+        if c_split in ["eval", "dev"]:
+            break
         filename = Path(elem).stem
         tgt_name = os.path.join(
             output_audio_f,

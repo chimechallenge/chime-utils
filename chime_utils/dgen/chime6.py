@@ -170,7 +170,7 @@ def gen_chime6(
             for audio in c_sess_audio_f:
                 c_device = Path(audio).stem.lstrip(c_sess + "_")
                 if c_device.startswith("P"):
-                    if split in ["eval"]:
+                    if split in ["eval", "dev"]:
                         continue
                     # close talk device
                     d_type = {
@@ -212,6 +212,7 @@ def gen_chime6(
             for x in sess2audio[sess_name]:
                 if Path(x).stem.split("_")[-1].startswith("P") and split in [
                     "eval",
+                    "dev",
                 ]:
                     continue
                 symlink(
