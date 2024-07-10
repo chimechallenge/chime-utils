@@ -32,7 +32,7 @@ inference:
 # component level analysis
 asr:
   external_models_used: # e.g. wavlm,hubert
-  num_ensembled_sys: # 0 if no ensemble
+  num_ensembled_sys: # 1 if no ensemble
   tot_parameters: # sum across all ensembled systems
   lm:
     type: # e.g. neural, n-gram statistical
@@ -51,7 +51,7 @@ asr:
 
 diarization:
   external_models_used: # e.g. wavlm,hubert
-  num_ensembled_sys: # 0 if no ensemble
+  num_ensembled_sys: # 1 if no ensemble
   tot_parameters: # sum across all ensembled systems
   training: # also for this, sum across all ensembled systems
     approx_tot_time: # in hours e.g. 27 h, report the sum here
@@ -66,7 +66,7 @@ diarization:
 
 sse_frontend: # speech separation and enhancement frontend
   external_models_used: # e.g. wavlm,hubert
-  num_ensembled_sys: # 0 if no ensemble
+  num_ensembled_sys: # 1 if no ensemble
   tot_parameters: # sum across all ensembled systems
   training: # also for this, sum across all ensembled systems
     approx_tot_time: # in hours e.g. 68 h
