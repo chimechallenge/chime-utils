@@ -56,12 +56,18 @@ def download_notsofar1(download_dir, subset_name):
     if subset_name == "dev":
         subset_name = "dev_set"
         version = "240825.1_dev1"
-    elif subset_name == "train":
+    elif subset_name == "train_legacy":
         subset_name = "train_set"
         version = "240501.1_train"
+    elif subset_name == "train":
+        subset_name = "train_set"
+        version = "240825.1_train"
     elif subset_name == "eval":
         subset_name = "eval_set"
         version = "240629.1_eval_small"
+    elif subset_name == "eval_large":
+        subset_name = "eval_set"
+        version = "240825.1_eval_full_with_GT"
     else:
         raise RuntimeError("Evaluation data has not yet been released !")
     try:
