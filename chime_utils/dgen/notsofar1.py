@@ -69,7 +69,7 @@ def download_notsofar1(download_dir, subset_name):
         subset_name = "eval_set"
         version = "240825.1_eval_full_with_GT"
     else:
-        raise RuntimeError("Evaluation data has not yet been released !")
+        raise RuntimeError(f"Unknown subset_name ({subset_name})")
     try:
         dev_meetings_dir = download_meeting_subset(
             subset_name=subset_name, version=version, destination_dir=str(download_dir)
