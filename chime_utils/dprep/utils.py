@@ -23,13 +23,3 @@ def read_uem(uem_file):
         sess_name, _, start, stop = uem_l.rstrip("\n").split(" ")
         out[sess_name] = (float(start), float(stop))
     return out
-
-
-def split_partition(
-    dasr_dset_folder,
-    output_folder,
-    dset_part="train",
-    new_name="val",
-):
-    pass
-    # using nachos ?

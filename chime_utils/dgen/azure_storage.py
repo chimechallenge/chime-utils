@@ -5,6 +5,7 @@ This module contains functions to download data from Azure blob storage to the l
 from: https://github.com/microsoft/NOTSOFAR1-Challenge/blob/main/utils/azure_storage.py
 LICENSE: https://github.com/microsoft/NOTSOFAR1-Challenge/blob/main/LICENSE
 """
+
 import logging
 import os
 import shutil

@@ -4,7 +4,6 @@ https://github.com/lhotse-speech/lhotse/blob/master/lhotse/recipes/
 Plus lhotse parsing recipe for NOTSOFAR1.
 """
 
-
 import json
 import logging
 import os.path

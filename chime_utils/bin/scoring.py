@@ -1,4 +1,7 @@
+import glob
+import json
 import logging
+import os
 import pathlib
 import textwrap
 import traceback
@@ -227,3 +230,29 @@ def cpwer(
             ignore_missing,
             "cpWER",
         )
+
+
+@score.command()
+@click.option(
+    "-i",
+    "--in-dir",
+    help="Folder containing the JSON SegLST files relative to the system output"
+    "you want to merge into a single one.",
+    type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path),
+)
+@click.option(
+    "-o",
+    "--out-file",
+    help="JSON SegLST file in which the input JSON SegLST files will be merged.",
+    type=click.Path(exists=False, file_okay=True, path_type=pathlib.Path),
+)
+def merge_seglst(in_dir, out_file):
+    merged = []
+    json_files = glob.glob(os.path.join(in_dir, "*.json"))
+    for j_f in json_files:
+        with open(j_f, "r") as f:
+            c_annotation = json.load(f)
+            merged.extend(c_annotation)
+
+    with open(out_file, "w") as f:
+        json.dump(merged, f, indent=4)
