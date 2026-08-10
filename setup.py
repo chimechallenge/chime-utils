@@ -9,6 +9,7 @@ try:
 except ImportError:
     requirements.append("torch")
 
+
 def read_requirements():
     requirements_file = Path(__file__).resolve().parent / "requirements.txt"
 
@@ -18,6 +19,7 @@ def read_requirements():
         for line in lines
         if line.strip() and not line.lstrip().startswith("#")
     ]
+
 
 setup(
     name="chime_utils",
@@ -32,8 +34,7 @@ setup(
     url="https://www.chimechallenge.org/",
     license="MIT",
     packages=find_packages(exclude=["tests*"]),
-    install_requires=requirements
-    + read_requirements(),
+    install_requires=requirements + read_requirements(),
     entry_points={
         "console_scripts": [
             "chime-utils=chime_utils.bin.base:cli",
