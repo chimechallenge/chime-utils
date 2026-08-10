@@ -1,6 +1,5 @@
-import os
+from pathlib import Path
 
-import pkg_resources
 from setuptools import find_packages, setup
 
 requirements = []
@@ -9,6 +8,18 @@ try:
     import torch  # noqa: F401
 except ImportError:
     requirements.append("torch")
+
+
+def read_requirements():
+    requirements_file = Path(__file__).resolve().parent / "requirements.txt"
+
+    lines = requirements_file.read_text(encoding="utf-8").splitlines()
+    return [
+        line.strip()
+        for line in lines
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+
 
 setup(
     name="chime_utils",
@@ -23,13 +34,7 @@ setup(
     url="https://www.chimechallenge.org/",
     license="MIT",
     packages=find_packages(exclude=["tests*"]),
-    install_requires=requirements
-    + [
-        str(r)
-        for r in pkg_resources.parse_requirements(
-            open(os.path.join(os.path.dirname(__file__), "requirements.txt"))
-        )
-    ],
+    install_requires=requirements + read_requirements(),
     entry_points={
         "console_scripts": [
             "chime-utils=chime_utils.bin.base:cli",
