@@ -23,13 +23,15 @@ setup(
     url="https://www.chimechallenge.org/",
     license="MIT",
     packages=find_packages(exclude=["tests*"]),
-    install_requires=requirements
-    + [
-        str(r)
-        for r in pkg_resources.parse_requirements(
-            open(os.path.join(os.path.dirname(__file__), "requirements.txt"))
-        )
-    ],
+    install_requires=(
+        requirements
+        + [
+            str(r)
+            for r in pkg_resources.parse_requirements(
+                open(os.path.join(os.path.dirname(__file__), "requirements.txt"))
+            )
+        ]
+    ),
     entry_points={
         "console_scripts": [
             "chime-utils=chime_utils.bin.base:cli",
