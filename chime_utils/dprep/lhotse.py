@@ -181,7 +181,6 @@ def prepare_notsofar1(
         ("train", "dev" and "eval"), and the
         value is Dicts with the keys 'recordings' and 'supervisions'.
     """
-    assert mic in ["ihm", "mdm"], "mic must be one of 'ihm' or 'mdm'"
     manifests = prep_lhotse_shared(
         corpus_dir, output_dir, dset_part, mic, "notsofar1", json_dir, txt_norm
     )

@@ -5,12 +5,12 @@ import os
 import subprocess
 from copy import deepcopy
 from pathlib import Path
+from typing import Optional, Union, Literal
 
 import soundfile as sf
-
-from chime_utils.dgen.azure_storage import download_meeting_subset
 from chime_utils.dgen.utils import get_mappings, symlink
 from chime_utils.text_norm import get_txt_norm
+from huggingface_hub import snapshot_download
 
 logging.basicConfig(
     format=(
@@ -23,8 +23,44 @@ logger = logging.getLogger(__name__)
 
 NOTSOFAR1_FS = 16000
 
-
 _check_version_exists_cache = None
+
+
+def download_meeting_subset(
+        subset_name: Literal["train_set", "dev_set", "eval_set"],
+        version: str,
+        destination_dir: Union[str, Path],
+        overwrite: bool = False,
+) -> Optional[str]:
+    """
+    Download a subset of the meeting dataset to the destination directory.
+    The subsets and versions available will be updated in:
+        https://www.chimechallenge.org/current/task2/index
+
+    Args:
+        subset_name: name of split to download (dev_set / eval_set / train_set)
+        version: version to download (240103g / etc.). it's best to use the latest.
+        destination_dir: path to the directory where files will be downloaded.
+        overwrite: whether to override the output file if it already exists
+                   (warning!: if true, will delete the entire destination_dir if it exists)
+    Returns:
+        a string indicates the output directory path, or None if the download failed
+    """
+    snapshot_download(
+        repo_id="microsoft/NOTSOFAR",
+        repo_type="dataset",
+        local_dir=destination_dir,
+        force_download=overwrite,
+        allow_patterns=f"benchmark-datasets/{subset_name}/{version}/*"
+    )
+
+    # Create a symlink to mimic folder structure expected by following data prep scripts
+    downloaded_path = Path(destination_dir) / "benchmark-datasets" / subset_name
+    symlink_path = Path(destination_dir) / subset_name
+    if not symlink_path.exists():
+        symlink_path.symlink_to(downloaded_path, target_is_directory=True)
+
+    return str(destination_dir)
 
 
 def check_version_exists(version):
@@ -82,7 +118,7 @@ def download_notsofar1(download_dir, subset_name):
 
 
 def normalize_notsofar1_annotation(
-    transcriptions, session_name, txt_normalization, spk_map
+        transcriptions, session_name, txt_normalization, spk_map
 ):
     # Sam: this is FUGLY but works
     output = []
@@ -116,13 +152,13 @@ def normalize_notsofar1_annotation(
 
 
 def convert2chime(
-    c_split,
-    audio_dir,
-    session_name,
-    spk_map,
-    txt_normalization,
-    output_root,
-    is_sc=False,
+        c_split,
+        audio_dir,
+        session_name,
+        spk_map,
+        txt_normalization,
+        output_root,
+        is_sc=False,
 ):
     output_audio_f = os.path.join(output_root, "audio", c_split)
     os.makedirs(output_audio_f, exist_ok=True)
@@ -130,7 +166,7 @@ def convert2chime(
     output_devices_info = os.path.join(output_root, "devices", c_split)
     os.makedirs(output_devices_info, exist_ok=True)
 
-    if c_split in ["train", "train_sc", "dev", "eval"]:
+    if c_split in ["train", "train_sc", "dev", "dev_sc", "eval", "eval_sc"]:
         # dump transcriptions
         output_txt_f = os.path.join(output_root, "transcriptions", c_split)
         os.makedirs(output_txt_f, exist_ok=True)
@@ -141,7 +177,7 @@ def convert2chime(
         # load device info here we need it to get the speaker mapping
 
         with open(
-            os.path.join(Path(audio_dir).parent, "gt_meeting_metadata.json"), "r"
+                os.path.join(Path(audio_dir).parent, "gt_meeting_metadata.json"), "r"
         ) as f:
             metadata = json.load(f)
 
@@ -171,7 +207,7 @@ def convert2chime(
         }
         devices_info[device_name] = d_type
 
-    if c_split not in ["train", "train_sc", "dev", "eval"]:
+    if c_split not in ["train", "train_sc", "dev", "dev_sc", "eval", "eval_sc"]:
         devices_info = dict(sorted(devices_info.items(), key=lambda x: x[0]))
         with open(os.path.join(output_devices_info, f"{session_name}.json"), "w") as f:
             json.dump(devices_info, f, indent=4)
@@ -220,7 +256,7 @@ def convert2chime(
 
 
 def gen_notsofar1(
-    output_dir, corpus_dir, download=False, dset_part="dev", challenge="chime8"
+        output_dir, corpus_dir, download=False, dset_part="dev", challenge="chime8"
 ):
     corpus_dir = Path(corpus_dir).resolve()  # allow for relative path
     mapping = get_mappings(challenge)
@@ -303,10 +339,8 @@ def gen_notsofar1(
     with open(uem_file, "w") as f:
         f.writelines(uem_data)
 
-    if dset_part not in ["train"]:
-        return
     # also prep sc data
-    uem_file_sc = os.path.join(output_dir, "uem", "train_sc", "all.uem")
+    uem_file_sc = os.path.join(output_dir, "uem", f"{dset_part}_sc", "all.uem")
     Path(uem_file_sc).parent.mkdir(parents=True, exist_ok=True)
     uem_data_sc = []
     for device_j in device_jsons:
@@ -336,7 +370,7 @@ def gen_notsofar1(
             sess_name = sess_map[f"{orig_sess_name}_{device_name}_sc"]
 
             convert2chime(
-                "train_sc",
+                f"{dset_part}_sc",
                 device_folder,
                 sess_name,
                 spk_map,
